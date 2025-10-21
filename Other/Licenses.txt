@@ -1,0 +1,8 @@
+Image - Title1 : "Prussian Infantry on the March", https://www.simonis-buunk.com/art/koekkoek-h-w/1588/
+Image - Title2 : "Défense de Saint-Privat", Public Domain
+
+Image - BattleOfSpicheren   : "French Troops at the Forbach Train Station", Public Domain - by Alphonse de Neuville
+Image - BattleOfMarsLaTour  : "Garde-Dragoner-Regiments bei Mars-la-Tour", Public Domain - by Emil Hünten 
+Image - BattleOfGravelotte  : "Fighting at the cemetery of saint privat", Public Domain - by Alphonse de Neuville
+Image - BattleOfMetz        : "French Skirmishers at Metz", Public Domain - by Alphonse de Neuville
+Image - BattleOfSedan       : "Bataille de Sedan. - Un episode du combat de La Moncelle", by Beato, Felice A.

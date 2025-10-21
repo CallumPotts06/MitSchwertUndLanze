@@ -1,0 +1,9 @@
+
+Battles:
+
+Franco-Prussian War:
+    Battle of Spicheren
+    Battle of Mars-la-Tour
+    Battle of Gravelotte
+    Battle of Metz
+    Battle of Sedan
