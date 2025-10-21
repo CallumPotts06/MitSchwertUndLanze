@@ -31,10 +31,32 @@ function MainMenu.Open()
     --create the background image ui--
     BackgroundImage = ImageBox.New("BackgroundImage",img,imgPos,imgSize,0,0,transparent,transparent,false,false)
 
-    --setup appearance data for all the buttons--
+    --create the title and version appearance and positional data--
+    local titlePosA = Mathematics.ScreenScaleVector(0.55,0.85)
+    local titlePosB = Mathematics.ScreenScaleVector(0.553,0.853)
+    local titleSize = Mathematics.ScreenScaleVector(0.4,0.1)
+    local titleMaxSize = 60
+    local titleText = "- mit schwert und lanze -" 
+    local titleFont = Font.Gothic2
+
+    local versionPosA = Mathematics.ScreenScaleVector(0.7,0.935)
+    local versionPosB = Mathematics.ScreenScaleVector(0.702,0.937)
+    local versionSize = Mathematics.ScreenScaleVector(0.4,0.05)
+    local versionMaxSize = 25
+    local versionText = "Version 1.0" 
+    local versionFont = Font.Georgia
+
+    --setup appearance data for all the text objects--
     local white = Colours.CreateColour(Colours.White)
     local black = Colours.CreateColour(Colours.Black)
     local textBackClr = Colours.CreateColour({0,0,0,0.1})
+
+    local titleA = TextBox.New("TitleA",titleText,titlePosA,titleSize,titleMaxSize,0,5,titleFont,1,white,transparent,transparent,false,false)
+    local titleB = TextBox.New("TitleB",titleText,titlePosB,titleSize,titleMaxSize,0,5,titleFont,1,black,transparent,transparent,false,false)
+    local versionA = TextBox.New("VersionA",versionText,versionPosA,versionSize,versionMaxSize,0,5,versionFont,1,white,transparent,transparent,false,false)
+    local versionB = TextBox.New("VersionB",versionText,versionPosB,versionSize,versionMaxSize,0,5,versionFont,1,black,transparent,transparent,false,false)
+
+    
 
     --all the text data for the buttons--
     local btnFont = Font.Georgia
@@ -56,23 +78,25 @@ function MainMenu.Open()
     local btnpos4 = Mathematics.ScreenScaleVector(0.035,0.65)
     local btnpos4b = Mathematics.ScreenScaleVector(0.0355,0.653)
 
+    local maxFont = 60
+
     --create all the button objects--
-    btn1 = TextBox.New("CampaignBtn",txt1,btnpos1,btnSize,0,25,btnFont,1,white,textBackClr,transparent,true,true)
-    btn1b = TextBox.New("CampaignBtnb",txt1,btnpos1b,btnSize,0,25,btnFont,1,black,transparent,transparent,true,false)
+    btn1 = TextBox.New("CampaignBtn",txt1,btnpos1,btnSize,maxFont,0,25,btnFont,1,white,textBackClr,transparent,true,true)
+    btn1b = TextBox.New("CampaignBtnb",txt1,btnpos1b,btnSize,maxFont,0,25,btnFont,1,black,transparent,transparent,true,false)
 
-    btn2 = TextBox.New("QuickBattleBtn",txt2,btnpos2,btnSize,0,25,btnFont,1,white,textBackClr,transparent,true,true)
-    btn2b = TextBox.New("QuickBattleBtnb",txt2,btnpos2b,btnSize,0,25,btnFont,1,black,transparent,transparent,true,false)
+    btn2 = TextBox.New("QuickBattleBtn",txt2,btnpos2,btnSize,maxFont,0,25,btnFont,1,white,textBackClr,transparent,true,true)
+    btn2b = TextBox.New("QuickBattleBtnb",txt2,btnpos2b,btnSize,maxFont,0,25,btnFont,1,black,transparent,transparent,true,false)
 
-    btn3 = TextBox.New("SettingsBtn",txt3,btnpos3,btnSize,0,25,btnFont,1,white,textBackClr,transparent,true,true)
-    btn3b = TextBox.New("SettingsBtnb",txt3,btnpos3b,btnSize,0,25,btnFont,1,black,transparent,transparent,true,false)
+    btn3 = TextBox.New("SettingsBtn",txt3,btnpos3,btnSize,maxFont,0,25,btnFont,1,white,textBackClr,transparent,true,true)
+    btn3b = TextBox.New("SettingsBtnb",txt3,btnpos3b,btnSize,maxFont,0,25,btnFont,1,black,transparent,transparent,true,false)
 
-    btn4 = TextBox.New("ExitBtn",txt4,btnpos4,btnSize,0,25,btnFont,1,white,textBackClr,transparent,true,true)
-    btn4b = TextBox.New("ExitBtnb",txt4,btnpos4b,btnSize,0,25,btnFont,1,black,transparent,transparent,true,false)
+    btn4 = TextBox.New("ExitBtn",txt4,btnpos4,btnSize,maxFont,0,25,btnFont,1,white,textBackClr,transparent,true,true)
+    btn4b = TextBox.New("ExitBtnb",txt4,btnpos4b,btnSize,maxFont,0,25,btnFont,1,black,transparent,transparent,true,false)
 
 
     --create a new screen to return to the menu handler--
     local newScreen = Screen.New(1)
-    newScreen.UiObjects = {BackgroundImage,btn1b,btn1,btn2b,btn2,btn3b,btn3,btn4b,btn4}
+    newScreen.UiObjects = {BackgroundImage,btn1b,btn1,btn2b,btn2,btn3b,btn3,btn4b,btn4,titleB,titleA,versionB,versionA}
 
     return newScreen--returns a screen object to call location--
 end

@@ -15,11 +15,11 @@ Font.Deutsch3 = "Assets/Other/deutsch_gotisch_heavy.otf"
 Font.Deutsch4 = "Assets/Other/deutsch_gotisch_shadow.otf"
 
 --// METHODS //--
-function Font.CreateFont(text,fontStyle,areaSize,padding)
+function Font.CreateFont(text,fontStyle,areaSize,padding,startSize)
     --creates a new font for a specific text box according to size--
 
     local newfont = love.graphics.newFont(fontStyle, 8)--create a back up font with size before the loop--
-    for size = 80, 8, -1 do--loop to find the best size--
+    for size = startSize, 4, -2 do--loop to find the best size--
         newfont = love.graphics.newFont(fontStyle, size)
 
         --breaks loop having found best size--

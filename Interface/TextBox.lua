@@ -6,7 +6,7 @@ Font = require("../Interface/Font")
 TextBox = {}
 
 --// CONSTRUCTOR //--
-function TextBox.New(name, text, position, size, borderSize, padding, font, textScale, textColour, backColour, borderColour, hoverEnabled, clickFx)
+function TextBox.New(name, text, position, size, startSize, borderSize, padding, font, textScale, textColour, backColour, borderColour, hoverEnabled, clickFx)
     local newTextBox = {}
 
     newTextBox.Name = name
@@ -16,9 +16,10 @@ function TextBox.New(name, text, position, size, borderSize, padding, font, text
     newTextBox.Size = size
     newTextBox.BorderSize = borderSize
     newTextBox.Padding = padding
+    newTextBox.MaxFontSize = startSize
 
     -- Appearance data --
-    newTextBox.Font = Font.CreateFont(text, font, size, padding)
+    newTextBox.Font = Font.CreateFont(text, font, size, padding, startSize)
     assert(newTextBox.Font, "Font creation failed") -- Ensure font is valid
 
     newTextBox.TextColour = textColour

@@ -1,9 +1,31 @@
 
-Battles:
+BATTLES:
+    Franco-Prussian War:
+        Battle of Spicheren
+        Battle of Mars-la-Tour
+        Battle of Gravelotte
+        Battle of Metz
+        Battle of Sedan
 
-Franco-Prussian War:
-    Battle of Spicheren
-    Battle of Mars-la-Tour
-    Battle of Gravelotte
-    Battle of Metz
-    Battle of Sedan
+
+GAME LOGIC:
+    Charge Logic:
+        Infantry Vs Infantry:
+
+            if Attackers Hp < (1/3) then
+                Attackers Retreat
+
+            if Attackers Morale < (1/2) then
+                Attackers Retreat
+
+            if Attackers Hp - Defenders Hp > (1/3) then
+                Defenders Retreat
+
+            if Defenders Morale < (1/3) then
+                Defenders Retreat
+            
+            else
+                Brawl
+                ...
+                Least Hp is Destroyed
+

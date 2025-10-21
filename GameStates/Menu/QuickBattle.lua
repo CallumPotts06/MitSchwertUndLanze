@@ -101,20 +101,20 @@ function QuickBattleMenu.Open()
     local prevBtlPos = Mathematics.ScreenScaleVector(0.18,0.5)
     
     --create all the button objects--
-    btnR = TextBox.New("Return",rtn,returnPos,rtnSize,5,10,btnFont,1,white,textBackClr,transparent,true,true)
+    btnR = TextBox.New("Return",rtn,returnPos,rtnSize,50,5,10,btnFont,1,white,textBackClr,transparent,true,true)
 
     battleImage = ImageBox.New("BattleImage",img,battleImagePos,battleImageSize,15,0,black,black,false,false)
-    battleTextA = TextBox.New("BattleTextA",battleText,battleTextPosA,battleTextSize,0,25,battleFont,2,white,transparent,transparent,false,false)
-    battleTextB = TextBox.New("BattleTextB",battleText,battleTextPosB,battleTextSize,0,25,battleFont,2,black,transparent,transparent,false,false)
+    battleTextA = TextBox.New("BattleTextA",battleText,battleTextPosA,battleTextSize,110,0,25,battleFont,1.1,white,transparent,transparent,false,false)
+    battleTextB = TextBox.New("BattleTextB",battleText,battleTextPosB,battleTextSize,110,0,25,battleFont,1.1,black,transparent,transparent,false,false)
     
-    nextBattle = TextBox.New("nextBtl",">",nextBtlPos,iconSize,0,5,btnFont,1,black,white,lGray,true,true)
-    prevBattle = TextBox.New("prevBtl","<",prevBtlPos,iconSize,0,5,btnFont,1,black,white,lGray,true,true)
+    nextBattle = TextBox.New("nextBtl",">",nextBtlPos,iconSize,60,0,5,btnFont,1,black,white,lGray,true,true)
+    prevBattle = TextBox.New("prevBtl","<",prevBtlPos,iconSize,60,0,5,btnFont,1,black,white,lGray,true,true)
 
     t1Image = ImageBox.New("Faction1",t1Img,t1Pos,tSize,5,0,yellow,yellow,true,true)
     t2Image = ImageBox.New("Faction2",t2Img,t2Pos,tSize,5,0,yellow,yellow,true,true)
 
-    p1Txt = TextBox.New("Faction1Prompt",prompt1,p1Pos,pSize,0,5,btnFont,1,black,textBackClr,transparent,false,false)
-    p2Txt = TextBox.New("Faction2Prompt",prompt2,p2Pos,pSize,0,5,btnFont,1,black,textBackClr,transparent,false,false)
+    p1Txt = TextBox.New("Faction1Prompt",prompt1,p1Pos,pSize,35,0,5,btnFont,1,black,textBackClr,transparent,false,false)
+    p2Txt = TextBox.New("Faction2Prompt",prompt2,p2Pos,pSize,35,0,5,btnFont,1,black,textBackClr,transparent,false,false)
 
     --create a new screen to return to the menu handler--
     local newScreen = Screen.New(1)

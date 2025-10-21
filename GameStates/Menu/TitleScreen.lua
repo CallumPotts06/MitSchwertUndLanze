@@ -38,14 +38,16 @@ function TitleScreen.Open()
     local white = Colours.CreateColour(Colours.White)
     local title1Pos = Mathematics.ScreenScaleVector(0.135,0.1)
     local titleSize = Mathematics.ScreenScaleVector(0.73,0.24)
-    local titleTextScale = 1.84
+    --local titleTextScale = 1.84
+    local titleScreenScale = 1
+    local titleMaxSize = 200
     --create the title text ui--
-    Title1 = TextBox.New("Title1",titleText,title1Pos,titleSize,0,25,titleFont,titleTextScale,white,titleBackClr,transparent,false,false)
+    Title1 = TextBox.New("Title1",titleText,title1Pos,titleSize,titleMaxSize,0,25,titleFont,titleTextScale,white,titleBackClr,transparent,false,false)
     --setup data for the title shadow text--
     local black = Colours.CreateColour(Colours.Black)
-    local title2Pos = Mathematics.ScreenScaleVector(0.137,0.102)
+    local title2Pos = Mathematics.ScreenScaleVector(0.1385,0.1035)
     --create the title text shadow ui--
-    Title2 = TextBox.New("Title2",titleText,title2Pos,titleSize,0,25,titleFont,titleTextScale,black,transparent,transparent,false,false)
+    Title2 = TextBox.New("Title2",titleText,title2Pos,titleSize,titleMaxSize,0,25,titleFont,titleTextScale,black,transparent,transparent,false,false)
 
 
     --setup data for the start button--
@@ -55,8 +57,9 @@ function TitleScreen.Open()
     local lGray = Colours.CreateColour(Colours.LightGray)
     local buttonPos = Mathematics.ScreenScaleVector(0.35,0.8)
     local buttonSize = Mathematics.ScreenScaleVector(0.3,0.1175)
+    local buttonMaxSize = 50
     --create the start button ui--
-    Button = TextBox.New("StartButton",buttonText,buttonPos,buttonSize,5,25,buttonFont,1.025,black,white,lGray,true,true)
+    Button = TextBox.New("StartButton",buttonText,buttonPos,buttonSize,buttonMaxSize,5,25,buttonFont,1.025,black,white,lGray,true,true)
 
 
     --create a new screen to return to the menu handler--
