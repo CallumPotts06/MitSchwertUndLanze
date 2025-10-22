@@ -35,7 +35,7 @@ function MainMenu.Open()
     local titlePosA = Mathematics.ScreenScaleVector(0.55,0.85)
     local titlePosB = Mathematics.ScreenScaleVector(0.553,0.853)
     local titleSize = Mathematics.ScreenScaleVector(0.4,0.1)
-    local titleMaxSize = 60
+    local titleMaxSize = 85
     local titleText = "- mit schwert und lanze -" 
     local titleFont = Font.Gothic2
 
