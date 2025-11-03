@@ -43,6 +43,10 @@ Stats = require("../GameStats/UnitStats")
 --// IMPORT SQUAD LIBRARY //--
 Squad = require("../Army/Squad")
 
+--// IMPORT MATHS LIBRARIES //--
+Vector = require("../Mathematics/Vector")
+Mathematics = require("../Mathematics/Mathematics")
+
 
 local function findStatsObject(team,unitType)
     local teamStats = nil
@@ -51,8 +55,7 @@ local function findStatsObject(team,unitType)
     --simple function that maps team and unit type to find the correct stats object--
     if team == "Germany" then
         teamStats = Stats.GermanUnits
-
-        if unitType == "PrussianLineInfantry" then typeStats = teamStats.PrussianLineInfantry end
+        if unitType == "PreussischerLineninfanterie" then typeStats = teamStats.PrussianLineInfantry end
         if unitType == "Landwehr" then typeStats = teamStats.Landwehr end
     end
 
@@ -64,7 +67,7 @@ end
 Battalion = {}
 
 --// SETUP METHODS //--
-function LoadImagesOntoUnit(team,unittype)
+function LoadImagesOntoUnit(team,unitservice,unittype)
     local nationSet = "none"
     local imgSet = "none"
 
@@ -72,10 +75,9 @@ function LoadImagesOntoUnit(team,unittype)
     if team=="Germany" then nationSet = Squad.ImageLibrary.GermanUnits end
 
     --find the branch of service related to unit type--
-    if unittype=="Infantry" then imgSet = nationSet.Infantry
-    elseif unittype=="Artillery" then imgSet = nationSet.Artillery
+    if unitservice=="Infantry" then imgSet = nationSet.Infantry
+    elseif unitservice=="Artillery" then imgSet = nationSet.Artillery
     else imgSet = nationSet.Cavalry end
-
     local newImages = {}
     newImages.Battleline = {}
     newImages.FiringLine = {}
@@ -108,7 +110,7 @@ function LoadImagesOntoUnit(team,unittype)
 end
 
 --// CONSTRUCTOR //--
-function Battalion.New(name,regiment,team,unitType,unitTypeName,startPos,season)
+function Battalion.New(name,regiment,team,service,unitType,unitTypeName,startPos,season)
     --create new empty object--
     local newBattalion = {}
 
@@ -118,13 +120,15 @@ function Battalion.New(name,regiment,team,unitType,unitTypeName,startPos,season)
     newBattalion.Team = team
     newBattalion.UnitType = unitType
     newBattalion.UnitTypeName = unitTypeName
+    newBattalion.BranchofService = service
 
     --add mathematical data--
     newBattalion.Position = startPos
     newBattalion.MoveObject = nil
 
     --add statistics from stats library--
-    local currentStats = findStatsObject(team,unitType)
+    local currentStats = findStatsObject(team,unitTypeName)
+    newBattalion.MaxHealth = currentStats.Health
     newBattalion.Health = currentStats.Health
     newBattalion.Damage = currentStats.Damage
     newBattalion.Accuracy = currentStats.Accuracy
@@ -133,15 +137,64 @@ function Battalion.New(name,regiment,team,unitType,unitTypeName,startPos,season)
     newBattalion.ChargeEnabled = currentStats.ChargeEnabled
 
     --add appearance data--
-    newBattalion.Images = LoadImagesOntoUnit(team,unitType)
+    newBattalion.Images = LoadImagesOntoUnit(team,service,unitType)
+    newBattalion.Facing = "North"
+    newBattalion.CurrentImage = nil
+    newBattalion.Season = season
 
+    --add game data--
+    newBattalion.Formation = "MarchingColumn"
+    newBattalion.Animation = "Idle"
+    if unitType=="Dragoon" then newBattalion.Formation = "Mounted" newBattalion.Animation = "MountedIdle" end
 
     --finish up the object--
     setmetatable(newBattalion,{__index=Battalion})--map the new table onto the Battalion class--
     return newBattalion--return the new object--
 end
 
+function Battalion:UpdateCurrentImage()
+    local imgFormationSet = nil
+    if self.Formation=="BattleLine" then imgFormationSet = self.Images.BattleLine
+    elseif self.Formation=="MarchingColumn" then imgFormationSet = self.Images.MarchingColumn
+    elseif self.Formation=="FiringLine" then imgFormationSet = self.Images.FiringLine
+    elseif self.Formation=="SkirmishOrder" then imgFormationSet = self.Images.SkirmishOrder
+    elseif self.Formation=="Mounted" then imgFormationSet = self.Images.Mounted
+    elseif self.Formation=="Dismounted" then imgFormationSet = self.Images.Dismounted end
 
+    for i=1,#imgFormationSet,1 do
+        print(imgFormationSet[i].Animation)
+        if imgFormationSet[i].Animation==self.Animation then
+            if imgFormationSet[i].Facing==self.Facing then
+                if imgFormationSet[i].Dress==self.Season then
+                    squadImage = imgFormationSet[i].Image
+                end
+            end
+        end
+    end
+
+    self.CurrentImage = squadImage
+end
+
+function Battalion:DrawBattalion()
+    local squadsPerHealth = 1/50
+    local squadCount = self.Health*squadsPerHealth
+
+    local squadWidth = self.CurrentImage:getWidth()
+    local squadHeight = self.CurrentImage:getHeight()
+
+    for i=math.floor(-squadCount/2),math.ceil(squadCount/2),1 do
+
+        if self.Formation=="MarchingColumn" then
+
+            if self.BranchofService=="Infantry" then squadHeight = (Squad.INFANTRY_SIZE_NORTHSOUTH.Y+4) end 
+
+            local newPos = Mathematics.VectorFromAddition(Mathematics.ForwardVector(self.Position,(squadHeight*i)),self.Position)
+            love.graphics.draw(self.CurrentImage,newPos.X,newPos.Y)
+        else
+            --!--
+        end 
+    end
+end
 
 
 return Battalion

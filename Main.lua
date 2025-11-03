@@ -38,6 +38,9 @@ function love.load()
 
     --load squads for gameplay--
     Squad.LoadAllSquads()
+    local tempReg = {}
+    battalion1 = Battalion.New("Battalion 1",tempReg,"Germany","Infantry","DeutscherLineninfanterie","PreussischerLineninfanterie",Vector.New(500,500,0),"Summer")
+    battalion1:UpdateCurrentImage()
 end
 
 ----//// ** LOVE UPDATE FUNCTION ** ////----
@@ -58,5 +61,6 @@ end
 function love.draw()
     --MenuController.DrawMenu()
     love.graphics.setBackgroundColor(0.35, 0.6, 0.35)
-    love.graphics.draw(Squad.ImageLibrary.GermanUnits.Infantry[soldierIndex].Image,150,150)
+
+    battalion1:DrawBattalion()
 end

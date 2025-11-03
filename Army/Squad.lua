@@ -7,25 +7,25 @@
 --// IMPORT OTHER LIBRARIES //--
 Vector = require("../Mathematics/Vector")
 
---// CONSTANTS //--
-local INFANTRY_MAXSIZE = Vector.New(70,55)
-local INFANTRY_SIZE_WESTEAST = Vector.New(20,55)
-local INFANTRY_OFFSET_WESTEAST = Vector.New(0,0)
-local INFANTRY_SIZE_NORTHSOUTH = Vector.New(20,55)
-local INFANTRY_OFFSET_NORTHSOUTH = Vector.New(-23,0)
-
-local ARTILLERY_SIZE_WESTEAST = Vector.New(250,115)
-local ARTILLERY_OFFSET_WESTEAST = Vector.New(1,12)
-local ARTILLERY_SIZE_NORTHSOUTH = Vector.New(100,164)
-local ARTILLERY_OFFSET_NORTHSOUTH = Vector.New(1,5)
-
-local CAVALRY_MAXSIZE = Vector.New(150,110)
-local CAVALRY_SIZE_WESTEAST = Vector.New(30,90)
-local CAVALRY_OFFSET_WESTEAST = Vector.New(0,0)
-local CAVALRY_SIZE_NORTHSOUTH = Vector.New(30,95)
-local CAVALRY_OFFSET_NORTHSOUTH = Vector.New(-30,0)
-
 Squads = {}
+
+--// CONSTANTS //--
+Squads.INFANTRY_MAXSIZE = Vector.New(70,55)
+Squads.INFANTRY_SIZE_WESTEAST = Vector.New(20,55)
+Squads.INFANTRY_OFFSET_WESTEAST = Vector.New(0,0)
+Squads.INFANTRY_SIZE_NORTHSOUTH = Vector.New(20,55)
+Squads.INFANTRY_OFFSET_NORTHSOUTH = Vector.New(-23,0)
+
+Squads.ARTILLERY_SIZE_WESTEAST = Vector.New(250,115)
+Squads.ARTILLERY_OFFSET_WESTEAST = Vector.New(1,12)
+Squads.ARTILLERY_SIZE_NORTHSOUTH = Vector.New(100,164)
+Squads.ARTILLERY_OFFSET_NORTHSOUTH = Vector.New(1,5)
+
+Squads.CAVALRY_MAXSIZE = Vector.New(150,110)
+Squads.CAVALRY_SIZE_WESTEAST = Vector.New(30,90)
+Squads.CAVALRY_OFFSET_WESTEAST = Vector.New(0,0)
+Squads.CAVALRY_SIZE_NORTHSOUTH = Vector.New(30,95)
+Squads.CAVALRY_OFFSET_NORTHSOUTH = Vector.New(-30,0)
 
 function Squads.LoadImages(team,unitTypeName,unitType,dress,facing,animation,formation)
     --function load images from directory--
@@ -119,29 +119,29 @@ function Squads.CreateSquad(team,unitTypeName,unitType,dress,facing,animation,fo
         elseif formation=="MarchingColumn" then soldierCount = Vector.New(4,2)
         elseif formation=="SkirmishOrder" then soldierCount = Vector.New(1,1) end 
 
-        soldierMaxSize = INFANTRY_MAXSIZE
+        soldierMaxSize = Squads.INFANTRY_MAXSIZE
 
         if (facing=="North")or(facing=="South") then
-            soldierSize = INFANTRY_SIZE_NORTHSOUTH
-            soldierOffset = INFANTRY_OFFSET_NORTHSOUTH
+            soldierSize = Squads.INFANTRY_SIZE_NORTHSOUTH
+            soldierOffset = Squads.INFANTRY_OFFSET_NORTHSOUTH
         else
-            soldierSize = INFANTRY_SIZE_WESTEAST
-            soldierOffset = INFANTRY_OFFSET_WESTEAST
+            soldierSize = Squads.INFANTRY_SIZE_WESTEAST
+            soldierOffset = Squads.INFANTRY_OFFSET_WESTEAST
         end
 
     elseif unitType=="Artillery" then
         soldierCount = Vector.New(1,1)
 
         if (facing=="North")or(facing=="South") then
-            soldierSize = ARTILLERY_SIZE_NORTHSOUTH
-            soldierOffset = ARTILLERY_OFFSET_NORTHSOUTH
+            soldierSize = Squads.ARTILLERY_SIZE_NORTHSOUTH
+            soldierOffset = Squads.ARTILLERY_OFFSET_NORTHSOUTH
         else
-            soldierSize = ARTILLERY_SIZE_WESTEAST
-            soldierOffset = ARTILLERY_OFFSET_WESTEAST
+            soldierSize = Squads.ARTILLERY_SIZE_WESTEAST
+            soldierOffset = Squads.ARTILLERY_OFFSET_WESTEAST
         end
 
     elseif unitType=="Cavalry" then
-        soldierMaxSize = CAVALRY_MAXSIZE
+        soldierMaxSize = Squads.CAVALRY_MAXSIZE
 
         if formation=="BattleLine" then
             soldierCount = Vector.New(2,2)
@@ -150,32 +150,32 @@ function Squads.CreateSquad(team,unitTypeName,unitType,dress,facing,animation,fo
         end
 
         if (facing=="North")or(facing=="South") then
-            soldierSize = CAVALRY_SIZE_NORTHSOUTH
-            soldierOffset = CAVALRY_OFFSET_NORTHSOUTH
+            soldierSize = Squads.CAVALRY_SIZE_NORTHSOUTH
+            soldierOffset = Squads.CAVALRY_OFFSET_NORTHSOUTH
         else
-            soldierSize = CAVALRY_SIZE_WESTEAST
-            soldierOffset = CAVALRY_OFFSET_WESTEAST
+            soldierSize = Squads.CAVALRY_SIZE_WESTEAST
+            soldierOffset = Squads.CAVALRY_OFFSET_WESTEAST
         end
 
     elseif unitType=="Dragoon" then
         if formation=="Mounted" then 
-            soldierMaxSize = CAVALRY_MAXSIZE
+            soldierMaxSize = Squads.CAVALRY_MAXSIZE
             soldierCount = Vector.New(4,2) 
             if (facing=="North")or(facing=="South") then
-                soldierSize = CAVALRY_SIZE_NORTHSOUTH
-                soldierOffset = CAVALRY_OFFSET_NORTHSOUTH
+                soldierSize = Squads.CAVALRY_SIZE_NORTHSOUTH
+                soldierOffset = Squads.CAVALRY_OFFSET_NORTHSOUTH
             else
-                soldierSize = CAVALRY_SIZE_WESTEAST
-                soldierOffset = CAVALRY_OFFSET_WESTEAST
+                soldierSize = Squads.CAVALRY_SIZE_WESTEAST
+                soldierOffset = Squads.CAVALRY_OFFSET_WESTEAST
             end
         else
-            soldierMaxSize = INFANTRY_MAXSIZE
+            soldierMaxSize = Squads.INFANTRY_MAXSIZE
             if (facing=="North")or(facing=="South") then
-                soldierSize = INFANTRY_SIZE_NORTHSOUTH
-                soldierOffset = INFANTRY_OFFSET_NORTHSOUTH
+                soldierSize = Squads.INFANTRY_SIZE_NORTHSOUTH
+                soldierOffset = Squads.INFANTRY_OFFSET_NORTHSOUTH
             else
-                soldierSize = INFANTRY_SIZE_WESTEAST
-                soldierOffset = INFANTRY_OFFSET_WESTEAST
+                soldierSize = Squads.INFANTRY_SIZE_WESTEAST
+                soldierOffset = Squads.INFANTRY_OFFSET_WESTEAST
             end
 
             if animation=="Guard" then
