@@ -38,7 +38,10 @@ Formation Types:
 ]]--
 
 --// IMPORT UNIT STATISTICS //--
-stats = require("../GameStats/UnitStats")
+Stats = require("../GameStats/UnitStats")
+
+--// IMPORT SQUAD LIBRARY //--
+Squad = require("../Army/Squad")
 
 
 local function findStatsObject(team,unitType)
@@ -47,11 +50,10 @@ local function findStatsObject(team,unitType)
 
     --simple function that maps team and unit type to find the correct stats object--
     if team == "Germany" then
-        teamStats = stats.GermanUnits
+        teamStats = Stats.GermanUnits
 
         if unitType == "PrussianLineInfantry" then typeStats = teamStats.PrussianLineInfantry end
         if unitType == "Landwehr" then typeStats = teamStats.Landwehr end
-
     end
 
     return typeStats
@@ -61,8 +63,52 @@ end
 ----//// CLASS : BATTALION ////----
 Battalion = {}
 
+--// SETUP METHODS //--
+function LoadImagesOntoUnit(team,unittype)
+    local nationSet = "none"
+    local imgSet = "none"
+
+    --find the necessary object for the relevant nation--
+    if team=="Germany" then nationSet = Squad.ImageLibrary.GermanUnits end
+
+    --find the branch of service related to unit type--
+    if unittype=="Infantry" then imgSet = nationSet.Infantry
+    elseif unittype=="Artillery" then imgSet = nationSet.Artillery
+    else imgSet = nationSet.Cavalry end
+
+    local newImages = {}
+    newImages.Battleline = {}
+    newImages.FiringLine = {}
+    newImages.SkirmishOrder = {}
+    newImages.MarchingColumn = {}
+    newImages.Mounted = {}
+    newImages.Dismounted = {}
+    --look for images that apply to unit type and add them to anims table--
+    for i=1,#imgSet,1 do
+        if imgSet[i].UnitType==unittype then
+
+            if imgSet[i].Formation=="BattleLine" then
+                table.insert(newImages.Battleline,imgSet[i])
+            elseif imgSet[i].Formation=="FiringLine" then
+                table.insert(newImages.FiringLine,imgSet[i])
+            elseif imgSet[i].Formation=="SkirmishOrder" then
+                table.insert(newImages.SkirmishOrder,imgSet[i])
+            elseif imgSet[i].Formation=="MarchingColumn" then
+                table.insert(newImages.MarchingColumn,imgSet[i])
+            elseif imgSet[i].Formation=="Mounted" then
+                table.insert(newImages.Mounted,imgSet[i])
+            elseif imgSet[i].Formation=="Dismounted" then
+                table.insert(newImages.Dismounted,imgSet[i])
+            end
+
+        end
+    end
+
+    return newImages
+end
+
 --// CONSTRUCTOR //--
-function Battalion.New(name,regiment,team,unitType,startPos)
+function Battalion.New(name,regiment,team,unitType,unitTypeName,startPos,season)
     --create new empty object--
     local newBattalion = {}
 
@@ -71,6 +117,7 @@ function Battalion.New(name,regiment,team,unitType,startPos)
     newBattalion.Regiment = regiment
     newBattalion.Team = team
     newBattalion.UnitType = unitType
+    newBattalion.UnitTypeName = unitTypeName
 
     --add mathematical data--
     newBattalion.Position = startPos
@@ -86,24 +133,16 @@ function Battalion.New(name,regiment,team,unitType,startPos)
     newBattalion.ChargeEnabled = currentStats.ChargeEnabled
 
     --add appearance data--
-    newBattalion.BattleLineSquad = nil
-    newBattalion.BattleLineSquadFlag = nil
-    newBattalion.MarchingSquad = nil
-    newBattalion.MarchingSquadFlag = nil
+    newBattalion.Images = LoadImagesOntoUnit(team,unitType)
 
-    --add appearance data for skirmishing infantry and dismounted dragoons--
-    newBattalion.OpenOrderSquad1 = nil
-    newBattalion.OpenOrderSquad2 = nil
-    newBattalion.OpenOrderSquad3 = nil
-
-    --add appearance data for dragoon and artillery rally / reserve points--
-    newBattalion.ReserveSquad = nil
-    newBattalion.ReserveSquadFlag = nil
 
     --finish up the object--
     setmetatable(newBattalion,{__index=Battalion})--map the new table onto the Battalion class--
     return newBattalion--return the new object--
 end
+
+
+
 
 return Battalion
 
