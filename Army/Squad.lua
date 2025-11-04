@@ -59,7 +59,6 @@ function Squads.LoadImages(team,unitTypeName,unitType,dress,facing,animation,for
     end
 
     if unitType=="Dragoon" then
-        print("Dragoon "..formation)
         filepath2="Assets/Images/Units/"..team.."/"..unitTypeName.."/Dismounted/"..facing.."/1.png"
         if formation=="Dismounted" then
             if animation=="Idle" then filepath1="Assets/Images/Units/"..team.."/"..unitTypeName.."/Dismounted/"..facing.."/3.png"end
@@ -81,7 +80,6 @@ function Squads.LoadImages(team,unitTypeName,unitType,dress,facing,animation,for
         if path == "Not Found" then return nil end
         local ok, img = pcall(love.graphics.newImage, path)
         if not ok then
-            print("Failed to load image:", path)
             return nil
         end
         return img

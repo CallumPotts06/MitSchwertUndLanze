@@ -138,7 +138,7 @@ function Battalion.New(name,regiment,team,service,unitType,unitTypeName,startPos
 
     --add appearance data--
     newBattalion.Images = LoadImagesOntoUnit(team,service,unitType)
-    newBattalion.Facing = "North"
+    newBattalion.Facing = "South"
     newBattalion.CurrentImage = nil
     newBattalion.Season = season
 
@@ -176,13 +176,13 @@ function Battalion:UpdateCurrentImage()
 end
 
 function Battalion:DrawBattalion()
-    local squadsPerHealth = 1/50
+    local squadsPerHealth = 1/30
     local squadCount = self.Health*squadsPerHealth
 
     local squadWidth = self.CurrentImage:getWidth()
     local squadHeight = self.CurrentImage:getHeight()
 
-    for i=math.floor(-squadCount/2),math.ceil(squadCount/2),1 do
+    for i=math.floor(-squadCount/2),math.floor(squadCount/2),1 do
 
         if self.Formation=="MarchingColumn" then
 
