@@ -34,24 +34,29 @@ local cumulativeTime = 0
 ----//// ** LOVE LOAD FUNCTION ** ////----
 function love.load()
     local success = love.window.setFullscreen(true)--set the screen to full screen--
+    
+    love.graphics.setDefaultFilter("nearest", "nearest")--removes anti aliasing--
+    
     --MenuController.InitialiseMenu("TitleScreen")--open title screen on opening the game
 
     --load squads for gameplay--
     Squad.LoadAllSquads()
-    local tempReg = {}
-    battalion1 = Battalion.New("Battalion 1",tempReg,"Germany","Infantry","DeutscherLineninfanterie","PreussischerLineninfanterie",Vector.New(500,500,0.6),"Summer")
+
+    battalion1 = Battalion.New("Battalion 1",{},"Germany","Artillery","DeutscherArtillerie","PreussischerArtillerie",Vector.New(500,200,math.rad(290)),"None")
+    --battalion1 = Battalion.New("Battalion 1",{},"Germany","Cavalry","PreussischerUhlanen","PreussischerUhlanen",Vector.New(500,200,math.rad(290)),"None")
+    --battalion1 = Battalion.New("Battalion 1",{},"Germany","Cavalry","PreussischerDragoner","PreussischerDragoner",Vector.New(500,200,math.rad(290)),"None")
+    --battalion1 = Battalion.New("Battalion 1",{},"Germany","Infantry","BayerischerLineninfanterie","BayerischerLineninfanterie",Vector.New(500,200,math.rad(290)),"Summer")
     battalion1:UpdateCurrentImage()
 end
 
 ----//// ** LOVE UPDATE FUNCTION ** ////----
-local soldierIndex = 1
 local timer1 = 0
 
 function love.update(dt)
     timer1=timer1+dt
     cumulativeTime = cumulativeTime + dt
 
-    if timer1>=1 then timer1=timer1-1 soldierIndex=soldierIndex+1 end
+    if timer1>=0.5 then timer1=timer1-0.5 battalion1.Position.Theta=battalion1.Position.Theta+math.rad(6) end
 
     local mouseData = Mouse.GetData(true,cumulativeTime)
     --MenuController.CheckForClicks(mouseData.Position,mouseData.LMBDown)

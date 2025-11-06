@@ -27,6 +27,9 @@ Squads.CAVALRY_OFFSET_WESTEAST = Vector.New(0,0)
 Squads.CAVALRY_SIZE_NORTHSOUTH = Vector.New(30,95)
 Squads.CAVALRY_OFFSET_NORTHSOUTH = Vector.New(-30,0)
 
+Squads.SKIRMISH_ORDER_SEED = 1870
+
+
 function Squads.LoadImages(team,unitTypeName,unitType,dress,facing,animation,formation)
     --function load images from directory--
     local filepath1="Not Found"
@@ -287,7 +290,6 @@ function Squads.LoadAllSquads()
                             if season=="Enabled" then currentSeasons=seasons else currentSeasons={"None"} end
                             for i7=1,#currentSeasons,1 do
                                 Squads.ImageLibrary.SoldiersLoadedCounter=Squads.ImageLibrary.SoldiersLoadedCounter+1
-                                print(Squads.ImageLibrary.SoldiersLoadedCounter)
 
                                 local unit = nations[i1][i2]
                                 local newSquad = Squads.CreateSquad(team,unit[2],unit[3],currentSeasons[i7],facings[i5],anims[i4],forms[i3],timesOfDay[i6])
@@ -313,7 +315,7 @@ function Squads.LoadAllSquads()
                                 else
                                     ImgSet = nationImgSet.Cavalry
                                 end
-
+                                
                                 table.insert(ImgSet,newSquadData)
                             end
                         end

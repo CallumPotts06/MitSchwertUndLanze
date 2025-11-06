@@ -57,6 +57,10 @@ local function findStatsObject(team,unitType)
         teamStats = Stats.GermanUnits
         if unitType == "PreussischerLineninfanterie" then typeStats = teamStats.PrussianLineInfantry end
         if unitType == "Landwehr" then typeStats = teamStats.Landwehr end
+        if unitType == "PreussischerUhlanen" then typeStats = teamStats.Uhlanen end
+        if unitType == "PreussischerArtillerie" then typeStats = teamStats.Artillery end
+        if unitType == "PreussischerDragoner" then typeStats = teamStats.Dragoons end
+        if unitType == "BayerischerLineninfanterie" then typeStats = teamStats.BayerischerLineInfantry end
     end
 
     return typeStats
@@ -66,7 +70,7 @@ end
 ----//// CLASS : BATTALION ////----
 Battalion = {}
 
---// SETUP METHODS //--
+---/// SETUP METHODS FOR BATTALION ///---
 function LoadImagesOntoUnit(team,unitservice,unittype)
     local nationSet = "none"
     local imgSet = "none"
@@ -79,7 +83,7 @@ function LoadImagesOntoUnit(team,unitservice,unittype)
     elseif unitservice=="Artillery" then imgSet = nationSet.Artillery
     else imgSet = nationSet.Cavalry end
     local newImages = {}
-    newImages.Battleline = {}
+    newImages.BattleLine = {}
     newImages.FiringLine = {}
     newImages.SkirmishOrder = {}
     newImages.MarchingColumn = {}
@@ -87,10 +91,12 @@ function LoadImagesOntoUnit(team,unitservice,unittype)
     newImages.Dismounted = {}
     --look for images that apply to unit type and add them to anims table--
     for i=1,#imgSet,1 do
+        print(imgSet[i].UnitType)
         if imgSet[i].UnitType==unittype then
+            print("true")
 
             if imgSet[i].Formation=="BattleLine" then
-                table.insert(newImages.Battleline,imgSet[i])
+                table.insert(newImages.BattleLine,imgSet[i])
             elseif imgSet[i].Formation=="FiringLine" then
                 table.insert(newImages.FiringLine,imgSet[i])
             elseif imgSet[i].Formation=="SkirmishOrder" then
@@ -108,8 +114,13 @@ function LoadImagesOntoUnit(team,unitservice,unittype)
 
     return newImages
 end
+---/// END OF SETUP METHODS FOR BATTALION ///---
 
---// CONSTRUCTOR //--
+
+
+
+
+---/// CONSTRUCTOR BY ARGUMENT PASSING FOR BATTALION ///---
 function Battalion.New(name,regiment,team,service,unitType,unitTypeName,startPos,season)
     --create new empty object--
     local newBattalion = {}
@@ -143,15 +154,31 @@ function Battalion.New(name,regiment,team,service,unitType,unitTypeName,startPos
     newBattalion.Season = season
 
     --add game data--
-    newBattalion.Formation = "MarchingColumn"
-    newBattalion.Animation = "Idle"
-    if unitType=="Dragoon" then newBattalion.Formation = "Mounted" newBattalion.Animation = "MountedIdle" end
+    if serive=="Infantry" or serive=="Artillery" or service=="Cavalry" then
+        newBattalion.Formation = "MarchingColumn"
+        newBattalion.Animation = "Idle"
+    end
+    if (unitType=="PreussischerDragoner")or(unitType=="PreussischerDragoner") then newBattalion.Formation = "Mounted" newBattalion.Animation = "MountedIdle" end
 
     --finish up the object--
     setmetatable(newBattalion,{__index=Battalion})--map the new table onto the Battalion class--
     return newBattalion--return the new object--
 end
 
+---/// END OF CONSTRUCTOR METHOD FOR BATTALION ///---
+
+
+
+
+
+
+
+
+
+
+---/// OTHER METHODS FOR BATTALION ///---
+
+--// UPDATE THE BATTALION'S CURRENT IMAGE ATTRIBUTE //--
 function Battalion:UpdateCurrentImage()
     local imgFormationSet = nil
     if self.Formation=="BattleLine" then imgFormationSet = self.Images.BattleLine
@@ -162,7 +189,6 @@ function Battalion:UpdateCurrentImage()
     elseif self.Formation=="Dismounted" then imgFormationSet = self.Images.Dismounted end
 
     for i=1,#imgFormationSet,1 do
-        print(imgFormationSet[i].Animation)
         if imgFormationSet[i].Animation==self.Animation then
             if imgFormationSet[i].Facing==self.Facing then
                 if imgFormationSet[i].Dress==self.Season then
@@ -175,27 +201,103 @@ function Battalion:UpdateCurrentImage()
     self.CurrentImage = squadImage
 end
 
+
+
+
+--// DRAW BATTALION METHOD //--
 function Battalion:DrawBattalion()
-    local squadsPerHealth = 1/30
+    local preFacing = self.Facing
+    --update the battalions facing--
+    self.Position.Theta = self.Position.Theta % (2 * math.pi)
+    if (self.Position.Theta > math.rad(320)) or (self.Position.Theta < math.rad(45)) then self.Facing="North"
+    elseif (self.Position.Theta >= math.rad(45)) and (self.Position.Theta <= math.rad(135)) then self.Facing="East"
+    elseif (self.Position.Theta >= math.rad(135)) and (self.Position.Theta <= math.rad(225)) then self.Facing="South"
+    elseif (self.Position.Theta >= math.rad(225)) and (self.Position.Theta <= math.rad(320)) then self.Facing="West"
+    end
+
+    --if a change occurs, update the image--
+    if not (preFacing==self.Facing) then self:UpdateCurrentImage() end
+    
+    --setup local variables for the method--
+    local squadsPerHealth=2
+    if self.BranchofService=="Artillery" then squadsPerHealth = 1/60
+    else squadsPerHealth = 1/20 end
     local squadCount = self.Health*squadsPerHealth
 
     local squadWidth = self.CurrentImage:getWidth()
     local squadHeight = self.CurrentImage:getHeight()
 
-    for i=math.floor(-squadCount/2),math.floor(squadCount/2),1 do
+    local drawPositions = {}
 
-        if self.Formation=="MarchingColumn" then
+    local startMag = -1
+    local endMag = 1
 
-            if self.BranchofService=="Infantry" then squadHeight = (Squad.INFANTRY_SIZE_NORTHSOUTH.Y+4) end 
-
-            local newPos = Mathematics.VectorFromAddition(Mathematics.ForwardVector(self.Position,(squadHeight*i)),self.Position)
-            love.graphics.draw(self.CurrentImage,newPos.X,newPos.Y)
-        else
-            --!--
-        end 
+    --to make sure that the squads overlap correctly--
+    if self.Formation=="BattleLine" then
+        if self.Position.Theta > math.rad(180) then
+            startMag = 1
+            endMag = -1
+        end
     end
+    if self.Formation=="MarchingColumn" then
+        if (self.Position.Theta < math.rad(90)) or (self.Position.Theta > math.rad(270)) then
+            startMag = 1
+            endMag = -1
+        end
+    end
+
+    --finds all the positions that the squads need to be placed in--
+    
+    for i=math.floor((startMag*squadCount)/2),math.floor((endMag*squadCount)/2),endMag do
+
+        if (self.Formation=="MarchingColumn")or(self.Formation=="Mounted") then
+            if (not (i%2==0)) then--only half the amount of images drawn in marching column--
+                if self.BranchofService=="Infantry" then squadHeight = ((Squad.INFANTRY_SIZE_NORTHSOUTH.Y/2)+4) end 
+                if self.BranchofService=="Cavalry" then squadHeight = ((Squad.CAVALRY_SIZE_NORTHSOUTH.Y/1.4)+12) end 
+                local newPos = Mathematics.VectorFromAddition(Mathematics.ForwardVector(self.Position,(squadHeight*i)),self.Position)
+                table.insert(drawPositions,newPos)            
+            elseif (self.BranchofService=="Artillery") then
+                squadHeight = ((Squad.ARTILLERY_SIZE_NORTHSOUTH.X*2)+15)
+                local newPos = Mathematics.VectorFromAddition(Mathematics.ForwardVector(self.Position,(squadHeight*i)),self.Position)
+                table.insert(drawPositions,newPos)
+            end
+        elseif (self.Formation=="BattleLine")or(self.Formation=="FiringLine") then
+            if self.BranchofService=="Infantry" then squadWidth = ((Squad.INFANTRY_SIZE_NORTHSOUTH.X*2)) end 
+            if self.BranchofService=="Cavalry" then squadWidth = ((Squad.CAVALRY_SIZE_NORTHSOUTH.X*2)+5) end 
+            if self.BranchofService=="Artillery" then squadWidth = ((Squad.ARTILLERY_SIZE_NORTHSOUTH.X*2)+5) end 
+
+            local newPos = Mathematics.VectorFromAddition(Mathematics.RightVector(self.Position,(squadWidth*i)),self.Position)
+            table.insert(drawPositions,newPos)  
+        elseif self.Formation=="SkirmishOrder" then
+            math.randomseed(Squad.SKIRMISH_ORDER_SEED+i)
+            --Front Rank--
+            local newPos = Mathematics.VectorFromAddition(Mathematics.RightVector(self.Position,(i*100)+math.random(-25,25)),self.Position)
+            newPos = Mathematics.VectorFromAddition(Mathematics.ForwardVector(newPos,math.random(-35,35)),newPos)
+            table.insert(drawPositions,newPos)
+
+            --Rear Rank--
+            local theta=self.Position.Theta
+            if i~=0 then
+                if i<0 then theta = Mathematics.AngleFromVector(Mathematics.VectorFromSubtraction(newPos,self.Position))
+                else theta = Mathematics.AngleFromVector(Mathematics.VectorFromSubtraction(self.Position,newPos))
+                end
+                newPos.Theta=theta
+                newPos = Mathematics.VectorFromAddition(Mathematics.RightVector(newPos,(-125)+math.random(-25,25)),newPos)
+            else
+                newPos.Theta=theta
+                newPos = Mathematics.VectorFromAddition(Mathematics.ForwardVector(newPos,(-125)+math.random(-25,25)),newPos)
+            end
+            
+            table.insert(drawPositions,newPos)
+        end
+    end
+
+    --draw the squads to screen--
+    for i=1,#drawPositions,1 do love.graphics.draw(self.CurrentImage,drawPositions[i].X,drawPositions[i].Y) end
 end
 
 
+
+--// FINISH UP BY RETURNING THE NEW OBJECT BACK TO MAIN //--
 return Battalion
 
