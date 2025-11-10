@@ -50,6 +50,10 @@ Colours = require("../Interface/Colours")
 Vector = require("../Mathematics/Vector")
 Mathematics = require("../Mathematics/Mathematics")
 
+--// IMPORT GRAPHICS LIBRARIES //--
+Highlight = require("../Graphics/Highlighter")
+Effects = require("../Graphics/Effects")
+
 
 local function findStatsObject(team,unitType)
     local teamStats = nil
@@ -397,7 +401,11 @@ function Battalion:DrawBattalion()
     local img = self.CurrentImage
     local pos = self.Position
 
+    Effects.DrawShadow(img,pos)
     love.graphics.draw(img,pos.X,pos.Y)
+
+    local imgSize = Vector.New(img:getWidth(),img:getHeight())
+    Highlight.Box(pos,imgSize,Colours.CreateColour(Colours.White))
 end
 
 

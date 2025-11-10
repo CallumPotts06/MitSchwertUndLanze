@@ -35,7 +35,6 @@ Squads.SKIRMISH_ORDER_SEED = 1870
 --function that crops the input image / canvas--
 function Squads.CropImage(drawable,drawableType)
     if drawable then
-        print(type(drawable), tostring(drawable))
         local imageData = drawable
         if drawableType=="Canvas" then imageData = drawable:newImageData() end
         local minX, minY = imageData:getWidth(), imageData:getHeight()

@@ -46,7 +46,7 @@ function love.load()
     --battalion1 = Battalion.New("Battalion 1",{},"Germany","Cavalry","PreussischerUhlanen","PreussischerUhlanen",Vector.New(500,200,math.rad(290)),"None",true)
     --battalion1 = Battalion.New("Battalion 1",{},"Germany","Cavalry","PreussischerDragoner","PreussischerDragoner",Vector.New(500,200,math.rad(290)),"None",true)
     --battalion1 = Battalion.New("Battalion 1",{},"Germany","Infantry","BayerischerLineninfanterie","BayerischerLineninfanterie",Vector.New(500,200,math.rad(290)),"Summer",true)
-    battalion1 = Battalion.New("Battalion 1",{},"Germany","Infantry","DeutscherGardeZuFuss","PreussischerGardeZuFuss",Vector.New(600,800,math.rad(180)),"Summer",true)
+    battalion1 = Battalion.New("Battalion 1",{},"Germany","Infantry","DeutscherGardeZuFuss","PreussischerGardeZuFuss",Vector.New(100,300,math.rad(180)),"Summer",true)
 
     battalion1:UpdateCurrentImage()
     battalion1:CreateFlagMeshes()
@@ -58,14 +58,14 @@ local flagIncrement = -1
 --/ GLOBALS /--
 FlagTick = -5
 CameraZoom = 0.5
-TimeOfDay = 1500
+TimeOfDay = 0600
 
 
 function love.update(dt)
     unitAnimTimer=unitAnimTimer+dt
     cumulativeTime = cumulativeTime + dt
 
-    if unitAnimTimer>=0.125 then unitAnimTimer=unitAnimTimer-0.125 FlagTick=FlagTick+flagIncrement end--TimeOfDay=TimeOfDay+6 end
+    if unitAnimTimer>=0.125 then unitAnimTimer=unitAnimTimer-0.125 FlagTick=FlagTick+flagIncrement TimeOfDay=TimeOfDay+6 end
     if FlagTick > 5 then flagIncrement = -1  end
     if FlagTick < -5 then flagIncrement = 1  end
 
