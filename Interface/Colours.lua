@@ -67,7 +67,7 @@ function Colours.SetColour(colour)
 end
 
 
-function Colours.ResetColour(colour)
+function Colours.ResetColour()
     love.graphics.setColor(1,1,1,1)
 end
 

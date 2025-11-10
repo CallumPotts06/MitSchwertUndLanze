@@ -29,52 +29,80 @@ Squads.CAVALRY_OFFSET_NORTHSOUTH = Vector.New(-30,0)
 
 Squads.SKIRMISH_ORDER_SEED = 1870
 
+--function that crops the input image / canvas--
+function Squads.CropImage(drawable)
+    if drawable then
+        local imageData = drawable:newImageData()
+        local minX, minY = imageData:getWidth(), imageData:getHeight()
+        local maxX, maxY = 0, 0
+
+        for y = 0, imageData:getHeight() - 1 do
+            for x = 0, imageData:getWidth() - 1 do
+                local r, g, b, a = imageData:getPixel(x, y)
+                if a > 0 then  -- non-transparent
+                    if x < minX then minX = x end
+                    if y < minY then minY = y end
+                    if x > maxX then maxX = x end
+                    if y > maxY then maxY = y end
+                end
+            end
+        end
+        local croppedWidth  = maxX - minX + 1
+        local croppedHeight = maxY - minY + 1
+        local cropped = love.image.newImageData(croppedWidth, croppedHeight)
+        cropped:paste(imageData, 0, 0, minX, minY, croppedWidth, croppedHeight)
+        drawable = love.graphics.newImage(cropped)
+    end
+    return drawable
+end
 
 function Squads.LoadImages(team,unitTypeName,unitType,dress,facing,animation,formation)
     --function load images from directory--
-    local filepath1="Not Found"
-    local filepath2="Not Found"
+    local filepath1 = "Not Found"
+    local filepath2 = "Not Found"
 
     if unitType=="Infantry" then
-        filepath2="Assets/Images/Units/"..team.."/"..unitTypeName.."/"..dress.."/"..facing.."/1.png"
-        if animation=="Idle" then filepath1="Assets/Images/Units/"..team.."/"..unitTypeName.."/"..dress.."Dress".."/"..facing.."/3.png"end
-        if animation=="Aiming" then filepath1="Assets/Images/Units/"..team.."/"..unitTypeName.."/"..dress.."Dress".."/"..facing.."/2.png"end
-        if animation=="March1" then filepath1="Assets/Images/Units/"..team.."/"..unitTypeName.."/"..dress.."Dress".."/"..facing.."/4.png"end
-        if animation=="March2" then filepath1="Assets/Images/Units/"..team.."/"..unitTypeName.."/"..dress.."Dress".."/"..facing.."/5.png"end
-        if animation=="March3" then filepath1="Assets/Images/Units/"..team.."/"..unitTypeName.."/"..dress.."Dress".."/"..facing.."/6.png"end
-        if animation=="March4" then filepath1="Assets/Images/Units/"..team.."/"..unitTypeName.."/"..dress.."Dress".."/"..facing.."/7.png"end
+        filepath2 = "Assets/Images/Units/"..team.."/"..unitTypeName.."/"..dress.."/"..facing.."/1.png"
+        if animation=="Idle" then filepath1="Assets/Images/Units/"..team.."/"..unitTypeName.."/"..dress.."Dress".."/"..facing.."/3.png" end
+        if animation=="Aiming" then filepath1="Assets/Images/Units/"..team.."/"..unitTypeName.."/"..dress.."Dress".."/"..facing.."/2.png" end
+        if animation=="March1" then filepath1="Assets/Images/Units/"..team.."/"..unitTypeName.."/"..dress.."Dress".."/"..facing.."/4.png" end
+        if animation=="March2" then filepath1="Assets/Images/Units/"..team.."/"..unitTypeName.."/"..dress.."Dress".."/"..facing.."/5.png" end
+        if animation=="March3" then filepath1="Assets/Images/Units/"..team.."/"..unitTypeName.."/"..dress.."Dress".."/"..facing.."/6.png" end
+        if animation=="March4" then filepath1="Assets/Images/Units/"..team.."/"..unitTypeName.."/"..dress.."Dress".."/"..facing.."/7.png" end
     end
 
     if unitType=="Artillery" then
-        if animation=="Firing" then filepath1="Assets/Images/Units/"..team.."/"..unitTypeName.."/"..facing.."/1.png"end
-        if animation=="Idle" then filepath1="Assets/Images/Units/"..team.."/"..unitTypeName.."/"..facing.."/2.png"end
-        if animation=="March1" then filepath1="Assets/Images/Units/"..team.."/"..unitTypeName.."/"..facing.."/3.png"end
-        if animation=="March2" then filepath1="Assets/Images/Units/"..team.."/"..unitTypeName.."/"..facing.."/1.png"end
+        filepath2 = "Assets/Images/Units/"..team.."/"..unitTypeName.."/"..facing.."/1.png"
+        if animation=="Firing" then filepath1 = "Assets/Images/Units/"..team.."/"..unitTypeName.."/"..facing.."/1.png" end
+        if animation=="Idle"   then filepath1 = "Assets/Images/Units/"..team.."/"..unitTypeName.."/"..facing.."/2.png" end
+        if animation=="March1" then filepath1 = "Assets/Images/Units/"..team.."/"..unitTypeName.."/"..facing.."/3.png" end
+        if animation=="March2" then filepath1 = "Assets/Images/Units/"..team.."/"..unitTypeName.."/"..facing.."/1.png" end
     end
 
     if unitType=="Cavalry" then
-        if animation=="Idle" then filepath1="Assets/Images/Units/"..team.."/"..unitTypeName.."/"..facing.."/2.png"end
-        if animation=="March1" then filepath1="Assets/Images/Units/"..team.."/"..unitTypeName.."/"..facing.."/3.png"end
-        if animation=="March2" then filepath1="Assets/Images/Units/"..team.."/"..unitTypeName.."/"..facing.."/4.png"end
-        if animation=="Charge1" then filepath1="Assets/Images/Units/"..team.."/"..unitTypeName.."/"..facing.."/5.png"end
-        if animation=="Charge2" then filepath1="Assets/Images/Units/"..team.."/"..unitTypeName.."/"..facing.."/7.png"end
-        if animation=="Charge3" then filepath1="Assets/Images/Units/"..team.."/"..unitTypeName.."/"..facing.."/6.png"end
+        filepath2 = "Assets/Images/Units/"..team.."/"..unitTypeName.."/"..facing.."/1.png"
+        if animation=="Idle"    then filepath1 = "Assets/Images/Units/"..team.."/"..unitTypeName.."/"..facing.."/2.png" end
+        if animation=="March1"  then filepath1 = "Assets/Images/Units/"..team.."/"..unitTypeName.."/"..facing.."/3.png" end
+        if animation=="March2"  then filepath1 = "Assets/Images/Units/"..team.."/"..unitTypeName.."/"..facing.."/4.png" end
+        if animation=="Charge1" then filepath1 = "Assets/Images/Units/"..team.."/"..unitTypeName.."/"..facing.."/5.png" end
+        if animation=="Charge2" then filepath1 = "Assets/Images/Units/"..team.."/"..unitTypeName.."/"..facing.."/7.png" end
+        if animation=="Charge3" then filepath1 = "Assets/Images/Units/"..team.."/"..unitTypeName.."/"..facing.."/6.png" end
     end
 
     if unitType=="Dragoon" then
-        filepath2="Assets/Images/Units/"..team.."/"..unitTypeName.."/Dismounted/"..facing.."/1.png"
+        filepath2 = "Assets/Images/Units/"..team.."/"..unitTypeName.."/Dismounted/"..facing.."/1.png"
         if formation=="Dismounted" then
-            if animation=="Idle" then filepath1="Assets/Images/Units/"..team.."/"..unitTypeName.."/Dismounted/"..facing.."/3.png"end
-            if animation=="Aiming" then filepath1="Assets/Images/Units/"..team.."/"..unitTypeName.."/Dismounted/"..facing.."/2.png"end
-            if animation=="March1" then filepath1="Assets/Images/Units/"..team.."/"..unitTypeName.."/Dismounted/"..facing.."/4.png"end
-            if animation=="March2" then filepath1="Assets/Images/Units/"..team.."/"..unitTypeName.."/Dismounted/"..facing.."/5.png"end
-            if animation=="March3" then filepath1="Assets/Images/Units/"..team.."/"..unitTypeName.."/Dismounted/"..facing.."/6.png"end
-            if animation=="March4" then filepath1="Assets/Images/Units/"..team.."/"..unitTypeName.."/Dismounted/"..facing.."/7.png"end
-            if animation=="Guard" then filepath1="Assets/Images/Units/"..team.."/"..unitTypeName.."/Dismounted/"..facing.."/8.png"end
+            if animation=="Idle" then filepath1="Assets/Images/Units/"..team.."/"..unitTypeName.."/Dismounted/"..facing.."/3.png" end
+            if animation=="Aiming" then filepath1="Assets/Images/Units/"..team.."/"..unitTypeName.."/Dismounted/"..facing.."/2.png" end
+            if animation=="March1" then filepath1="Assets/Images/Units/"..team.."/"..unitTypeName.."/Dismounted/"..facing.."/4.png" end
+            if animation=="March2" then filepath1="Assets/Images/Units/"..team.."/"..unitTypeName.."/Dismounted/"..facing.."/5.png" end
+            if animation=="March3" then filepath1="Assets/Images/Units/"..team.."/"..unitTypeName.."/Dismounted/"..facing.."/6.png" end
+            if animation=="March4" then filepath1="Assets/Images/Units/"..team.."/"..unitTypeName.."/Dismounted/"..facing.."/7.png" end
+            if animation=="Guard" then filepath1="Assets/Images/Units/"..team.."/"..unitTypeName.."/Dismounted/"..facing.."/8.png" end
         else
-            if animation=="MountedIdle" then filepath1="Assets/Images/Units/"..team.."/"..unitTypeName.."/Mounted/"..facing.."/1.png"end
-            if animation=="MountedMarch1" then filepath1="Assets/Images/Units/"..team.."/"..unitTypeName.."/Mounted/"..facing.."/3.png"end
-            if animation=="MountedMarch2" then filepath1="Assets/Images/Units/"..team.."/"..unitTypeName.."/Mounted/"..facing.."/4.png"end
+            if animation=="MountedIdle"   then filepath1="Assets/Images/Units/"..team.."/"..unitTypeName.."/Mounted/"..facing.."/1.png" end
+            if animation=="MountedMarch1" then filepath1="Assets/Images/Units/"..team.."/"..unitTypeName.."/Mounted/"..facing.."/3.png" end
+            if animation=="MountedMarch2" then filepath1="Assets/Images/Units/"..team.."/"..unitTypeName.."/Mounted/"..facing.."/4.png" end
         end
     end
 
@@ -83,6 +111,7 @@ function Squads.LoadImages(team,unitTypeName,unitType,dress,facing,animation,for
         if path == "Not Found" then return nil end
         local ok, img = pcall(love.graphics.newImage, path)
         if not ok then
+            -- optional debug: print("Failed to load image:", path)
             return nil
         end
         return img
@@ -98,6 +127,7 @@ function Squads.LoadImages(team,unitTypeName,unitType,dress,facing,animation,for
     end
     if not image2 then image2 = image1 end
 
+
     return {image1,image2}
 end
 
@@ -108,100 +138,55 @@ function Squads.CreateSquad(team,unitTypeName,unitType,dress,facing,animation,fo
 
     --first get the necessary images--
     local images = Squads.LoadImages(team,unitTypeName,unitType,dress,facing,animation,formation)
+    local img = Squads.CropImage(images[1])
 
     --positional data--
-    local soldierMaxSize = Vector.New(images[1]:getWidth(),images[1]:getHeight())
     local soldierCount = Vector.New(1,1)
-    local soldierSize = Vector.New(1,1)
-    local soldierOffset = Vector.New(0,0)
+    local soldierSize = Vector.New(img:getWidth(),img:getHeight())
+    local override = false
 
+    --setup the amount of soldiers for each squad (depending on service and formation)--
     if unitType=="Infantry" then 
+        overide = true
         if formation=="BattleLine" then soldierCount = Vector.New(2,2)
         elseif formation=="MarchingColumn" then soldierCount = Vector.New(4,2)
         elseif formation=="SkirmishOrder" then soldierCount = Vector.New(1,1) end 
 
-        soldierMaxSize = Squads.INFANTRY_MAXSIZE
-
-        if (facing=="North")or(facing=="South") then
-            soldierSize = Squads.INFANTRY_SIZE_NORTHSOUTH
-            soldierOffset = Squads.INFANTRY_OFFSET_NORTHSOUTH
-        else
-            soldierSize = Squads.INFANTRY_SIZE_WESTEAST
-            soldierOffset = Squads.INFANTRY_OFFSET_WESTEAST
-        end
-
     elseif unitType=="Artillery" then
         soldierCount = Vector.New(1,1)
 
-        if (facing=="North")or(facing=="South") then
-            soldierSize = Squads.ARTILLERY_SIZE_NORTHSOUTH
-            soldierOffset = Squads.ARTILLERY_OFFSET_NORTHSOUTH
-        else
-            soldierSize = Squads.ARTILLERY_SIZE_WESTEAST
-            soldierOffset = Squads.ARTILLERY_OFFSET_WESTEAST
-        end
-
     elseif unitType=="Cavalry" then
-        soldierMaxSize = Squads.CAVALRY_MAXSIZE
-
-        if formation=="BattleLine" then
-            soldierCount = Vector.New(2,2)
-        else
-            soldierCount = Vector.New(4,2)
-        end
-
-        if (facing=="North")or(facing=="South") then
-            soldierSize = Squads.CAVALRY_SIZE_NORTHSOUTH
-            soldierOffset = Squads.CAVALRY_OFFSET_NORTHSOUTH
-        else
-            soldierSize = Squads.CAVALRY_SIZE_WESTEAST
-            soldierOffset = Squads.CAVALRY_OFFSET_WESTEAST
-        end
+        if formation=="BattleLine" then soldierCount = Vector.New(2,2)
+        else soldierCount = Vector.New(4,2) end
 
     elseif unitType=="Dragoon" then
         if formation=="Mounted" then 
-            soldierMaxSize = Squads.CAVALRY_MAXSIZE
             soldierCount = Vector.New(4,2) 
-            if (facing=="North")or(facing=="South") then
-                soldierSize = Squads.CAVALRY_SIZE_NORTHSOUTH
-                soldierOffset = Squads.CAVALRY_OFFSET_NORTHSOUTH
-            else
-                soldierSize = Squads.CAVALRY_SIZE_WESTEAST
-                soldierOffset = Squads.CAVALRY_OFFSET_WESTEAST
-            end
         else
-            soldierMaxSize = Squads.INFANTRY_MAXSIZE
-            if (facing=="North")or(facing=="South") then
-                soldierSize = Squads.INFANTRY_SIZE_NORTHSOUTH
-                soldierOffset = Squads.INFANTRY_OFFSET_NORTHSOUTH
-            else
-                soldierSize = Squads.INFANTRY_SIZE_WESTEAST
-                soldierOffset = Squads.INFANTRY_OFFSET_WESTEAST
-            end
-
-            if animation=="Guard" then
-                soldierMaxSize = Vector.New(110,140)
-                soldierSize = Vector.New(100,130)
-                soldierOffset = Vector.New(0,0)
-                soldierCount = Vector.New(1,1) 
-            else
-                soldierCount = Vector.New(2,2) 
-            end
+            if animation=="Guard" then soldierCount = Vector.New(1,1) 
+            else overide = true soldierCount = Vector.New(2,2) end
         end
     end 
 
-    local size = Vector.New(soldierMaxSize.X*soldierCount.X,soldierMaxSize.Y*soldierCount.Y)
+    local size = Vector.New(soldierSize.X*soldierCount.X,soldierSize.Y*soldierCount.Y)
+    --for infantry and dismounted dragoons--
+    if overide then size = Vector.New(70*soldierCount.X,soldierSize.Y*soldierCount.Y) end--70 is the width of the troops E/W--
+
 
     --canvas creation--
-    local drawable = love.graphics.newCanvas(size.X+5, size.Y+5)
+    local drawable = love.graphics.newCanvas(size.X, size.Y)
     love.graphics.setCanvas(drawable)
-        for x=1,soldierCount.X,1 do
-            for y=1,soldierCount.Y,1 do
-                love.graphics.draw(images[1], (soldierSize.X*(x-1))-soldierOffset.X, ((soldierSize.Y/2)*(y-1)-soldierOffset.Y))
+        for x=1,soldierCount.X,1 do for y=1,soldierCount.Y,1 do
+            if (not overide)or(facing=="West") then
+                love.graphics.draw(img, (soldierSize.X*(x-1)), ((soldierSize.Y/2)*(y-1)))
+            else
+                love.graphics.draw(img, (soldierSize.X*(x-1))+24, ((soldierSize.Y/2)*(y-1)))--offset for infantry--
             end
-        end
+        end end
     love.graphics.setCanvas()
 
+    --crop the final squad canvas (unless its infantry or dismounted dragoons)--
+    if not override then drawable = Squads.CropImage(drawable) end
 
     --return the canvases
     return drawable
@@ -212,6 +197,7 @@ Squads.ImageLibrary.SoldiersLoadedCounter = 0
 
 Squads.ImageLibrary.GermanUnits = {}
 
+Squads.ImageLibrary.GermanUnits.Flags = {}
 Squads.ImageLibrary.GermanUnits.Infantry = {}
 Squads.ImageLibrary.GermanUnits.Cavalry = {}
 Squads.ImageLibrary.GermanUnits.Artillery = {}
@@ -226,7 +212,7 @@ function Squads.LoadAllSquads()
         {"BayerischerLineninfanterie","BayerischerLineninfanterie","Infantry","Seasonal"},
         {"BadenLineninfanterie","DeutscherLineninfanterie","Infantry","Seasonal"},
         {"HessischLineninfanterie","DeutscherLineninfanterie","Infantry","Seasonal"},
-        {"SaechischLineninfanterie","DeutscherLineninfanterie","Infantry","Seasonal"},
+        {"SaechsischLineninfanterie","DeutscherLineninfanterie","Infantry","Seasonal"},
         {"WuerttemburgLineninfanterie","DeutscherLineninfanterie","Infantry","Seasonal"},
         {"PreussischerLandwehr","DeutscherLandwehr","Infantry","Seasonal"},
 
@@ -277,6 +263,9 @@ function Squads.LoadAllSquads()
             elseif nations[i1][i2][3]=="Artillery" then forms = ArtilleryFormations anims = ArtilleryAnimations service="Artillery" season="None"
             elseif nations[i1][i2][3]=="Dragoon" then forms = DragoonFormations anims = DragoonDismountedAnimations service="Cavalry" season="None"
             else forms = CavalryFormations anims = CavalryAnimations service="Cavalry" season="None" end
+
+            local newFlag = love.graphics.newImage("Assets/Images/Units/"..team.."/Flags/"..nations[i1][i2][1]..".png", {mipmaps = false, linear = false})
+            if team=="Germany" then table.insert(Squads.ImageLibrary.GermanUnits.Flags,{newFlag,nations[i1][i2][1],Vector.New(1,1)}) end
 
             for i3 = 1,#forms,1 do
                 if (nations[i1][i2][3]=="Dragoon") then 
