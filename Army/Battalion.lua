@@ -273,7 +273,7 @@ end
 
 
 --// DRAW BATTALION METHOD //--
-function Battalion:DrawBattalion()
+--[[function Battalion:DrawBattalion()
     local shadowAngle = math.sin((TimeOfDay-1200)/600)
     local preFacing = self.Facing
     --update the battalions facing--
@@ -389,6 +389,15 @@ function Battalion:DrawBattalion()
         flagPole:DrawVector(flagPolePos,Colours.CreateColour({0.2627,0.1569,0.0941,1}))--brown colour
         Colours.ResetColour()
     end
+end]]
+
+
+function Battalion:DrawBattalion()
+
+    local img = self.CurrentImage
+    local pos = self.Position
+
+    love.graphics.draw(img,pos.X,pos.Y)
 end
 
 

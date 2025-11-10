@@ -29,10 +29,15 @@ Squads.CAVALRY_OFFSET_NORTHSOUTH = Vector.New(-30,0)
 
 Squads.SKIRMISH_ORDER_SEED = 1870
 
+
+
+----//// FUNCTIONS OF THE SQUAD LIBRARYH ////----
 --function that crops the input image / canvas--
-function Squads.CropImage(drawable)
+function Squads.CropImage(drawable,drawableType)
     if drawable then
-        local imageData = drawable:newImageData()
+        print(type(drawable), tostring(drawable))
+        local imageData = drawable
+        if drawableType=="Canvas" then imageData = drawable:newImageData() end
         local minX, minY = imageData:getWidth(), imageData:getHeight()
         local maxX, maxY = 0, 0
 
@@ -55,6 +60,10 @@ function Squads.CropImage(drawable)
     end
     return drawable
 end
+
+
+
+
 
 function Squads.LoadImages(team,unitTypeName,unitType,dress,facing,animation,formation)
     --function load images from directory--
@@ -118,14 +127,16 @@ function Squads.LoadImages(team,unitTypeName,unitType,dress,facing,animation,for
     end
 
     local image1 = safeNewImage(filepath1)
-    local image2 = safeNewImage(filepath2) or image1
+    local image2 = nil
+    if not (image1==nil) then image2 = love.image.newImageData(filepath1) end 
 
-    -- final fallback to a tiny canvas if nothing loaded
+    -- final fallback to a error image if nothing loaded
     if not image1 then
-        local fallbackData = love.image.newImageData(1,1)
-        image1 = love.graphics.newImage(fallbackData)
+        image1 = love.graphics.newImage("Assets/Images/Icons/ImageNotFound.png")
     end
-    if not image2 then image2 = image1 end
+    if not image2 then
+        image2 = love.image.newImageData("Assets/Images/Icons/ImageNotFound.png")
+    end
 
 
     return {image1,image2}
@@ -138,7 +149,7 @@ function Squads.CreateSquad(team,unitTypeName,unitType,dress,facing,animation,fo
 
     --first get the necessary images--
     local images = Squads.LoadImages(team,unitTypeName,unitType,dress,facing,animation,formation)
-    local img = Squads.CropImage(images[1])
+    local img = Squads.CropImage(images[2],"Image")
 
     --positional data--
     local soldierCount = Vector.New(1,1)
@@ -186,11 +197,16 @@ function Squads.CreateSquad(team,unitTypeName,unitType,dress,facing,animation,fo
     love.graphics.setCanvas()
 
     --crop the final squad canvas (unless its infantry or dismounted dragoons)--
-    if not override then drawable = Squads.CropImage(drawable) end
+    if not override then drawable = Squads.CropImage(drawable,"Canvas") end
 
     --return the canvases
     return drawable
 end
+
+
+
+
+
 
 Squads.ImageLibrary = {}
 Squads.ImageLibrary.SoldiersLoadedCounter = 0
@@ -201,6 +217,9 @@ Squads.ImageLibrary.GermanUnits.Flags = {}
 Squads.ImageLibrary.GermanUnits.Infantry = {}
 Squads.ImageLibrary.GermanUnits.Cavalry = {}
 Squads.ImageLibrary.GermanUnits.Artillery = {}
+
+
+
 
 
 
