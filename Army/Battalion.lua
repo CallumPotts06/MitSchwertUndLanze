@@ -402,10 +402,10 @@ function Battalion:DrawBattalion()
     local pos = self.Position
 
     Effects.DrawShadow(img,pos)
-    love.graphics.draw(img,pos.X,pos.Y)
+    love.graphics.draw(img.Drawable,pos.X,pos.Y)
 
-    local imgSize = Vector.New(img:getWidth(),img:getHeight())
-    Highlight.Box(pos,imgSize,Colours.CreateColour(Colours.White))
+    local imgSize = Vector.New(img.Drawable:getWidth(),img.Drawable:getHeight())
+    --Highlight.Box(pos,imgSize,Colours.CreateColour(Colours.White))
 end
 
 

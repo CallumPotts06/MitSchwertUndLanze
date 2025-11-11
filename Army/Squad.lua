@@ -34,6 +34,7 @@ Squads.SKIRMISH_ORDER_SEED = 1870
 ----//// FUNCTIONS OF THE SQUAD LIBRARYH ////----
 --function that crops the input image / canvas--
 function Squads.CropImage(drawable,drawableType)
+    local shadowPivotPixel = Vector.New(0,0)
     if drawable then
         local imageData = drawable
         if drawableType=="Canvas" then imageData = drawable:newImageData() end
@@ -56,8 +57,42 @@ function Squads.CropImage(drawable,drawableType)
         local cropped = love.image.newImageData(croppedWidth, croppedHeight)
         cropped:paste(imageData, 0, 0, minX, minY, croppedWidth, croppedHeight)
         drawable = love.graphics.newImage(cropped)
+        imageData = cropped
+
+        local foundLeft = false
+        local foundRight = false
+        shadowPivotPixel = Vector.New(imageData:getWidth(),imageData:getHeight())
+        for y = imageData:getHeight() - 1, 0 , -1  do
+            if not foundLeft then
+                for x = 0, imageData:getWidth() - 1 , 1 do
+                    local r, g, b, a = imageData:getPixel(x, y)
+                    if a > 0 then  -- non-transparent
+                        shadowPivotPixelLeft = Vector.New(x,y)
+                        foundLeft = true
+                        break
+                    end
+                end
+            end
+            if not foundRight then
+                for x = imageData:getWidth() - 1, 0, -1 do
+                    local r, g, b, a = imageData:getPixel(x, y)
+                    if a > 0 then  -- non-transparent
+                        shadowPivotPixelRight = Vector.New(x,y)
+                        foundRight = true
+                        break
+                    end
+                end
+            end
+            if foundLeft and foundRight then break end
+        end
     end
-    return drawable
+
+    local drawData = {}
+    drawData.Drawable = drawable
+    drawData.ShadowPivotLeft = shadowPivotPixelLeft
+    drawData.ShadowPivotRight = shadowPivotPixelRight
+
+    return drawData
 end
 
 
@@ -152,7 +187,7 @@ function Squads.CreateSquad(team,unitTypeName,unitType,dress,facing,animation,fo
 
     --positional data--
     local soldierCount = Vector.New(1,1)
-    local soldierSize = Vector.New(img:getWidth(),img:getHeight())
+    local soldierSize = Vector.New(img.Drawable:getWidth(),img.Drawable:getHeight())
     local override = false
 
     --setup the amount of soldiers for each squad (depending on service and formation)--
@@ -188,9 +223,9 @@ function Squads.CreateSquad(team,unitTypeName,unitType,dress,facing,animation,fo
     love.graphics.setCanvas(drawable)
         for x=1,soldierCount.X,1 do for y=1,soldierCount.Y,1 do
             if (not overide)or(facing=="West") then
-                love.graphics.draw(img, (soldierSize.X*(x-1)), ((soldierSize.Y/2)*(y-1)))
+                love.graphics.draw(img.Drawable, (soldierSize.X*(x-1)), ((soldierSize.Y/2)*(y-1)))
             else
-                love.graphics.draw(img, (soldierSize.X*(x-1))+24, ((soldierSize.Y/2)*(y-1)))--offset for infantry--
+                love.graphics.draw(img.Drawable, (soldierSize.X*(x-1))+24, ((soldierSize.Y/2)*(y-1)))--offset for infantry--
             end
         end end
     love.graphics.setCanvas()

@@ -16,33 +16,70 @@ Effects.SHADOW_COLOUR = {0,0,0,0.5}
 ---/// METHODS & FUNCTIONS ///---
 
 --draws a shadow which is cast at angle depending on the suns position--
-function Effects.DrawShadow(drawable,pos)
-    --equation works out the angle to draw the shadow--
-    local shadowAngle = math.sin((TimeOfDay-1200)/600)
+function Effects.DrawShadow(img, pos)
 
-    --find the offset required to re-align shadow and the would be original image--
-    local offsetX=0
-    local offsetY=0
+    --[[print("\n\nSHADOW PIVOTS: LEFT=("..tostring(img.ShadowPivotLeft.X)..","..tostring(img.ShadowPivotLeft.Y)..")")
+    print("SHADOW PIVOTS: RIGHT=("..tostring(img.ShadowPivotRight.X)..","..tostring(img.ShadowPivotRight.Y)..")")
 
-    local imgX = drawable:getWidth()
-    local imgY = drawable:getHeight()
+    local shadowAngle = (TimeOfDay - 1200) / 600
+    local shadowScale = Vector.New(
+        (1 - (0.4 * math.sin(math.abs(shadowAngle)))), 
+        (0.4 + (0.4 * math.sin(math.abs(shadowAngle))))
+    )
+    local offset = Vector.New(0, 0)
 
-    if shadowAngle>0 then 
-        offsetX = (imgX*math.tan(shadowAngle))
-        offsetY = (1*math.cos(shadowAngle))
-    else 
-        offsetX = -(1*math.tan(shadowAngle)) 
-        offsetY = (imgY*math.tan(shadowAngle))
+    local imgW = img.Drawable:getWidth()
+    local imgH = img.Drawable:getHeight()
+
+    -- choose origin based on angle
+    local ox, oy
+    if shadowAngle > 0 then
+        -- anchor at bottom-right
+        ox, oy = img.ShadowPivotRight.X, img.ShadowPivotRight.Y
+        offset = Vector.New(imgW+(0.5*shadowScale.X), imgH)
+    else
+        -- anchor at bottom-left
+        ox, oy = img.ShadowPivotLeft.X, img.ShadowPivotLeft.Y
+        offset = Vector.New(0+(0.5*shadowScale.X), imgH)
+    end]]
+
+    local shadowAngle = (TimeOfDay - 1200) / 600
+    local shadowScale = Vector.New(
+        (1 - (0.4 * math.sin(math.abs(shadowAngle)))), 
+        (1.04 + (0.25 * math.sin(math.abs(shadowAngle))))
+    )
+    local offset = Vector.New(0, 0)
+
+    local imgW = img.Drawable:getWidth()
+    local imgH = img.Drawable:getHeight()
+
+    -- choose origin based on angle
+    local ox, oy
+    if shadowAngle > 0 then
+        -- anchor at bottom-right
+        ox, oy = imgW, imgH
+        offset = Vector.New(imgW+(0.5*shadowScale.X), imgH)
+    else
+        -- anchor at bottom-left
+        ox, oy = 0, imgH
+        offset = Vector.New(0+(0.5*shadowScale.X), imgH)
     end
 
-    --other variables--
-    local shadowScale = Vector.New(1.0,1.1)
-    local shadowPos = Vector.New(pos.X+offsetX,pos.Y-offsetY)
-
-    --draw the shadow to screen--
+    -- draw shadow
     Colours.SetColour(Colours.CreateColour(Effects.SHADOW_COLOUR))
-    love.graphics.draw(drawable,shadowPos.X,shadowPos.Y,shadowAngle,shadowScale.X,shadowScale.Y)
+    love.graphics.draw(
+        img.Drawable,
+        pos.X + offset.X, pos.Y + offset.Y,
+        shadowAngle,
+        shadowScale.X, shadowScale.Y,
+        ox, oy
+    )
     Colours.ResetColour()
 end
+
+
+
+
+function Effects.LightingColour() end
 
 return Effects
