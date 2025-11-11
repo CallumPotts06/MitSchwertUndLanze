@@ -8,6 +8,7 @@ Effects = {}
 Vector = require("../Mathematics/Vector")
 Mathematics = require("../Mathematics/Mathematics")
 Colours = require("../Interface/Colours")
+Shaders = require("../Graphics/Shaders")
 
 ---/// CONSTANTS ///---
 Effects.SHADOW_COLOUR = {0,0,0,0.5}
@@ -45,8 +46,8 @@ function Effects.DrawShadow(img, pos)
 
     local shadowAngle = (TimeOfDay - 1200) / 600
     local shadowScale = Vector.New(
-        (1 - (0.4 * math.sin(math.abs(shadowAngle)))), 
-        (1.04 + (0.25 * math.sin(math.abs(shadowAngle))))
+        (1.05 - (0.4 * math.sin(math.abs(shadowAngle)))), 
+        (1.1 + (0.25 * math.sin(math.abs(shadowAngle))))
     )
     local offset = Vector.New(0, 0)
 
@@ -66,6 +67,15 @@ function Effects.DrawShadow(img, pos)
     end
 
     -- draw shadow
+
+    --first set up the shaders--
+    -- send a scalar radius
+    Shaders.WeakBlur:send("radius", 1.15 + (0.5 * math.sin(math.abs(shadowAngle))))
+    -- send texture size (vec2)
+    Shaders.WeakBlur:send("texSize", {imgW, imgH})
+    love.graphics.setShader(Shaders.WeakBlur)
+    
+    --draw the shadow--
     Colours.SetColour(Colours.CreateColour(Effects.SHADOW_COLOUR))
     love.graphics.draw(
         img.Drawable,
@@ -74,6 +84,7 @@ function Effects.DrawShadow(img, pos)
         shadowScale.X, shadowScale.Y,
         ox, oy
     )
+    love.graphics.setShader()
     Colours.ResetColour()
 end
 

@@ -44,14 +44,17 @@ function love.load()
     --load squads for gameplay--
     Squad.LoadAllSquads()
 
-    --battalion1 = Battalion.New("Battalion 1",{},"Germany","Artillery","DeutscherArtillerie","PreussischerArtillerie",Vector.New(500,200,math.rad(290)),"None",true)
-    battalion1 = Battalion.New("Battalion 1",{},"Germany","Cavalry","PreussischerUhlanen","PreussischerUhlanen",Vector.New(500,200,math.rad(290)),"None",true)
+    battalion1 = Battalion.New("Battalion 1",{},"Germany","Artillery","DeutscherArtillerie","PreussischerArtillerie",Vector.New(100,200,math.rad(290)),"None",true)
+    --battalion1 = Battalion.New("Battalion 1",{},"Germany","Cavalry","PreussischerUhlanen","PreussischerUhlanen",Vector.New(350,200,math.rad(290)),"None",true)
     --battalion1 = Battalion.New("Battalion 1",{},"Germany","Cavalry","PreussischerDragoner","PreussischerDragoner",Vector.New(500,200,math.rad(290)),"None",true)
     --battalion1 = Battalion.New("Battalion 1",{},"Germany","Infantry","BayerischerLineninfanterie","BayerischerLineninfanterie",Vector.New(500,200,math.rad(290)),"Summer",true)
-    --battalion1 = Battalion.New("Battalion 1",{},"Germany","Infantry","DeutscherGardeZuFuss","PreussischerGardeZuFuss",Vector.New(100,300,math.rad(180)),"Summer",true)
+    battalion2 = Battalion.New("Battalion 2",{},"Germany","Infantry","DeutscherGardeZuFuss","PreussischerGardeZuFuss",Vector.New(350,500,math.rad(180)),"Summer",true)
 
     battalion1:UpdateCurrentImage()
     battalion1:CreateFlagMeshes()
+
+    battalion2:UpdateCurrentImage()
+    battalion2:CreateFlagMeshes()
 end
 
 ----//// ** LOVE UPDATE FUNCTION ** ////----
@@ -86,4 +89,5 @@ function love.draw()
     love.graphics.setBackgroundColor(0.35, 0.6, 0.35)
 
     battalion1:DrawBattalion()
+    battalion2:DrawBattalion()
 end

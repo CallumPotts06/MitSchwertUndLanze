@@ -33,7 +33,7 @@ Squads.SKIRMISH_ORDER_SEED = 1870
 
 ----//// FUNCTIONS OF THE SQUAD LIBRARYH ////----
 --function that crops the input image / canvas--
-function Squads.CropImage(drawable,drawableType)
+function Squads.CropImage(drawable,drawableType,override)
     local shadowPivotPixel = Vector.New(0,0)
     if drawable then
         local imageData = drawable
@@ -56,7 +56,7 @@ function Squads.CropImage(drawable,drawableType)
         local croppedHeight = maxY - minY + 1
         local cropped = love.image.newImageData(croppedWidth, croppedHeight)
         cropped:paste(imageData, 0, 0, minX, minY, croppedWidth, croppedHeight)
-        drawable = love.graphics.newImage(cropped)
+        if not (override) then drawable = love.graphics.newImage(cropped) end
         imageData = cropped
 
         local foundLeft = false
@@ -119,7 +119,7 @@ function Squads.LoadImages(team,unitTypeName,unitType,dress,facing,animation,for
         if animation=="Firing" then filepath1 = "Assets/Images/Units/"..team.."/"..unitTypeName.."/"..facing.."/1.png" end
         if animation=="Idle"   then filepath1 = "Assets/Images/Units/"..team.."/"..unitTypeName.."/"..facing.."/2.png" end
         if animation=="March1" then filepath1 = "Assets/Images/Units/"..team.."/"..unitTypeName.."/"..facing.."/3.png" end
-        if animation=="March2" then filepath1 = "Assets/Images/Units/"..team.."/"..unitTypeName.."/"..facing.."/1.png" end
+        if animation=="March2" then filepath1 = "Assets/Images/Units/"..team.."/"..unitTypeName.."/"..facing.."/4.png" end
     end
 
     if unitType=="Cavalry" then
@@ -192,7 +192,7 @@ function Squads.CreateSquad(team,unitTypeName,unitType,dress,facing,animation,fo
 
     --setup the amount of soldiers for each squad (depending on service and formation)--
     if unitType=="Infantry" then 
-        overide = true
+        override = true
         if formation=="BattleLine" then soldierCount = Vector.New(2,2)
         elseif formation=="MarchingColumn" then soldierCount = Vector.New(4,2)
         elseif formation=="SkirmishOrder" then soldierCount = Vector.New(1,1) end 
@@ -209,20 +209,19 @@ function Squads.CreateSquad(team,unitTypeName,unitType,dress,facing,animation,fo
             soldierCount = Vector.New(4,2) 
         else
             if animation=="Guard" then soldierCount = Vector.New(1,1) 
-            else overide = true soldierCount = Vector.New(2,2) end
+            else override = true soldierCount = Vector.New(2,2) end
         end
     end 
 
     local size = Vector.New(soldierSize.X*soldierCount.X,soldierSize.Y*soldierCount.Y)
     --for infantry and dismounted dragoons--
-    if overide then size = Vector.New(70*soldierCount.X,soldierSize.Y*soldierCount.Y) end--70 is the width of the troops E/W--
-
+    if override then size = Vector.New((soldierSize.X*soldierCount.X)+(2*24),soldierSize.Y*soldierCount.Y) end--70 is the width of the troops E/W--
 
     --canvas creation--
     local drawable = love.graphics.newCanvas(size.X, size.Y)
     love.graphics.setCanvas(drawable)
         for x=1,soldierCount.X,1 do for y=1,soldierCount.Y,1 do
-            if (not overide)or(facing=="West") then
+            if (not override)or(facing=="West") then
                 love.graphics.draw(img.Drawable, (soldierSize.X*(x-1)), ((soldierSize.Y/2)*(y-1)))
             else
                 love.graphics.draw(img.Drawable, (soldierSize.X*(x-1))+24, ((soldierSize.Y/2)*(y-1)))--offset for infantry--
@@ -231,7 +230,8 @@ function Squads.CreateSquad(team,unitTypeName,unitType,dress,facing,animation,fo
     love.graphics.setCanvas()
 
     --crop the final squad canvas (unless its infantry or dismounted dragoons)--
-    if not override then drawable = Squads.CropImage(drawable,"Canvas") end
+    if not override then drawable = Squads.CropImage(drawable,"Canvas")
+    else drawable = Squads.CropImage(drawable,"Canvas",override) end
 
     --return the canvases
     return drawable

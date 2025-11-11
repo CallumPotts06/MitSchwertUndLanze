@@ -405,7 +405,7 @@ function Battalion:DrawBattalion()
     love.graphics.draw(img.Drawable,pos.X,pos.Y)
 
     local imgSize = Vector.New(img.Drawable:getWidth(),img.Drawable:getHeight())
-    --Highlight.Box(pos,imgSize,Colours.CreateColour(Colours.White))
+    Highlight.Box(pos,imgSize,Colours.CreateColour(Colours.White))
 end
 
 
