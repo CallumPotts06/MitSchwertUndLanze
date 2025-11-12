@@ -33,41 +33,60 @@ Squads.SKIRMISH_ORDER_SEED = 1870
 
 ----//// FUNCTIONS OF THE SQUAD LIBRARYH ////----
 --function that crops the input image / canvas--
-function Squads.CropImage(drawable,drawableType,override)
-    local shadowPivotPixel = Vector.New(0,0)
-    if drawable then
-        local imageData = drawable
-        if drawableType=="Canvas" then imageData = drawable:newImageData() end
-        local minX, minY = imageData:getWidth(), imageData:getHeight()
-        local maxX, maxY = 0, 0
+function Squads.CropImage(drawable, drawableType, override)
+    local imageData = drawable
+    if drawableType == "Canvas" then
+        imageData = drawable:newImageData()
+    end
 
-        for y = 0, imageData:getHeight() - 1 do
-            for x = 0, imageData:getWidth() - 1 do
-                local r, g, b, a = imageData:getPixel(x, y)
-                if a > 0 then  -- non-transparent
-                    if x < minX then minX = x end
-                    if y < minY then minY = y end
-                    if x > maxX then maxX = x end
-                    if y > maxY then maxY = y end
-                end
+    -- Correct initialization of bounds
+    local minX, minY = imageData:getWidth(), imageData:getHeight()
+    local maxX, maxY = 0, 0
+
+    local shadowPivotPixelLeft = Vector.New(0,minY)
+    local shadowPivotPixelRight = Vector.New(minX,minY)
+
+    -- Scan pixels for non-transparent bounds
+    for y = 0, imageData:getHeight() - 1 do
+        for x = 0, imageData:getWidth() - 1 do
+            local r, g, b, a = imageData:getPixel(x, y)
+            if a > 0 then  -- non-transparent
+                if y > maxY then maxY = y end
+                if y < minY then minY = y end
+                if x < minX then minX = x end
+                if x > maxX then maxX = x end
             end
         end
-        local croppedWidth  = maxX - minX + 1
-        local croppedHeight = maxY - minY + 1
-        local cropped = love.image.newImageData(croppedWidth, croppedHeight)
-        cropped:paste(imageData, 0, 0, minX, minY, croppedWidth, croppedHeight)
-        if not (override) then drawable = love.graphics.newImage(cropped) end
-        imageData = cropped
+    end
 
-        local foundLeft = false
-        local foundRight = false
-        shadowPivotPixel = Vector.New(imageData:getWidth(),imageData:getHeight())
-        for y = imageData:getHeight() - 1, 0 , -1  do
+    -- Guard against empty/non-transparent images
+    if maxX < minX or maxY < minY then
+        local newTable = {}
+        newTable.Drawable = drawable
+        newTable.ShadowPivotLeft = shadowPivotPixelLeft
+        newTable.ShadowPivotRight = shadowPivotPixelRight
+        return newTable
+    end
+
+    -- Crop image
+    local croppedWidth  = maxX - minX + 1
+    local croppedHeight = maxY - minY + 1
+    if override then croppedWidth = imageData:getWidth() end
+    local cropped = love.image.newImageData(croppedWidth, croppedHeight)
+    if override then cropped:paste(imageData, 24, 0, minX, minY, croppedWidth, croppedHeight)--24, the width of infantry
+    else cropped:paste(imageData, 0, 0, minX, minY, croppedWidth, croppedHeight) end
+    drawable = love.graphics.newImage(cropped)
+    imageData = cropped
+
+    -- Find shadow pivot points
+    if override then
+        local foundLeft, foundRight = false, false
+        for y = imageData:getHeight() - 1, 0, -1 do
             if not foundLeft then
-                for x = 0, imageData:getWidth() - 1 , 1 do
+                for x = 0, imageData:getWidth() - 1 do
                     local r, g, b, a = imageData:getPixel(x, y)
-                    if a > 0 then  -- non-transparent
-                        shadowPivotPixelLeft = Vector.New(x,y)
+                    if a > 0 then
+                        shadowPivotPixelLeft = Vector.New(x, y)
                         foundLeft = true
                         break
                     end
@@ -76,8 +95,8 @@ function Squads.CropImage(drawable,drawableType,override)
             if not foundRight then
                 for x = imageData:getWidth() - 1, 0, -1 do
                     local r, g, b, a = imageData:getPixel(x, y)
-                    if a > 0 then  -- non-transparent
-                        shadowPivotPixelRight = Vector.New(x,y)
+                    if a > 0 then
+                        shadowPivotPixelRight = Vector.New(x, y)
                         foundRight = true
                         break
                     end
@@ -87,13 +106,15 @@ function Squads.CropImage(drawable,drawableType,override)
         end
     end
 
-    local drawData = {}
+    -- Return structured data
+    drawData = {}
     drawData.Drawable = drawable
     drawData.ShadowPivotLeft = shadowPivotPixelLeft
     drawData.ShadowPivotRight = shadowPivotPixelRight
-
+    
     return drawData
 end
+
 
 
 
@@ -183,7 +204,7 @@ function Squads.CreateSquad(team,unitTypeName,unitType,dress,facing,animation,fo
 
     --first get the necessary images--
     local images = Squads.LoadImages(team,unitTypeName,unitType,dress,facing,animation,formation)
-    local img = Squads.CropImage(images[2],"Image")
+    local img = Squads.CropImage(images[2],"Image",false)
 
     --positional data--
     local soldierCount = Vector.New(1,1)
@@ -230,11 +251,10 @@ function Squads.CreateSquad(team,unitTypeName,unitType,dress,facing,animation,fo
     love.graphics.setCanvas()
 
     --crop the final squad canvas (unless its infantry or dismounted dragoons)--
-    if not override then drawable = Squads.CropImage(drawable,"Canvas")
-    else drawable = Squads.CropImage(drawable,"Canvas",override) end
-
+    croppedDrawable = Squads.CropImage(drawable,"Canvas",override)
+    
     --return the canvases
-    return drawable
+    return croppedDrawable
 end
 
 

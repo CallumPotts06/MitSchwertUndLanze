@@ -402,6 +402,7 @@ function Battalion:DrawBattalion()
     local pos = self.Position
 
     Effects.DrawShadow(img,pos)
+    Colours.SetColour(Effects.LightingColour(Colours.CreateColour({1,1,1,1})),false)--sets a "lighting" colour for the troops--
     love.graphics.draw(img.Drawable,pos.X,pos.Y)
 
     local imgSize = Vector.New(img.Drawable:getWidth(),img.Drawable:getHeight())

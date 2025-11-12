@@ -9,6 +9,8 @@ Images = require("MediaHandler/Images")
 Sounds = require("MediaHandler/Sounds")
 
 Mouse = require("OtherLibraries/Mouse")
+
+Effects = require("Graphics/Effects")
 --// IMPORT CLASSES //--
 Vector = require("Mathematics/Vector")
 
@@ -44,12 +46,14 @@ function love.load()
     --load squads for gameplay--
     Squad.LoadAllSquads()
 
-    battalion1 = Battalion.New("Battalion 1",{},"Germany","Artillery","DeutscherArtillerie","PreussischerArtillerie",Vector.New(100,200,math.rad(290)),"None",true)
+    battalion1 = Battalion.New("Battalion 1",{},"Germany","Artillery","DeutscherArtillerie","PreussischerArtillerie",Vector.New(300,200,math.rad(90)),"None",true)
     --battalion1 = Battalion.New("Battalion 1",{},"Germany","Cavalry","PreussischerUhlanen","PreussischerUhlanen",Vector.New(350,200,math.rad(290)),"None",true)
     --battalion1 = Battalion.New("Battalion 1",{},"Germany","Cavalry","PreussischerDragoner","PreussischerDragoner",Vector.New(500,200,math.rad(290)),"None",true)
     --battalion1 = Battalion.New("Battalion 1",{},"Germany","Infantry","BayerischerLineninfanterie","BayerischerLineninfanterie",Vector.New(500,200,math.rad(290)),"Summer",true)
     battalion2 = Battalion.New("Battalion 2",{},"Germany","Infantry","DeutscherGardeZuFuss","PreussischerGardeZuFuss",Vector.New(350,500,math.rad(180)),"Summer",true)
 
+    battalion1.Position.Theta=math.rad(90)
+    battalion1.Facing = "East"
     battalion1:UpdateCurrentImage()
     battalion1:CreateFlagMeshes()
 
@@ -63,14 +67,14 @@ local flagIncrement = -1
 --/ GLOBALS /--
 FlagTick = -5
 CameraZoom = 0.5
-TimeOfDay = 0600
+TimeOfDay = 0
 
 
 function love.update(dt)
     unitAnimTimer=unitAnimTimer+dt
     cumulativeTime = cumulativeTime + dt
 
-    if unitAnimTimer>=0.125 then unitAnimTimer=unitAnimTimer-0.125 FlagTick=FlagTick+flagIncrement TimeOfDay=TimeOfDay+1 end
+    if unitAnimTimer>=0.125 then unitAnimTimer=unitAnimTimer-0.125 FlagTick=FlagTick+flagIncrement TimeOfDay=TimeOfDay+6 end
     if FlagTick > 5 then flagIncrement = -1  end
     if FlagTick < -5 then flagIncrement = 1  end
 
@@ -86,7 +90,9 @@ function love.draw()
     --MenuController.DrawMenu()
     hudScreen:DrawScreen()
 
-    love.graphics.setBackgroundColor(0.35, 0.6, 0.35)
+    --sets a "lighting" colour for the background--
+    local newColour = Effects.LightingColour(Colours.CreateColour({0.35, 0.6, 0.35,1}),true)
+    love.graphics.setBackgroundColor(newColour.R,newColour.G,newColour.B)
 
     battalion1:DrawBattalion()
     battalion2:DrawBattalion()

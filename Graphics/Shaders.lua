@@ -6,12 +6,11 @@ Shaders = {}
 
 
 ---/// SHADER: WEAK GAUSSIAN BLUR ///---
-Shaders.WeakGaussianBlurCode = [[
+Shaders.GaussianBlurCode = [[
 extern number radius; // blur radius (control strength)
 extern vec2 texSize;  // texture size
 
 vec4 effect(vec4 color, Image tex, vec2 texCoord, vec2 screenCoord) {
-    // Use a small fixed kernel (9x9) and gaussian weights for a "weak" blur.
     float sigma = max(0.0001, radius);
     float twoSigmaSq = 2.0 * sigma * sigma;
 
@@ -38,7 +37,7 @@ vec4 effect(vec4 color, Image tex, vec2 texCoord, vec2 screenCoord) {
     return (sum / weightSum) * color;
 }
 ]]
-Shaders.WeakBlur = love.graphics.newShader(Shaders.WeakGaussianBlurCode)
+Shaders.Blur = love.graphics.newShader(Shaders.GaussianBlurCode)
 
 
 return Shaders

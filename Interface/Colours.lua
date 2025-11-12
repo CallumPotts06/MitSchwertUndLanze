@@ -58,6 +58,33 @@ function Colours.ConvertTo1(set)
     return newSet
 end
 
+function Colours.AddColours(colour1,colour2)
+    local newSet = {}
+    newSet.R = colour1.R + colour2.R
+    newSet.G = colour1.G + colour2.G
+    newSet.B = colour1.B + colour2.B
+
+    if newSet.R>1 then newSet.R=1 end
+    if newSet.G>1 then newSet.G=1 end
+    if newSet.B>1 then newSet.B=1 end
+    return newSet
+end
+
+function Colours.AverageColours(colourList)
+    local newSet = {}
+    newSet.R = colourList[1].R
+    newSet.G = colourList[1].G
+    newSet.B = colourList[1].B
+
+    for i=2,#colourList,1 do
+        newSet.R = (newSet.R+colourList[i].R)/2
+        newSet.G = (newSet.G+colourList[i].G)/2
+        newSet.B = (newSet.B+colourList[i].B)/2
+    end
+
+    return newSet
+end
+
 
 function Colours.SetColour(colour)
     if (colour.R>1)or(colour.G>1)or(colour.B>1) then
