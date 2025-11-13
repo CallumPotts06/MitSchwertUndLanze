@@ -13,23 +13,27 @@ Shaders = require("../Graphics/Shaders")
 ---/// CONSTANTS ///---
 Effects.SHADOW_COLOUR = {0,0,0,0.5}
 Effects.WEATHER_COLOURS = {}
-Effects.WEATHER_COLOURS.FOG = Colours.CreateColour({1,1,1,0.2})--Translucent White--
-Effects.WEATHER_COLOURS.CLOUDS = Colours.CreateColour({0.3,0.3,0.3,0.2})--Translucent Black--
-Effects.WEATHER_COLOURS.SUNNY = Colours.CreateColour({0.2,0.2,1,0.2})--Translucent Blue--
+Effects.WEATHER_COLOURS.FOG = Colours.CreateColour({1,1,1,0.35})--Translucent White--
+Effects.WEATHER_COLOURS.CLOUDS = Colours.CreateColour({0,0,0.12,0.4})--Translucent Black--
 
 Effects.WEATHER_COLOURS.DAWN_DUSK_MULTIPLIERS = {}
 Effects.WEATHER_COLOURS.DAWN_DUSK_MULTIPLIERS.R = 1
 Effects.WEATHER_COLOURS.DAWN_DUSK_MULTIPLIERS.G = 0.6275
 Effects.WEATHER_COLOURS.DAWN_DUSK_MULTIPLIERS.B = 0.15
 
----//// LOCAL FUNCTIONS ///---
+---/// VARIABLES ///---
+Effects.CurrentSeason = "Summer"
+Effects.CurrentWeather = "Foggy"
+
+
+---//// LOCALLY USED FUNCTIONS ///---
 Effects.LightingEquations = {}
 function Effects.LightingEquations.SummerFunc(x,currentClr)
     --set a multiplier based on which colour is being calculated--
     local m = 550000
     if currentClr == "R" then m = 250000
-    elseif currentClr == "G" then m = 350000
-    elseif currentClr == "B" then m = 650000 end
+    elseif currentClr == "G" then m = 400000
+    elseif currentClr == "B" then m = 750000 end
 
     --using quadratic equation to model colour changes over time--
     local y = ( -(x*x) + 2500*(x) - 840000 ) / m
@@ -48,24 +52,6 @@ function Effects.LightingEquations.SummerFunc(x,currentClr)
 
     return y
 end
-
---[[
-"GRAPH" FOR TIME OF DAY LIGHTING EFFECTS (SUMMER):
-0000 - R = 0.05, G = 0.05, B = 0.20
-0200 - R = 0.10, G = 0.05, B = 0.20 
-0400 - R = 0.15, G = 0.10, B = 0.20 
-0600 - R = 0.65, G = 0.40, B = 0.20
-0800 - R = 0.85, G = 0.65, B = 0.45
-1000 - R = 0.95, G = 0.65, B = 0.45
-
-
-
-]]
-
-
----/// VARIABLES ///---
-Effects.CurrentSeason = "Summer"
-Effects.CurrentWeather = "Sunny"
 
 ---/// METHODS & FUNCTIONS ///---
 
@@ -161,13 +147,22 @@ function Effects.LightingColour(inputColour,background)
     newColour.A = inputColour.A
 
     table.insert(colourTable,dayColour)
-    
-    --print("Day Colour = "..tostring(dayColour.R)..","..tostring(dayColour.G)..","..tostring(dayColour.B))
-
-    --print("Day Colour.B = "..tostring(dayColour.B))
-
-    --local newColour = Colours.AverageColours(colourTable)
     return newColour
+end
+
+function Effects.WeatherColour()
+    local weatherClr = Colours.CreateColour({1,1,1,0})
+    if Effects.CurrentWeather == "Foggy" then
+        weatherClr = Effects.WEATHER_COLOURS.FOG
+    elseif Effects.CurrentWeather == "Cloudy" then
+        weatherClr = Effects.WEATHER_COLOURS.CLOUDS
+    elseif Effects.CurrentWeather == "Rainy" then
+        weatherClr = Effects.WEATHER_COLOURS.CLOUDS
+    end
+
+    Colours.SetColour(weatherClr)
+    love.graphics.rectangle("fill",0,0,ScreenX,ScreenY)
+    Colours.ResetColour()
 end
 
 return Effects
