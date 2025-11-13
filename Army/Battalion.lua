@@ -399,14 +399,25 @@ end]]
 function Battalion:DrawBattalion()
 
     local img = self.CurrentImage
+    local imgSize = Vector.New(img.Drawable:getWidth(),img.Drawable:getHeight())
     local pos = self.Position
 
-    Effects.DrawShadow(img,pos)
-    Colours.SetColour(Effects.LightingColour(Colours.CreateColour({1,1,1,1})),false)--sets a "lighting" colour for the troops--
-    love.graphics.draw(img.Drawable,pos.X,pos.Y)
+    local flagPole = Vector.New(0,120)
+    local flagPos = Vector.New(pos.X+(imgSize.X/2),pos.Y-(imgSize.Y))
+    local flagImg = self.Images.Flags[FlagTick+7]
 
-    local imgSize = Vector.New(img.Drawable:getWidth(),img.Drawable:getHeight())
-    Highlight.Box(pos,imgSize,Colours.CreateColour(Colours.White))
+    --draw all the shadows--
+    Effects.DrawShadow(img.Drawable,pos,"Image")
+
+    --set a lighting colour for the troops--
+    Colours.SetColour(Effects.LightingColour(Colours.CreateColour({1,1,1,1})),false)
+    --draw flag and soldiers--
+    love.graphics.draw(img.Drawable,pos.X,pos.Y)
+    love.graphics.draw(flagImg,flagPos.X,flagPos.Y)
+    flagPole:DrawVector(flagPos,Colours.CreateColour({0.2627,0.1569,0.0941,1}))
+
+    
+    --Highlight.Box(pos,imgSize,Colours.CreateColour(Colours.White))
 end
 
 

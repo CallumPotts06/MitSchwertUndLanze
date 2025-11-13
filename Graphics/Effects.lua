@@ -20,19 +20,69 @@ Effects.WEATHER_COLOURS.SUNNY = Colours.CreateColour({0.2,0.2,1,0.2})--Transluce
 Effects.WEATHER_COLOURS.DAWN_DUSK_MULTIPLIERS = {}
 Effects.WEATHER_COLOURS.DAWN_DUSK_MULTIPLIERS.R = 1
 Effects.WEATHER_COLOURS.DAWN_DUSK_MULTIPLIERS.G = 0.6275
-Effects.WEATHER_COLOURS.DAWN_DUSK_MULTIPLIERS.B = 0
+Effects.WEATHER_COLOURS.DAWN_DUSK_MULTIPLIERS.B = 0.15
+
+---//// LOCAL FUNCTIONS ///---
+Effects.LightingEquations = {}
+function Effects.LightingEquations.SummerFunc(x,currentClr)
+    --set a multiplier based on which colour is being calculated--
+    local m = 550000
+    if currentClr == "R" then m = 250000
+    elseif currentClr == "G" then m = 350000
+    elseif currentClr == "B" then m = 650000 end
+
+    --using quadratic equation to model colour changes over time--
+    local y = ( -(x*x) + 2500*(x) - 840000 ) / m
+    
+    --ensure there is still light during night and it caps at 1 during midday--
+    if currentClr == "R" then
+        if y<0.1 then y = 0.1 end
+        if y>1 then y = 1 end
+    elseif currentClr == "G" then
+        if y<0.1 then y = 0.1 end
+        if y>1 then y = 1 end
+    elseif currentClr == "B" then
+        if y<0.175 then y = 0.175 end
+        if y>1 then y = 1 end
+    end
+
+    return y
+end
+
+--[[
+"GRAPH" FOR TIME OF DAY LIGHTING EFFECTS (SUMMER):
+0000 - R = 0.05, G = 0.05, B = 0.20
+0200 - R = 0.10, G = 0.05, B = 0.20 
+0400 - R = 0.15, G = 0.10, B = 0.20 
+0600 - R = 0.65, G = 0.40, B = 0.20
+0800 - R = 0.85, G = 0.65, B = 0.45
+1000 - R = 0.95, G = 0.65, B = 0.45
+
+
+
+]]
 
 
 ---/// VARIABLES ///---
-Effects.CurrentSeason = "Winter"
+Effects.CurrentSeason = "Summer"
 Effects.CurrentWeather = "Sunny"
 
 ---/// METHODS & FUNCTIONS ///---
 
 --draws a shadow which is cast at angle depending on the suns position--
-function Effects.DrawShadow(img, pos)
-    local imgW = img.Drawable:getWidth()
-    local imgH = img.Drawable:getHeight()
+function Effects.DrawShadow(img, pos, imgType)
+    local imgW = 1
+    local imgH = 1
+    if imgType == "Mesh" then
+        for i = 1, img:getVertexCount() do
+            local vx, vy = img:getVertex(i)
+            if vx > imgW then imgW = vx end
+            if vy > imgH then imgH = vy end
+        end
+    else
+        imgW = img:getWidth()
+        imgH = img:getHeight()
+    end
     
 
     --create an angle value from the time of day--
@@ -68,7 +118,7 @@ function Effects.DrawShadow(img, pos)
     transform:translate(-originX, -originY)
 
     --draw the shadow--
-    love.graphics.draw(img.Drawable, transform)
+    love.graphics.draw(img, transform)
     love.graphics.setShader()
     Colours.ResetColour()
 end
@@ -84,69 +134,39 @@ function Effects.LightingColour(inputColour,background)
     local dawnMultiplier = math.cos( ( TimeOfDay - 500 ) / 200 )
     local duskMultiplier = math.cos( ( TimeOfDay + 200 ) / 200 )
 
-    local dawnBounds = {200,800}
-    local duskBounds = {2000,2600}
+    local dawnBounds = {30,1000}
+    local duskBounds = {1930,2650}
 
-    local dayMultiplier = 1
-    if (Effects.CurrentSeason=="Summer")or(Effects.CurrentSeason=="Spring") then
-        dayMultiplier = math.abs( math.cos ( (TimeOfDay-1200) / 900 ) )
-    else
-        dayMultiplier = math.abs( math.cos ( (TimeOfDay-1200) / 700 ) )
-        dawnMultiplier = math.cos( ( TimeOfDay - 700 ) / 200 )
-        duskMultiplier = math.cos( ( TimeOfDay + 600 ) / 200 )
-        dawnBounds = {400,1000}
-        duskBounds = {1600,2200}
-    end
+    local dayColour = {}
+    local newColour = {}
 
-    if dayMultiplier>1 then dayMultiplier=1 end
+    dayColour.R = Effects.LightingEquations.SummerFunc(TimeOfDay, "R")
+    dayColour.G = Effects.LightingEquations.SummerFunc(TimeOfDay, "G")
+    dayColour.B = Effects.LightingEquations.SummerFunc(TimeOfDay, "B")
+    dayColour.A = 1
 
-    --DAYTIME EFFECT--
-    --daytime effect brightens the colour depending on time of day--
-    local dayColour = inputColour
-    if background then
-        dayColour.R = inputColour.R * (dayMultiplier)
-        dayColour.G = inputColour.G * (dayMultiplier)
-        dayColour.B = inputColour.B * (dayMultiplier)
-    else
-        dayColour.R = 1.03 * inputColour.R * (dayMultiplier)
-        dayColour.G = 1.04 * inputColour.G * (dayMultiplier)
-        dayColour.B = 1.11 * inputColour.B * (dayMultiplier)
+    if not background then
+        dayColour.R = 2.5 * dayColour.R
+        dayColour.G = 2.5 * dayColour.G
+        dayColour.B = 2.5 * dayColour.B
     end
 
     if dayColour.R>1 then dayColour.R=1 end
     if dayColour.G>1 then dayColour.G=1 end
     if dayColour.B>1 then dayColour.B=1 end
 
-    --DAWN EFFECT--
-    --dawn colour accounts for dawn orange colour--
-    local dawnColour = Colours.CreateColour({1,1,1,1})
-    if (TimeOfDay>dawnBounds[1])and(TimeOfDay<dawnBounds[2]) then--only apply dawn effect if its multiplier is > 0--
-        dawnColour.R = dawnClr.R * (dawnMultiplier)
-        dawnColour.G = dawnClr.G * (dawnMultiplier)
-        dawnColour.B = dawnClr.B * (dawnMultiplier)
-        --dayColour = Colours.AddColours(dayColour,dawnColour)
-        dayColour = Colours.AverageColours({dayColour,dawnColour})
-    end
-
-
-    --DUSK EFFECT--
-    --dusk colour accounts for dusk orange colour--
-    local duskColour = Colours.CreateColour({1,1,1,1})
-    if (TimeOfDay>duskBounds[1])and(TimeOfDay<duskBounds[2]) then--only apply dusk effect if its multiplier is > 0--
-        duskColour.R = dawnClr.R * (duskMultiplier)
-        duskColour.G = dawnClr.G * (duskMultiplier)
-        duskColour.B = dawnClr.B * (duskMultiplier)
-        --dayColour = Colours.AddColours(dayColour,duskColour)
-        dayColour = Colours.AverageColours({dayColour,duskColour})
-    end
+    newColour.R = inputColour.R * dayColour.R
+    newColour.G = inputColour.G * dayColour.G
+    newColour.B = inputColour.B * dayColour.B
+    newColour.A = inputColour.A
 
     table.insert(colourTable,dayColour)
     
+    --print("Day Colour = "..tostring(dayColour.R)..","..tostring(dayColour.G)..","..tostring(dayColour.B))
 
+    --print("Day Colour.B = "..tostring(dayColour.B))
 
-    print("Day Multiplier = "..tostring(dayMultiplier))
-
-    local newColour = Colours.AverageColours(colourTable)
+    --local newColour = Colours.AverageColours(colourTable)
     return newColour
 end
 
