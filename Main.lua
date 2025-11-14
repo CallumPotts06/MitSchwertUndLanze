@@ -33,11 +33,14 @@ HUD = require("GameStates/Menu/GameHUD")
 ---/// LOCAL VARIABLES ///---
 local cumulativeTime = 0
 
+ScreenX, ScreenY = 1,1
+
 
 ----//// ** LOVE LOAD FUNCTION ** ////----
 function love.load()
     local success = love.window.setFullscreen(true)--set the screen to full screen--
-    
+    ScreenX, ScreenY = love.graphics.getDimensions()
+
     love.graphics.setDefaultFilter("nearest", "nearest")--removes anti aliasing--
     
     --MenuController.InitialiseMenu("TitleScreen")--open title screen on opening the game
@@ -74,7 +77,7 @@ function love.update(dt)
     unitAnimTimer=unitAnimTimer+dt
     cumulativeTime = cumulativeTime + dt
 
-    if unitAnimTimer>=0.125 then unitAnimTimer=unitAnimTimer-0.125 FlagTick=FlagTick+flagIncrement TimeOfDay=TimeOfDay+6 end
+    if unitAnimTimer>=0.125 then unitAnimTimer=unitAnimTimer-0.125 FlagTick=FlagTick+flagIncrement TimeOfDay=TimeOfDay+4 end
     if FlagTick > 5 then flagIncrement = -1  end
     if FlagTick < -5 then flagIncrement = 1  end
 
@@ -87,6 +90,8 @@ end
 
 ----//// ** LOVE DRAW FUNCTION ** ////----
 function love.draw()
+    if TimeOfDay>1400 then Effects.CurrentWeather = "Sunny" end
+
     --MenuController.DrawMenu()
     hudScreen:DrawScreen()
 
@@ -96,4 +101,6 @@ function love.draw()
 
     battalion1:DrawBattalion()
     battalion2:DrawBattalion()
+
+    Effects.WeatherColour()
 end

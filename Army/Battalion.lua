@@ -145,6 +145,8 @@ function Battalion.New(name,regiment,team,service,unitType,unitTypeName,startPos
     --add mathematical data--
     newBattalion.Position = startPos
     newBattalion.MoveObject = nil
+    newBattalion.Moved = true
+    newBattalion.PositionTable = {}
 
     --add statistics from stats library--
     local currentStats = findStatsObject(team,unitTypeName)
@@ -395,18 +397,106 @@ end
     end
 end]]
 
+function Battalion:FindSquadPositions()
+    self.Moved = false
+    self:UpdateCurrentImage()
 
-function Battalion:DrawBattalion()
-
-    local img = self.CurrentImage
+    --setup data--
+    local n1 = 1
+    local n2 = 2
+    local direction = "Right"
+    local squadsPerHealth = 1/20 
+    local squadCount = self.Health*squadsPerHealth
+    local positionTable = {}
     local pos = self.Position
 
-    Effects.DrawShadow(img,pos)
-    Colours.SetColour(Effects.LightingColour(Colours.CreateColour({1,1,1,1})),false)--sets a "lighting" colour for the troops--
-    love.graphics.draw(img.Drawable,pos.X,pos.Y)
+    --lowers the amount of squads if artillery--
+    if self.BranchofService == "Artillery" then squadsPerHealth = 1/60 squadCount = self.Health*squadsPerHealth end
 
+
+    --refines the information for the equations later--
+    if (self.Formation == "BattleLine") or (self.Formation == "FiringLine") or (self.Formation == "Dismounted") or (self.Formation == "Guard") then
+        n1 = - math.floor( squadCount / 2 )
+        n2 = math.floor( squadCount / 2 )
+
+    elseif (self.Formation == "MarchingColumn") or (self.Formation == "Mounted") then
+        direction = "Forward"
+        n1 = 0
+        n2 = squadCount
+
+    elseif self.Formation == "SkirmishLine" then
+        squadCount = squadCount * 1.5
+        n1 = - math.floor( squadCount / 2 )
+        n2 = math.floor( squadCount / 2 )
+
+    end
+
+
+    --get to locating the positions of the squads--
+    for n = n1,n2,1 do
+        local newPos = Vector.New(0,0)
+        
+        if not (self.Formation == "SkirmishLine") then
+            if direction == "Right" then
+                local dx = self.CurrentImage:getWidth() * n
+                newPos = Mathematics.RightVector(pos,dx)
+                
+            elseif direction == "Forward" then
+                local dy = self.CurrentImage:getHeight() * n
+                newPos = Mathematics.ForwardVector(pos,dy)
+            
+            end
+        else
+            math.randomseed(self.SkirmishOrderSeed+n)
+            local dx1 = ( self.CurrentImage:getWidth() * n ) + math.random(-12,12)
+            local dx2 = ( self.CurrentImage:getWidth() * n ) + math.random(-14,14)
+            local dy1 = math.random(-20,20)
+            local dy2 = ( self.CurrentImage:getHeight() * 4 ) + math.random(-20,20)
+
+            newPos = Mathematics.RightVector(pos,dx1)
+            newPos = Mathematics.ForwardVector(newPos,dy1)
+
+            local newPos2 = Mathematics.RightVector(pos,dx2)
+            local newPos2 = Mathematics.ForwardVector(newPos2,dy2)
+            table.insert(positionTable, newPos2)
+
+        end
+
+
+        table.insert(positionTable, newPos)
+    end
+
+    self.PositionTable = positionTable
+end
+
+
+
+function Battalion:DrawBattalion()
+    if self.Moved then self:FindSquadPositions() end
+
+    --setup local necessary variables--
+    local img = self.CurrentImage
     local imgSize = Vector.New(img.Drawable:getWidth(),img.Drawable:getHeight())
-    Highlight.Box(pos,imgSize,Colours.CreateColour(Colours.White))
+    local pos = self.Position
+
+    --create data for flag--
+    local flagPole = Vector.New(0,120)
+    local flagPos = Vector.New(pos.X+(imgSize.X/2),pos.Y-(imgSize.Y))
+    local flagImg = self.Images.Flags[FlagTick+7]
+
+    --draw all the troops' shadows--
+    for i=1,#self.PositionTable,1 do Effects.DrawShadow(img.Drawable,pos,"Image") end
+    
+
+    --set a lighting colour for the troops--
+    Colours.SetColour(Effects.LightingColour(Colours.CreateColour({1,1,1,1})),false)
+    --draw flag, flagpole and soldiers--
+    for i=1,#self.PositionTable,1 do love.graphics.draw(img.Drawable,pos.X,pos.Y) end
+    love.graphics.draw(flagImg,flagPos.X,flagPos.Y)
+    flagPole:DrawVector(flagPos,Colours.CreateColour({0.2627,0.1569,0.0941,1}))
+
+    
+    --Highlight.Box(pos,imgSize,Colours.CreateColour(Colours.White))
 end
 
 
