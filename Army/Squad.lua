@@ -223,11 +223,15 @@ function Squads.CreateSquad(team,unitTypeName,unitType,dress,facing,animation,fo
 
     elseif unitType=="Cavalry" then
         if formation=="BattleLine" then soldierCount = Vector.New(2,2)
-        else soldierCount = Vector.New(4,2) end
+        else 
+            if (facing == "East") or (facing == "West") then soldierCount = Vector.New(2,4) soldierSize.Y = soldierSize.Y / 1.75
+            else soldierCount = Vector.New(4,2) end
+        end
 
     elseif unitType=="Dragoon" then
         if formation=="Mounted" then 
-            soldierCount = Vector.New(4,2) 
+            if (facing == "East") or (facing == "West") then soldierCount = Vector.New(2,4) soldierSize.Y = soldierSize.Y / 1.75
+            else soldierCount = Vector.New(4,2) end
         else
             if animation=="Guard" then soldierCount = Vector.New(1,1) 
             else override = true soldierCount = Vector.New(2,2) end

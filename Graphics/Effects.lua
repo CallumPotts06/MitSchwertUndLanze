@@ -23,7 +23,7 @@ Effects.WEATHER_COLOURS.DAWN_DUSK_MULTIPLIERS.B = 0.15
 
 ---/// VARIABLES ///---
 Effects.CurrentSeason = "Summer"
-Effects.CurrentWeather = "Foggy"
+Effects.CurrentWeather = "Sunny"
 
 
 ---//// LOCALLY USED FUNCTIONS ///---
