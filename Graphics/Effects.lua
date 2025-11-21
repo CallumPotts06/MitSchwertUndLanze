@@ -69,7 +69,6 @@ function Effects.DrawShadow(img, pos, imgType)
         imgW = img:getWidth()
         imgH = img:getHeight()
     end
-    
 
     --create an angle value from the time of day--
     local sunAngle = (TimeOfDay - 1200) / 600  -- ranges -1 to 1
@@ -79,9 +78,10 @@ function Effects.DrawShadow(img, pos, imgType)
     local shadowDirection = math.sin(sunAngle)  -- inbetween -1, 0, and 1
     if sunAngle == 0 then shadowDirection = 0 end
     --set an origin for the shadow--
-    local originX = imgW / 2
-    local originY = imgH
+    local originX = (imgW / 2)
+    local originY = (imgH)
 
+    local newPos = Vector.New(pos.X, pos.Y)
 
     --set the parameters for the blur shader--
     Shaders.Blur:send("radius", 0.5 + (1.5 * shadowLength))
@@ -95,7 +95,8 @@ function Effects.DrawShadow(img, pos, imgType)
     
     --create a transform object to manipulate the shadow--
     local transform = love.math.newTransform()
-    transform:translate(pos.X, pos.Y)
+    transform:translate(newPos.X, newPos.Y)
+    transform:scale(CameraZoom, CameraZoom)
     transform:translate(originX, originY)
     --shearing horizontally will cast the shadow in a realistic manner--
     local shearAmount = -4 * shadowLength * shadowDirection

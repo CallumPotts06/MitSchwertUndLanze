@@ -55,4 +55,17 @@ function Vector:DrawPosition(radius,shape,colour)
     end
 end
 
+
+function Vector:ToScreenPosition()
+    --function converts a position on the game world to a position on screen based on the camera position--
+    self.X = (self.X * CameraZoom) + CameraPosition.X
+    self.Y = (self.Y * CameraZoom) + CameraPosition.Y
+end
+
+function Vector:ToGamePosition()
+    --function converts a position on screen to a position in the game world based on the camera position--
+    self.X = (self.X - CameraPosition.X) / CameraZoom
+    self.Y = (self.Y - CameraPosition.Y) / CameraZoom
+end
+
 return Vector

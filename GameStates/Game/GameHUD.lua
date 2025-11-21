@@ -22,12 +22,15 @@ function HUD.Open()
     --get the screen size--
     local x,y = love.graphics.getDimensions()
 
-    --create the title and version appearance and positional data--
+    --setup position and size data for all the text objects--
     local timeTextPosA = Mathematics.ScreenScaleVector(0.8,0.1)
     local timeTextSize = Mathematics.ScreenScaleVector(0.175,0.075)
     local timeTextMaxSize = 40
     local timeTextText = "Time: "..tostring(TimeOfDay) 
     local timeTextFont = Font.Georgia
+
+    local fpsPos = Mathematics.ScreenScaleVector(0.9,0.01)
+    local fpsSize = Mathematics.ScreenScaleVector(0.08,0.04)
 
     --setup appearance data for all the text objects--
     local white = Colours.CreateColour(Colours.White)
@@ -35,6 +38,8 @@ function HUD.Open()
     local textBackClr = Colours.CreateColour({0,0,0,0.1})
 
     local timeText = TextBox.New("TimeCounter",timeTextText,timeTextPosA,timeTextSize,timeTextMaxSize,0,5,timeTextFont,1,black,white,white,false,false)
+    local fpsText = TextBox.New("FpsCounter","FPS=0",fpsPos,fpsSize,20,0,5,timeTextFont,1,white,textBackClr,textBackClr,false,false)
+
 
     --create a new screen to return to the menu handler--
     local newScreen = Screen.New(1)

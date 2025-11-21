@@ -242,14 +242,20 @@ function Squads.CreateSquad(team,unitTypeName,unitType,dress,facing,animation,fo
     --for infantry and dismounted dragoons--
     if override then size = Vector.New((soldierSize.X*soldierCount.X)+(2*24),soldierSize.Y*soldierCount.Y) end--70 is the width of the troops E/W--
 
+    
     --canvas creation--
     local drawable = love.graphics.newCanvas(size.X, size.Y)
     love.graphics.setCanvas(drawable)
-        for x=1,soldierCount.X,1 do for y=1,soldierCount.Y,1 do
+        for x=soldierCount.X,1,-1 do for y=1,soldierCount.Y,1 do
             if (not override)or(facing=="West") then
-                love.graphics.draw(img.Drawable, (soldierSize.X*(x-1)), ((soldierSize.Y/2)*(y-1)))
+                if ((unitType=="Cavalry") or (unitType=="Artillery") or (unitType=="Dragoon" and formation=="Mounted"))or(animation=="Guard") then--and (facing=="West" or facing=="East") then
+                    love.graphics.draw(img.Drawable, (soldierSize.X*(x-1)), ((soldierSize.Y/3.5)*(y-1)))
+                else
+                    love.graphics.draw(img.Drawable, 25+(24*(x-1)), ((soldierSize.Y/3.5)*(y-1)))
+                end
             else
-                love.graphics.draw(img.Drawable, (soldierSize.X*(x-1))+24, ((soldierSize.Y/2)*(y-1)))--offset for infantry--
+                --love.graphics.draw(img.Drawable, (soldierSize.X*(x-1))+24, ((soldierSize.Y/2)*(y-1)))--offset for infantry--
+                love.graphics.draw(img.Drawable, (24*(x-1)), ((soldierSize.Y/2.5)*(y-1)))
             end
         end end
     love.graphics.setCanvas()
@@ -309,7 +315,7 @@ function Squads.LoadAllSquads()
     local InfantryAnimations = {"Idle","Aiming","March1","March2","March3","March4"}
 
     local ArtilleryFormations = {"FiringLine","MarchingColumn"}
-    local ArtilleryAnimations = {"Idle","March1","March2"}
+    local ArtilleryAnimations = {"Firing","Idle","March1","March2"}
 
     local CavalryFormations = {"BattleLine","MarchingColumn"}
     local CavalryAnimations = {"Idle","March1","March2","Charge1","Charge2","Charge3"}

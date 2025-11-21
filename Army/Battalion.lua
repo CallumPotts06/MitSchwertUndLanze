@@ -45,6 +45,7 @@ Squad = require("../Army/Squad")
 
 --// IMPORT INTERFACE LIBRARIES //--
 Colours = require("../Interface/Colours")
+UnitSelectUI = require("../GameStates/Game/UnitSelectUI")
 
 --// IMPORT MATHS LIBRARIES //--
 Vector = require("../Mathematics/Vector")
@@ -53,6 +54,13 @@ Mathematics = require("../Mathematics/Mathematics")
 --// IMPORT GRAPHICS LIBRARIES //--
 Highlight = require("../Graphics/Highlighter")
 Effects = require("../Graphics/Effects")
+
+--// CONSTANTS //--
+INFANTRY_MARCH_ANIMS = {"March1","March2","March1","Idle","March3","March4","March3","Idle"}
+CAVALRY_MARCH_ANIMS = {"March1","March1","Idle","Idle","March2","March2","Idle","Idle"}
+CAVALRY_CHARGE_ANIMS = {"Charge1","Charge1","Charge2","Charge2","Charge3","Charge3"}
+ARTY_MARCH_ANIMS = {"March1","March1","Idle","Idle","March2","March2","Idle","Idle"}
+DRAGOON_MARCH_ANIMS = {"MountedMarch1","MountedMarch1","MountedIdle","MountedIdle","MountedMarch2","MountedMarch2","MountedIdle","MountedIdle"}
 
 
 local function findStatsObject(team,unitType)
@@ -147,6 +155,7 @@ function Battalion.New(name,regiment,team,service,unitType,unitTypeName,startPos
     newBattalion.MoveObject = nil
     newBattalion.Moved = true
     newBattalion.PositionTable = {}
+    newBattalion.Facing = "South"
 
     --add statistics from stats library--
     local currentStats = findStatsObject(team,unitTypeName)
@@ -157,14 +166,20 @@ function Battalion.New(name,regiment,team,service,unitType,unitTypeName,startPos
     newBattalion.MarchSpeed = currentStats.MarchSpeed
     newBattalion.Morale = currentStats.Morale
     newBattalion.ChargeEnabled = currentStats.ChargeEnabled
+    newBattalion.Actions = currentStats.Actions
+    newBattalion.Formations = currentStats.Formations
+
+    --add other statistical data--
+    newBattalion.ColourBattalion = colour
+    newBattalion.CurrentAction = "Idle"
+    newBattalion.BuffInfo = {}
 
     --add appearance data--
     newBattalion.Images = LoadImagesOntoUnit(team,service,unitType)
-    newBattalion.Facing = "South"
     newBattalion.CurrentImage = nil
     newBattalion.Season = season
-    newBattalion.ColourBattalion = colour
     newBattalion.SkirmishOrderSeed = math.random(1,1000)
+    newBattalion.MarchSet = INFANTRY_MARCH_ANIMS
 
     --add game data--
     if service=="Infantry" or service=="Artillery" or service=="Cavalry" then
@@ -172,11 +187,16 @@ function Battalion.New(name,regiment,team,service,unitType,unitTypeName,startPos
         newBattalion.Animation = "Idle"
     end
     if (unitType=="PreussischerDragoner")or(unitType=="PreussischerDragoner") then newBattalion.Formation = "Mounted" newBattalion.Animation = "MountedIdle" end
-    -- if the concrete unit type name indicates dragoons, default to Mounted
+    -- if the unit type name indicates dragoons, default to Mounted
     if unitTypeName == "PreussischerDragoner" then
         newBattalion.Formation = "Mounted"
         newBattalion.Animation = "MountedIdle"
     end
+
+
+    if service=="Infantry" then newBattalion.MarchSet=INFANTRY_MARCH_ANIMS
+    elseif service=="Cavalry" then newBattalion.MarchSet=CAVALRY_MARCH_ANIMS
+    elseif service=="Artillery" then newBattalion.MarchSet=ARTY_MARCH_ANIMS end
 
     --finish up the object--
     setmetatable(newBattalion,{__index=Battalion})--map the new table onto the Battalion class--
@@ -239,6 +259,29 @@ function Battalion:UpdateCurrentImage()
     else
         -- leave CurrentImage unchanged (or set to a tiny fallback canvas if you prefer)
     end
+end
+
+--Function maps the current action to the correct animation--
+function Battalion:UpdateAnimation()
+    local marchAnims = {}
+
+    if self.CurrentAction=="Idle" then self.Animation="Idle"
+
+    elseif self.CurrentAction=="Marching" then
+        if self.Formation=="Mounted" then self.MarchSet = DRAGOON_MARCH_ANIMS
+        elseif self.Formation=="Dismounted" then self.MarchSet = INFANTRY_MARCH_ANIMS end
+
+        self.Animation=self.MarchSet[AnimTick]
+    
+    elseif self.CurrentAction=="Aiming" then self.Animation="Aiming"
+
+    elseif self.CurrentAction=="Firing" then self.Animation="Firing"
+
+    elseif self.CurrentAction=="Guard" then self.Animation="Guard"
+
+    end
+
+    self:UpdateCurrentImage()
 end
 
 function Battalion:CreateFlagMeshes()
@@ -304,32 +347,36 @@ function Battalion:FindSquadPositions()
     local tempN = 0
     local increment = 1
 
-    if (self.BranchofService=="Artillery") then imgW=imgW*2.2*math.cos(pos.Theta)  imgH=imgH*2.2*math.cos(pos.Theta) end
-    if (self.BranchofService=="Infantry") or (self.Formation=="Dismounted") then imgW = 40 imgH = 125 end
-    if (self.BranchofService=="Cavalry") and (not (self.Formation=="Dismounted")) then imgW = 70 imgH = 260 end
+    local offset = Vector.New(0,0)
 
+    if (self.BranchofService=="Artillery") then offset.Y = -60 imgW=150 imgH=400 end
+    if (self.BranchofService=="Infantry") or (self.Formation=="Dismounted") then imgW = 40 imgH = 110 end
+    if (self.BranchofService=="Cavalry") and (not (self.Formation=="Dismounted")) then imgW = 70 imgH = 260 offset.Y=-120 end
+    if (self.Animation=="Guard") then imgW=110 end
+
+    local tempTheta = pos.Theta
+    pos = Mathematics.VectorFromAddition(pos,offset)
+    pos.Theta = tempTheta
 
     --lowers the amount of squads if artillery--
-    if self.BranchofService == "Artillery" then squadsPerHealth = 1/60 squadCount = self.Health*squadsPerHealth end
-
+    if self.BranchofService == "Artillery" then squadsPerHealth = 1/40 squadCount = (self.Health*squadsPerHealth) end
 
     --refines the information for the equations later--
-    if (self.Formation == "BattleLine") or (self.Formation == "FiringLine") or (self.Formation == "Dismounted") or (self.Formation == "Guard") then
+    if (self.Formation == "BattleLine") or (self.Formation == "FiringLine") or (self.Formation == "Dismounted") then
         n1 = - math.floor( squadCount / 2 )
         n2 = math.floor( squadCount / 2 )
 
-
+        if self.BranchofService=="Artillery" then n1 = 0 end
         if (pos.Theta > math.rad(180)) and (pos.Theta < math.rad(360)) then tempN = n1 n1 = n2 n2 = tempN increment = -1 end
-        --if( self.Facing == "North" ) or ( self.Facing == "South" )then imgW = imgH end--change dimensions for different facings--
 
     elseif (self.Formation == "MarchingColumn") or (self.Formation == "Mounted") then
         direction = "Forward"
         n1 = 0
         n2 = squadCount
 
-        if (self.BranchofService=="Infantry")or(self.BranchofService=="Cavalry") then n2 = (n2 / 2)-1 end--infantry squads are 2x the size in this formation--
-        if (pos.Theta > math.rad(90)) and (pos.Theta < math.rad(270)) then tempN = n1-1 n1 = n2-1 n2 = tempN increment = -1 end
-       -- if( self.Facing == "East" ) or ( self.Facing == "West" )then imgH = imgW end--change dimensions for different facings--
+        if self.BranchofService=="Artillery" then n2 = n2 - 1
+        elseif (self.BranchofService=="Infantry")or(self.BranchofService=="Cavalry") then n2 = math.ceil(n2 / 2)-1 end--infantry squads are 2x the size in this formation--
+        if (pos.Theta>math.rad(90))and(pos.Theta<math.rad(270)) then tempN = n1 n1 = n2 n2 = tempN increment = -1 end
 
     elseif self.Formation == "SkirmishOrder" then
         squadCount = squadCount * 1.5
@@ -355,25 +402,27 @@ function Battalion:FindSquadPositions()
         else
             math.randomseed(self.SkirmishOrderSeed+n)
             --Front Rank--
-            newPos = Mathematics.VectorFromAddition(Mathematics.RightVector(pos,(n*75)+math.random(-12,12)),pos)
-            newPos = Mathematics.VectorFromAddition(Mathematics.ForwardVector(newPos,math.random(-20,20)),newPos)
-            table.insert(positionTable,newPos)
+            newPos = Mathematics.VectorFromAddition(Mathematics.RightVector(pos,(n*50)+math.random(-16,16)),pos)
+            newPos = Mathematics.VectorFromAddition(Mathematics.ForwardVector(pos,math.random(-24,24)),newPos)
 
+            math.randomseed(self.SkirmishOrderSeed+(n*2))
             --Rear Rank--
             local theta=pos.Theta
+            newPos2 = Vector.New(0,0)
+            newPos2.Theta=theta
             if n~=0 then
                 --update theta accordingly--
                 if n<0 then theta = Mathematics.AngleFromVector(Mathematics.VectorFromSubtraction(newPos,pos))
                 else theta = Mathematics.AngleFromVector(Mathematics.VectorFromSubtraction(pos,newPos)) end
-
-                newPos.Theta=theta
-                newPos = Mathematics.VectorFromAddition(Mathematics.RightVector(newPos,(-125)+math.random(-12,12)),newPos)
+                newPos2.Theta=theta
+                newPos2 = Mathematics.VectorFromAddition(Mathematics.RightVector(newPos,(-125)+math.random(-16,16)),newPos)
             else
-                newPos.Theta=theta
-                newPos = Mathematics.VectorFromAddition(Mathematics.ForwardVector(newPos,(-125)+math.random(-20,20)),newPos)
+                newPos2 = Mathematics.VectorFromAddition(Mathematics.ForwardVector(newPos,(-125)+math.random(-24,24)),newPos)
             end
-
+            newPos2:ToScreenPosition()
+            table.insert(positionTable,newPos2)
         end
+        newPos:ToScreenPosition()
         table.insert(positionTable, newPos)
     end
 
@@ -383,6 +432,7 @@ end
 
 
 function Battalion:DrawBattalion()
+    --update squad positions if necessary--
     if self.Moved then self:FindSquadPositions() end
 
     --setup local necessary variables--
@@ -391,9 +441,11 @@ function Battalion:DrawBattalion()
     local pos = self.Position
 
     --create data for flag--
-    local flagPole = Vector.New(0,120)
+    local flagPole = Vector.New(0,120*CameraZoom)
     local flagPos = Vector.New(pos.X+(imgSize.X/2),pos.Y-(imgSize.Y))
     local flagImg = self.Images.Flags[FlagTick+7]
+
+    flagPos:ToScreenPosition()
 
     --draw all the troops' shadows--
     for i=1,#self.PositionTable,1 do Effects.DrawShadow(img.Drawable,self.PositionTable[i],"Image") end
@@ -402,14 +454,18 @@ function Battalion:DrawBattalion()
     --set a lighting colour for the troops--
     Colours.SetColour(Effects.LightingColour(Colours.CreateColour({1,1,1,1})),false)
     --draw flag, flagpole and soldiers--
-    for i=1,#self.PositionTable,1 do love.graphics.draw(img.Drawable,self.PositionTable[i].X,self.PositionTable[i].Y) end
-    love.graphics.draw(flagImg,flagPos.X,flagPos.Y)
-    flagPole:DrawVector(flagPos,Colours.CreateColour({0.2627,0.1569,0.0941,1}))
-
-    
-    --Highlight.Box(pos,imgSize,Colours.CreateColour(Colours.White))
+    for i=1,#self.PositionTable,1 do love.graphics.draw(img.Drawable,self.PositionTable[i].X,self.PositionTable[i].Y,0,CameraZoom,CameraZoom) end
+    love.graphics.draw(flagImg,flagPos.X,flagPos.Y,0,CameraZoom,CameraZoom)
+    love.graphics.setLineWidth( 3 * CameraZoom )
+    flagPole:DrawVector(flagPos,Effects.LightingColour(Colours.CreateColour({0.2627,0.1569,0.0941,1})))
 end
 
+
+function Battalion:SelectUnit()
+    local ui = UnitSelectUI.Open(self)
+
+    return ui
+end
 
 
 --// FINISH UP BY RETURNING THE NEW OBJECT BACK TO MAIN //--
