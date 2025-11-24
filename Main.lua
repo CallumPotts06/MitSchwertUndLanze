@@ -11,6 +11,9 @@ Sounds = require("MediaHandler/Sounds")
 Mouse = require("OtherLibraries/Mouse")
 
 Effects = require("Graphics/Effects")
+
+InputControl = require("OtherLibraries/InputManager")
+
 --// IMPORT CLASSES //--
 Vector = require("Mathematics/Vector")
 
@@ -36,27 +39,28 @@ local cumulativeTime = 0
 ---/// GLOBALS ///---
 FlagTick = -5
 AnimTick = 1
-CameraZoom = 0.6
 TimeOfDay = 0
+
 ScreenX, ScreenY = 1,1
+
+CameraMoved = false
+CameraZoom = 0.6
 CameraPosition = Vector.New(0,0,0)
 
------!!!!!!!!!!!!!!!!!----
-local unitSelectUIScreen = false
+CurrentUnit = false
+CurrentUnitControl = ""
+CurrentUnitScreen = false
+
+
 
 ----//// ** LOVE LOAD FUNCTION ** ////----
 function love.load()
     local success = love.window.setFullscreen(true)--set the screen to full screen--
     ScreenX, ScreenY = love.graphics.getDimensions()
-
-    local w, h, flags = love.window.getMode()
-    flags.vsync = not flags.vsync
-    love.window.setMode(w, h, flags)
-
+    
     love.graphics.setDefaultFilter("nearest", "nearest")--removes anti aliasing--
     
-    MenuController.InitialiseMenu("TitleScreen")--open title screen on opening the game
-    hudScreen = HUD.Open()
+    --MenuController.InitialiseMenu("TitleScreen")--open title screen on opening the game
 
     --load squads for gameplay--
     Squad.LoadAllSquads()
@@ -65,15 +69,13 @@ function love.load()
     --battalion1 = Battalion.New("Battalion 1",{},"Germany","Cavalry","PreussischerUhlanen","PreussischerUhlanen",Vector.New(350,300,math.rad(290)),"None",true)
     --battalion1 = Battalion.New("Battalion 1",{},"Germany","Cavalry","PreussischerDragoner","PreussischerDragoner",Vector.New(500,400,math.rad(290)),"None",true)
     --battalion1 = Battalion.New("Battalion 1",{},"Germany","Infantry","BayerischerLineninfanterie","BayerischerLineninfanterie",Vector.New(500,200,math.rad(290)),"Summer",true)
-    --battalion1 = Battalion.New("Battalion 1",{},"Germany","Infantry","DeutscherGardeZuFuss","PreussischerGardeZuFuss",Vector.New(500,300,math.rad(0)),"Summer",true)
+    battalion1 = Battalion.New("Battalion 1",{},"Germany","Infantry","DeutscherGardeZuFuss","PreussischerGardeZuFuss",Vector.New(500,300,math.rad(0)),"Summer",true)
 
     battalion1.Position.Theta=math.rad(120)
-    battalion1.Formation = "Dismounted"
-    battalion1.CurrentAction = "Guard"
+    battalion1.Formation = "BattleLine"
+    battalion1.CurrentAction = "Aiming"
     battalion1:UpdateCurrentImage()
     battalion1:CreateFlagMeshes()
-
-    unitSelectUIScreen = battalion1:SelectUnit()
 end
 
 ----//// ** LOVE UPDATE FUNCTION ** ////----
@@ -85,14 +87,16 @@ local frameCounter = 0
 local fps = 0
 
 function love.update(dt)
+    CameraMoved = false
+
     fpsCounterTimer = fpsCounterTimer + dt
     frameCounter = frameCounter + 1
     unitAnimTimer=unitAnimTimer+dt
     cumulativeTime = cumulativeTime + dt
 
-    if fpsCounterTimer>=1 then 
-        fpsCounterTimer=fpsCounterTimer-1 
-        fps = frameCounter / 1 
+    if fpsCounterTimer>=0.1 then 
+        fpsCounterTimer=fpsCounterTimer-0.1
+        fps = frameCounter / 0.1
         frameCounter = 0
     end
 
@@ -108,39 +112,36 @@ function love.update(dt)
     
 
     local mouseData = Mouse.GetData(true,cumulativeTime)
-    MenuController.CheckForClicks(mouseData.Position,mouseData.LMBDown)
-    hudScreen.UiObjects[1].Text = "Time: "..tostring(TimeOfDay)
-    hudScreen.UiObjects[1].TextData = love.graphics.newText(hudScreen.UiObjects[1].Font, "Time: "..tostring(TimeOfDay))
-    hudScreen.UiObjects[1].Canvas = hudScreen.UiObjects[1]:CreateCanvas()
+    --MenuController.CheckForClicks(mouseData.Position,mouseData.LMBDown)
+    if CurrentUnitScreen then CurrentUnitScreen:CheckForClicks(mouseData.Position,mouseData.LMBDown) end
+    if mouseData.LMBDown then
+        local ui = battalion1:CheckForClick(mouseData.Position,"Select")
+        if ui then CurrentUnitScreen = ui end
+    end
 
 
-    --TEMPORARY CAMERA ZOOM CONTROLS--
-    if love.keyboard.isDown("up") then CameraZoom = CameraZoom * 1.01 battalion1.Moved = true
-    elseif love.keyboard.isDown("down") then CameraZoom = CameraZoom / 1.01 battalion1.Moved = true end
+    InputControl.ApplyAllInputs()
 
-    --TEMPORARY CAMERA MOVEMENT CONTROLS--
-    if love.keyboard.isDown("w") then CameraPosition.Y = CameraPosition.Y + 2 battalion1.Moved = true end
-    if love.keyboard.isDown("a") then CameraPosition.X = CameraPosition.X + 2 battalion1.Moved = true end
-    if love.keyboard.isDown("s") then CameraPosition.Y = CameraPosition.Y - 2 battalion1.Moved = true end
-    if love.keyboard.isDown("d") then CameraPosition.X = CameraPosition.X - 2 battalion1.Moved = true end
+    --apply to armies when coded--
+    if CameraMoved then battalion1.Moved = true end
 end
 
 ----//// ** LOVE DRAW FUNCTION ** ////----
 function love.draw()
     Colours.SetColour(Colours.CreateColour(Colours.White))
-    love.graphics.print("FPS="..tostring(love.timer.getFPS()), 10, 10)
+    love.graphics.print("FPS="..tostring(fps), 10, 10)
 
     if TimeOfDay>1400 then Effects.CurrentWeather = "Sunny" end
 
-    MenuController.DrawMenu()
-    hudScreen:DrawScreen()
-    unitSelectUIScreen:DrawScreen()
+    --MenuController.DrawMenu()
+
+    if CurrentUnitScreen and CurrentUnit then CurrentUnitScreen.Screen:DrawScreen() end
 
     --sets a "lighting" colour for the background--
     local newColour = Effects.LightingColour(Colours.CreateColour({0.35, 0.6, 0.35,1}),true)
     love.graphics.setBackgroundColor(newColour.R,newColour.G,newColour.B)
 
-    --battalion1:DrawBattalion()
+    battalion1:DrawBattalion()
 
     Effects.WeatherColour()
 end

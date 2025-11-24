@@ -17,10 +17,28 @@ ImageBox = require("Interface/ImageBox")
 Screen = require("Interface/Screen")
 --// END OF IMPORTS //--
 
+--// CONSTANTS //--
+MORALE_SCORES = {
+    "Excited",
+    "Confident",
+    "Uneased",
+    "Breaking Point",
+    "Routed"
+}
+HEALTH_SCORES = {
+    "Full Strength",
+    "High Strength",
+    "Half Strength",
+    "Quarter Strength",
+    "Destroyed",
+}
+
 
 UnitUI = {}
 
 function UnitUI.Open(unit)
+    local newUnitUI = {}
+
     local actionToKey = {
         {"Move", KeyBinds.Move},
         {"Double", KeyBinds.Double},
@@ -33,12 +51,13 @@ function UnitUI.Open(unit)
     --setup appearance data for the UI--
 
     --text colours--
-    local offwhite = Colours.CreateColour({0.9,0.9,0.7,1})
+    local offwhite = Colours.CreateColour({0.6,0.6,0.45,1})
     local white = Colours.CreateColour(Colours.White)
     local black = Colours.CreateColour(Colours.Black)
+    local transparent = Colours.CreateColour({1,1,1,0})
 
     --team colours--
-    local prussianBlue = Colours.CreateColour({0,0.188,0.564,1})
+    local prussianBlue = Colours.CreateColour({0,0.1,0.3,1})
 
     local teamColour = prussianBlue
     if unit.Team == "Prussian" then teamColour = prussianBlue end
@@ -53,40 +72,56 @@ function UnitUI.Open(unit)
     boxSize.X = boxSize.X - 8 --subtract border size x2--
 
     --inner box positions--
-    local innerbox_x = (1-(4*boxPadding))/3
+    local innerbox_x = (1-(4*boxPadding))/4
     local innerbox_y = 0.25 - (2*boxPadding)
     local innerbox_pad = 0.005
-    local statsPos = Mathematics.ScreenScaleVector(boxPadding,0.75+boxPadding)
-    local statsSize = Mathematics.ScreenScaleVector(innerbox_x,innerbox_y)
+    local statsPos = Mathematics.ScreenScaleVector( (2*boxPadding) + innerbox_x ,0.75+boxPadding)
+    local statsSize = Mathematics.ScreenScaleVector(innerbox_x*2,innerbox_y)
 
-    local formationsPos = Mathematics.ScreenScaleVector( (2*boxPadding) + innerbox_x ,0.75+boxPadding)
+    local formationsPos = Mathematics.ScreenScaleVector( boxPadding ,0.75+boxPadding)
     local formationsSize = Mathematics.ScreenScaleVector(innerbox_x,innerbox_y)
 
-    local buttonsPos = Mathematics.ScreenScaleVector( (3 *boxPadding) + (2*innerbox_x) ,0.75+boxPadding)
+    local buttonsPos = Mathematics.ScreenScaleVector( (3 * boxPadding) + (3*innerbox_x) ,0.75+boxPadding)
     local buttonsSize = Mathematics.ScreenScaleVector(innerbox_x,innerbox_y)
 
+    local statSize = Mathematics.ScreenScaleVector((innerbox_x*2)/3,(innerbox_y))
+    statSize.X = statSize.X - 20 statSize.Y = statSize.Y - 5
+    local stat1Pos = Mathematics.ScreenScaleVector( (2*boxPadding) + innerbox_x ,0.75+boxPadding)
+    stat1Pos.X = stat1Pos.X + 15 stat1Pos.Y = stat1Pos.Y + 20
+
+    local stat2Pos = Mathematics.ScreenScaleVector( (2*boxPadding) + innerbox_x ,0.75+boxPadding)
+    stat2Pos.X = stat2Pos.X + 30 + statSize.X stat2Pos.Y = stat2Pos.Y + 20
+
+    local stat3Pos = Mathematics.ScreenScaleVector( (2*boxPadding) + innerbox_x ,0.75+boxPadding)
+    stat3Pos.X = stat3Pos.X + 45 + (statSize.X*2) stat3Pos.Y = stat3Pos.Y + 20
+    
+
     --action positions--
-    local actionSize = Mathematics.ScreenScaleVector(innerbox_x-(2*innerbox_pad),((innerbox_y/2)-(innerbox_pad*3)))
-    print("action size = "..tostring(actionSize.X)..","..tostring(actionSize.Y))
+    local actionSize = Mathematics.ScreenScaleVector(innerbox_x-(2*innerbox_pad),((innerbox_y/4)-(innerbox_pad*2)))
     local actionPositions = {}
     for i=1,#unit.Actions do
         local actionPosX = buttonsPos.X + innerbox_pad
         local actionPosY = buttonsPos.Y + innerbox_pad + ((i-1) * (actionSize.Y + innerbox_pad))
-        table.insert(actionPositions, Mathematics.ScreenScaleVector(actionPosX,actionPosY))
+        table.insert(actionPositions, Vector.New(actionPosX+15,actionPosY+7))
     end
 
     --formation positions--
     local formationSize = Mathematics.ScreenScaleVector(innerbox_x-(2*innerbox_pad),(innerbox_y/3-(innerbox_pad*4)))
+    formationSize.X = formationSize.X - 20
     local formationPositions = {}
     for i=1,#unit.Formations do
-        local formPosX = formationsPos.X + innerbox_pad
-        local formPosY = formationsPos.Y + innerbox_pad + ((i-1) * (formationSize.Y + innerbox_pad))
-        table.insert(formationPositions, Mathematics.ScreenScaleVector(formPosX,formPosY))
+        local formPosX = formationsPos.X + innerbox_pad + 10
+        local formPosY = formationsPos.Y + innerbox_pad + ((i-1) * (formationSize.Y + innerbox_pad)) + (10*i)
+        table.insert(formationPositions, Vector.New(formPosX+8,formPosY+8))
     end
 
     --text appearance data--
     local nameFont = Font.Gothic2
     local mainFont = Font.Georgia
+
+    local healthScore = "Health:\n\n"..HEALTH_SCORES[ math.floor( (unit.MaxHealth / unit.Health) * 5 ) ]
+    local moraleScore = "Morale:\n\n"..MORALE_SCORES[ math.floor( (100 / unit.Morale) * 5 ) ]
+    local currentAction = "Currently:\n\n"..unit.CurrentAction
 
     --create main box--
     local unitUIBox=TextBox.New("Back"," ",boxPos,boxSize,1,4,1,mainFont,1,black,teamColour,black,false,false)
@@ -96,22 +131,83 @@ function UnitUI.Open(unit)
     local formationsBox=TextBox.New("Inner2"," ",formationsPos,formationsSize,1,3,1,mainFont,1,black,offwhite,black,false,false)
     local actionsBox=TextBox.New("Inner3"," ",buttonsPos,buttonsSize,1,3,1,mainFont,1,black,offwhite,black,false,false)
 
+    local health=TextBox.New("HpTitle",healthScore,stat1Pos,statSize,30,0,0,mainFont,1,white,transparent,transparent,false,false)
+    local morale=TextBox.New("HpTitle",moraleScore,stat2Pos,statSize,30,0,0,mainFont,1,white,transparent,transparent,false,false)
+    local currentActionTxt=TextBox.New("HpTitle",currentAction,stat3Pos,statSize,30,0,0,mainFont,1,white,transparent,transparent,false,false)
+
     --create action buttons--
     local actionBtns = {}
     for i=1,#unit.Actions,1 do
         local text = ""
         for i2=1,#actionToKey do if unit.Actions[i]==actionToKey[i2][1]then text=actionToKey[i2][2].." : "..unit.Actions[i]end end
-        local actionBtn=TextBox.New("Action"..tostring(i),text,actionPositions[i],actionSize,10,0,0,mainFont,1,black,white,black,false,false)
+        local shadowPos = Vector.New(actionPositions[i].X+2,actionPositions[i].Y+2)
+        local actionBtnShadow=TextBox.New("Action"..tostring(i),text,shadowPos,actionSize,25,0,0,mainFont,1,black,transparent,transparent,false,false)
+        local actionBtn=TextBox.New("Action"..tostring(i),text,actionPositions[i],actionSize,25,0,0,mainFont,1,white,transparent,transparent,false,false)
+        table.insert(actionBtns, actionBtnShadow)
         table.insert(actionBtns, actionBtn)
+    end
+    --create formation buttons--
+    local formationBtns = {}
+    for i=1,#unit.Formations,1 do
+        local text = unit.Formations[i]
+        local formBtn=TextBox.New(text,text,formationPositions[i],formationSize,25,3,5,mainFont,1,white,teamColour,black,true,true)
+        table.insert(formationBtns, formBtn)
     end
 
 
     --create a new screen to return--
     local newScreen = Screen.New(1)
-    --newScreen.UiObjects = {unitUIBox,statsBox,formationsBox,actionsBox}
-    --for i=1,#actionBtns do table.insert(newScreen.UiObjects,  actionBtns[i]) end
+    newScreen.UiObjects = {unitUIBox,statsBox,formationsBox,actionsBox,health,morale,currentActionTxt}
+    for i=1,#actionBtns do table.insert(newScreen.UiObjects, actionBtns[i]) end
+    for i=1,#formationBtns do table.insert(newScreen.UiObjects, formationBtns[i]) end
 
-    return newScreen--returns a screen object to call location--
+    newUnitUI.Screen = newScreen
+
+    setmetatable(newUnitUI,{__index=UnitUI})--map the new table onto the Battalion class--
+    return newUnitUI--return the new object--
 end
+
+function UnitUI:CheckForClicks(mousePos,mouseClick)
+    --creates an table of all clicked ui elements--
+    clickedObjects = self.Screen:CheckForMouse(mousePos,mouseClick)
+
+    local updatedFormation = false
+    for i=1,#clickedObjects,1 do 
+
+        if clickedObjects[i].Name=="BattleLine" then 
+            CurrentUnit.Formation = "BattleLine"
+            updatedFormation = true
+        
+        elseif clickedObjects[i].Name=="MarchingColumn" then 
+            CurrentUnit.Formation = "MarchingColumn"
+            updatedFormation = true
+
+        elseif clickedObjects[i].Name=="SkirmishOrder" then 
+            CurrentUnit.Formation = "SkirmishOrder"
+            updatedFormation = true
+
+        elseif clickedObjects[i].Name=="FiringLine" then 
+            CurrentUnit.Formation = "FiringLine"
+            updatedFormation = true
+
+        elseif clickedObjects[i].Name=="Dismounted" then 
+            CurrentUnit.Formation = "Dismounted"
+            updatedFormation = true
+
+        elseif clickedObjects[i].Name=="Mounted" then 
+            CurrentUnit.Formation = "Mounted"
+            updatedFormation = true
+
+        end
+
+        if updatedFormation then
+            CurrentUnit.CurrentAction = "Idle"
+            CurrentUnit.Moved = true
+            CurrentUnit:UpdateAnimation()
+            break
+        end
+    end
+end
+
 
 return UnitUI

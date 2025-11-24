@@ -468,6 +468,40 @@ function Battalion:SelectUnit()
 end
 
 
+function Battalion:CheckForClick(mousePos,task)
+    local minx = 99999999999
+    local maxx = -9999999999
+    local miny = 99999999999
+    local maxy = -9999999999
+
+    local clicked = false
+
+    for i = 1,#self.PositionTable,1 do
+        if self.PositionTable[i].X<minx then minx = self.PositionTable[i].X end
+        if self.PositionTable[i].X>maxx then maxx = self.PositionTable[i].X end
+
+        if self.PositionTable[i].Y<miny then miny = self.PositionTable[i].Y end
+        if self.PositionTable[i].Y>maxy then maxy = self.PositionTable[i].Y end
+    end
+
+    if (mousePos.X > minx) and (mousePos.X < maxx) and (mousePos.Y > miny) and (mousePos.Y < maxy) then 
+        clicked = true
+    end  
+
+
+    if clicked then
+        if task == "Select" then
+            CurrentUnit = self
+            return self:SelectUnit()
+        end
+
+        return true
+    end
+
+    return false
+end
+
+
 --// FINISH UP BY RETURNING THE NEW OBJECT BACK TO MAIN //--
 return Battalion
 
