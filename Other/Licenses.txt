@@ -6,3 +6,11 @@ Image - BattleOfMarsLaTour  : "Garde-Dragoner-Regiments bei Mars-la-Tour", Publi
 Image - BattleOfGravelotte  : "Fighting at the cemetery of saint privat", Public Domain - by Alphonse de Neuville
 Image - BattleOfMetz        : "French Skirmishers at Metz", Public Domain - by Alphonse de Neuville
 Image - BattleOfSedan       : "Bataille de Sedan. - Un episode du combat de La Moncelle", by Beato, Felice A.
+
+
+
+
+Music - Egmont Overture     : 	"Egmont Overture" Kevin MacLeod (incompetech.com)
+				Licensed under Creative Commons: By Attribution 4.0 License
+				http://creativecommons.org/licenses/by/4.0/
+
