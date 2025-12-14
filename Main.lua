@@ -14,6 +14,8 @@ Effects = require("Graphics/Effects")
 
 InputControl = require("OtherLibraries/InputManager")
 
+LoadMap = require("GameStates/Game/LoadMap")
+
 --// IMPORT CLASSES //--
 Vector = require("Mathematics/Vector")
 
@@ -64,6 +66,8 @@ function love.load()
 
     --load squads for gameplay--
     Squad.LoadAllSquads()
+    --load tiles for map--
+    LoadMap.LoadTiles()
 
     --battalion1 = Battalion.New("Battalion 1",{},"Germany","Artillery","DeutscherArtillerie","PreussischerArtillerie",Vector.New(500,200,math.rad(90)),"None",true)
     --battalion1 = Battalion.New("Battalion 1",{},"Germany","Cavalry","PreussischerUhlanen","PreussischerUhlanen",Vector.New(350,300,math.rad(290)),"None",true)
@@ -86,6 +90,10 @@ local fpsCounterTimer = 0
 local frameCounter = 0
 local fps = 0
 
+local TEMP_TILE_TIMER = 0
+
+tileIndexTest = 1
+
 function love.update(dt)
     CameraMoved = false
 
@@ -93,6 +101,8 @@ function love.update(dt)
     frameCounter = frameCounter + 1
     unitAnimTimer=unitAnimTimer+dt
     cumulativeTime = cumulativeTime + dt
+
+    TEMP_TILE_TIMER = TEMP_TILE_TIMER + dt
 
     if fpsCounterTimer>=0.1 then 
         fpsCounterTimer=fpsCounterTimer-0.1
@@ -110,6 +120,11 @@ function love.update(dt)
         battalion1:UpdateAnimation()
     end
     
+
+    if TEMP_TILE_TIMER > 2 then
+        TEMP_TILE_TIMER = TEMP_TILE_TIMER - 2
+        tileIndexTest=tileIndexTest+1
+    end
 
     local mouseData = Mouse.GetData(true,cumulativeTime)
     --MenuController.CheckForClicks(mouseData.Position,mouseData.LMBDown)
@@ -137,11 +152,17 @@ function love.draw()
 
     if CurrentUnitScreen and CurrentUnit then CurrentUnitScreen.Screen:DrawScreen() end
 
+
+    --[[
     --sets a "lighting" colour for the background--
     local newColour = Effects.LightingColour(Colours.CreateColour({0.35, 0.6, 0.35,1}),true)
     love.graphics.setBackgroundColor(newColour.R,newColour.G,newColour.B)
 
     battalion1:DrawBattalion()
 
-    Effects.WeatherColour()
+    Effects.WeatherColour()]]
+
+    --testing the tiles--
+    love.graphics.draw(LoadMap.AllTiles[tileIndexTest].Image,250,250)
+    print("length of alltiles = "..tostring(#LoadMap.AllTiles).."   |   current index = "..tostring(tileIndexTest))
 end
