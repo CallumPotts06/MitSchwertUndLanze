@@ -469,14 +469,14 @@ end
 
 
 function Battalion:CheckForClick(mousePos,task)
-    local minx = 99999999999
+    local minx = 99999999999--inf--
     local maxx = -9999999999
     local miny = 99999999999
     local maxy = -9999999999
 
     local clicked = false
 
-    for i = 1,#self.PositionTable,1 do
+    for i = 1,#self.PositionTable,1 do--chech for each squad if mouse is inbetween position--
         if self.PositionTable[i].X<minx then minx = self.PositionTable[i].X end
         if self.PositionTable[i].X>maxx then maxx = self.PositionTable[i].X end
 
@@ -489,7 +489,7 @@ function Battalion:CheckForClick(mousePos,task)
     end  
 
 
-    if clicked then
+    if clicked then--click was successfull--
         if task == "Select" then
             CurrentUnit = self
             return self:SelectUnit()
