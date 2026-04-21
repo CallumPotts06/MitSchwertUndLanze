@@ -1,0 +1,22 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Run Love2D",
+            "type": "shell",
+            "command": "\"C:\\Users\\Callum Potts\\Documents\\Programming\\love.exe\"",
+            "args": ["\"${workspaceFolder}\""],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "problemMatcher": []
+        }
+    ]
+}

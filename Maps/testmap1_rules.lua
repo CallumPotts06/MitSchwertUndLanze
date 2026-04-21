@@ -1,0 +1,2 @@
+maprules = {}
+return maprules
