@@ -15,6 +15,7 @@ Effects = require("Graphics/Effects")
 InputControl = require("OtherLibraries/InputManager")
 
 LoadMap = require("GameStates/Game/LoadMap")
+MapEditor = require("OtherLibraries/MapEditor")
 
 --// IMPORT CLASSES //--
 Vector = require("Mathematics/Vector")
@@ -53,6 +54,8 @@ CurrentUnit = false
 CurrentUnitControl = ""
 CurrentUnitScreen = false
 
+AntiAliasAmount = 4
+
 
 
 ----//// ** LOVE LOAD FUNCTION ** ////----
@@ -65,21 +68,21 @@ function love.load()
     --MenuController.InitialiseMenu("TitleScreen")--open title screen on opening the game
 
     --load squads for gameplay--
-    Squad.LoadAllSquads()
-    --load tiles for map--
-    LoadMap.LoadTiles()
+    
+    --TEMPORARILY REMOVED FOR SPEED --Squad.LoadAllSquads()
 
     --battalion1 = Battalion.New("Battalion 1",{},"Germany","Artillery","DeutscherArtillerie","PreussischerArtillerie",Vector.New(500,200,math.rad(90)),"None",true)
     --battalion1 = Battalion.New("Battalion 1",{},"Germany","Cavalry","PreussischerUhlanen","PreussischerUhlanen",Vector.New(350,300,math.rad(290)),"None",true)
     --battalion1 = Battalion.New("Battalion 1",{},"Germany","Cavalry","PreussischerDragoner","PreussischerDragoner",Vector.New(500,400,math.rad(290)),"None",true)
     --battalion1 = Battalion.New("Battalion 1",{},"Germany","Infantry","BayerischerLineninfanterie","BayerischerLineninfanterie",Vector.New(500,200,math.rad(290)),"Summer",true)
-    battalion1 = Battalion.New("Battalion 1",{},"Germany","Infantry","DeutscherGardeZuFuss","PreussischerGardeZuFuss",Vector.New(500,300,math.rad(0)),"Summer",true)
+    
+    --[[battalion1 = Battalion.New("Battalion 1",{},"Germany","Infantry","DeutscherGardeZuFuss","PreussischerGardeZuFuss",Vector.New(500,300,math.rad(0)),"Summer",true)
 
     battalion1.Position.Theta=math.rad(120)
     battalion1.Formation = "BattleLine"
     battalion1.CurrentAction = "Aiming"
     battalion1:UpdateCurrentImage()
-    battalion1:CreateFlagMeshes()
+    battalion1:CreateFlagMeshes()]]
 end
 
 ----//// ** LOVE UPDATE FUNCTION ** ////----
@@ -90,9 +93,7 @@ local fpsCounterTimer = 0
 local frameCounter = 0
 local fps = 0
 
-local TEMP_TILE_TIMER = 0
-
-tileIndexTest = 1
+local map = nil
 
 function love.update(dt)
     CameraMoved = false
@@ -102,7 +103,6 @@ function love.update(dt)
     unitAnimTimer=unitAnimTimer+dt
     cumulativeTime = cumulativeTime + dt
 
-    TEMP_TILE_TIMER = TEMP_TILE_TIMER + dt
 
     if fpsCounterTimer>=0.1 then 
         fpsCounterTimer=fpsCounterTimer-0.1
@@ -117,28 +117,23 @@ function love.update(dt)
 
         if AnimTick > 8 then AnimTick = 1  end
 
-        battalion1:UpdateAnimation()
+        --battalion1:UpdateAnimation()
     end
     
-
-    if TEMP_TILE_TIMER > 2 then
-        TEMP_TILE_TIMER = TEMP_TILE_TIMER - 2
-        tileIndexTest=tileIndexTest+1
-    end
-
     local mouseData = Mouse.GetData(true,cumulativeTime)
     --MenuController.CheckForClicks(mouseData.Position,mouseData.LMBDown)
     if CurrentUnitScreen then CurrentUnitScreen:CheckForClicks(mouseData.Position,mouseData.LMBDown) end
     if mouseData.LMBDown then
-        local ui = battalion1:CheckForClick(mouseData.Position,"Select")
-        if ui then CurrentUnitScreen = ui end
+        --local ui = battalion1:CheckForClick(mouseData.Position,"Select")
+        --if ui then CurrentUnitScreen = ui end
     end
 
+    map = MapEditor.UpdateMap()
 
     InputControl.ApplyAllInputs()
 
     --apply to armies when coded--
-    if CameraMoved then battalion1.Moved = true end
+    --if CameraMoved then battalion1.Moved = true end
 end
 
 ----//// ** LOVE DRAW FUNCTION ** ////----
@@ -162,7 +157,5 @@ function love.draw()
 
     Effects.WeatherColour()]]
 
-    --testing the tiles--
-    love.graphics.draw(LoadMap.AllTiles[tileIndexTest].Image,250,250)
-    print("length of alltiles = "..tostring(#LoadMap.AllTiles).."   |   current index = "..tostring(tileIndexTest))
+    love.graphics.draw(map)
 end
