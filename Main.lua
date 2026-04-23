@@ -11,14 +11,16 @@ Sounds = require("MediaHandler/Sounds")
 Mouse = require("OtherLibraries/Mouse")
 
 Effects = require("Graphics/Effects")
+Renderer = require("Graphics/Renderer")
 
 InputControl = require("OtherLibraries/InputManager")
 
-LoadMap = require("GameStates/Game/LoadMap")
-MapEditor = require("OtherLibraries/MapEditor")
+MapController = require("GameStates/Game/MapController")
+MapGraphics = require("GameStates/Game/MapGraphics")
 
 --// IMPORT CLASSES //--
 Vector = require("Mathematics/Vector")
+Queue = require("Mathematics/Queue")
 
 TextBox = require("Interface/TextBox")
 ImageBox = require("Interface/ImageBox")
@@ -38,6 +40,7 @@ HUD = require("GameStates/Game/GameHUD")
 
 ---/// LOCAL VARIABLES ///---
 local cumulativeTime = 0
+local currentMapPath = "Maps/Map1.map"
 
 ---/// GLOBALS ///---
 FlagTick = -5
@@ -56,6 +59,12 @@ CurrentUnitScreen = false
 
 AntiAliasAmount = 4
 
+TileQ = Queue.New()
+DetailQ = Queue.New()
+
+TileZoom = 1
+DetailZoom = 1
+
 
 
 ----//// ** LOVE LOAD FUNCTION ** ////----
@@ -68,21 +77,24 @@ function love.load()
     --MenuController.InitialiseMenu("TitleScreen")--open title screen on opening the game
 
     --load squads for gameplay--
-    
-    --TEMPORARILY REMOVED FOR SPEED --Squad.LoadAllSquads()
+    Squad.LoadAllSquads()
 
     --battalion1 = Battalion.New("Battalion 1",{},"Germany","Artillery","DeutscherArtillerie","PreussischerArtillerie",Vector.New(500,200,math.rad(90)),"None",true)
     --battalion1 = Battalion.New("Battalion 1",{},"Germany","Cavalry","PreussischerUhlanen","PreussischerUhlanen",Vector.New(350,300,math.rad(290)),"None",true)
     --battalion1 = Battalion.New("Battalion 1",{},"Germany","Cavalry","PreussischerDragoner","PreussischerDragoner",Vector.New(500,400,math.rad(290)),"None",true)
     --battalion1 = Battalion.New("Battalion 1",{},"Germany","Infantry","BayerischerLineninfanterie","BayerischerLineninfanterie",Vector.New(500,200,math.rad(290)),"Summer",true)
     
-    --[[battalion1 = Battalion.New("Battalion 1",{},"Germany","Infantry","DeutscherGardeZuFuss","PreussischerGardeZuFuss",Vector.New(500,300,math.rad(0)),"Summer",true)
+    battalion1 = Battalion.New("Battalion 1",{},"Germany","Infantry","DeutscherGardeZuFuss","PreussischerGardeZuFuss",Vector.New(500,300,math.rad(0)),"Summer",true)
 
     battalion1.Position.Theta=math.rad(120)
     battalion1.Formation = "BattleLine"
     battalion1.CurrentAction = "Aiming"
     battalion1:UpdateCurrentImage()
-    battalion1:CreateFlagMeshes()]]
+    battalion1:CreateFlagMeshes()
+
+
+    --load map, testing --
+    MapController.LoadMap( currentMapPath )
 end
 
 ----//// ** LOVE UPDATE FUNCTION ** ////----
@@ -128,12 +140,10 @@ function love.update(dt)
         --if ui then CurrentUnitScreen = ui end
     end
 
-    map = MapEditor.UpdateMap()
-
     InputControl.ApplyAllInputs()
 
     --apply to armies when coded--
-    --if CameraMoved then battalion1.Moved = true end
+    if CameraMoved then battalion1.Moved = true end
 end
 
 ----//// ** LOVE DRAW FUNCTION ** ////----
@@ -148,14 +158,24 @@ function love.draw()
     if CurrentUnitScreen and CurrentUnit then CurrentUnitScreen.Screen:DrawScreen() end
 
 
-    --[[
+    
     --sets a "lighting" colour for the background--
-    local newColour = Effects.LightingColour(Colours.CreateColour({0.35, 0.6, 0.35,1}),true)
-    love.graphics.setBackgroundColor(newColour.R,newColour.G,newColour.B)
+    Effects.WeatherColour()
+
+    if CameraMoved then
+        TileQ, TileZoom  = MapController.ReturnTiles()
+        DetailQ, DetailZoom = MapController.ReturnDetails()
+    end
+
+    for i=1,#TileQ.Data do
+        local index = TileQ.Data[i]
+        Renderer.DrawWithLighting( index.Canvas, index.DrawPos, TileZoom )
+    end
+    for i=1,#DetailQ.Data do
+        local index = DetailQ.Data[i]
+        Renderer.DrawWithLightingAndShadow( index.Image, index.DrawPos, DetailZoom )
+    end
+
 
     battalion1:DrawBattalion()
-
-    Effects.WeatherColour()]]
-
-    love.graphics.draw(map)
 end

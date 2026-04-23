@@ -1,9 +1,15 @@
 MapController = {}
 
+--// link the map graphics library //--
+graphics = require("GameStates/Game/MapGraphics")
+Queue = require("Mathematics/Queue")
+
 
 ----//// ############################################### ////----
 ----//// MAP VARIABLES AND CONSTANTS, IMAGES AND COLOURS ////----
 ----//// ############################################### ////----
+MapController.VisibleTiles = Queue.New()
+MapController.VisibleDetails = Queue.New()
 MapController.UpdatedTiles = {}
 MapController.CurrentMap = {}
 MapController.CurrentMap.Tiles = {}
@@ -13,12 +19,12 @@ MapController.CurrentMap.Gameplay = {}
 MapController.CurrentMap.MapSize = Vector.New(graphics.KILOMETRE * 2.5, graphics.KILOMETRE * 2.5)---initial size---
 
 MapController.Textures = {}
-MapController.Textures.Grass = love.image.newImageData("MapTextures/GrassTexture.png")
-MapController.Textures.Forest = love.image.newImageData("MapTextures/ForestTexture.png")
-MapController.Textures.BlueWater = love.image.newImageData("MapTextures/BlueWaterTexture.png")
-MapController.Textures.Sand = love.image.newImageData("MapTextures/SandTexture.png")
-MapController.Textures.Path = love.image.newImageData("MapTextures/Path.png")
-MapController.Textures.Road = love.image.newImageData("MapTextures/Road.png")
+MapController.Textures.Grass = love.image.newImageData("Assets/Images/MapTextures/GrassTexture.png")
+MapController.Textures.Forest = love.image.newImageData("Assets/Images/MapTextures/ForestTexture.png")
+MapController.Textures.BlueWater = love.image.newImageData("Assets/Images/MapTextures/BlueWaterTexture.png")
+MapController.Textures.Sand = love.image.newImageData("Assets/Images/MapTextures/SandTexture.png")
+MapController.Textures.Path = love.image.newImageData("Assets/Images/MapTextures/Path.png")
+MapController.Textures.Road = love.image.newImageData("Assets/Images/MapTextures/Road.png")
 
 MapController.Details = {}
 MapController.Details.DetailIndex = 1
@@ -28,23 +34,22 @@ MapController.Details.List = {
 "House1","House2","House3","House4","House5","House6",
 }
 
-MapController.Details.DeciduousTree1 = love.graphics.newImage("MapDetails/OakTree1_Summer.png")
-MapController.Details.DeciduousTree2 = love.graphics.newImage("MapDetails/OakTree2_Summer.png")
-MapController.Details.DeciduousTree3 = love.graphics.newImage("MapDetails/AshTree1_Summer.png")
-MapController.Details.DeciduousTree4 = love.graphics.newImage("MapDetails/AshTree2_Summer.png")
-MapController.Details.DeciduousTree5 = love.graphics.newImage("MapDetails/BirchTree1_Summer.png")
-MapController.Details.DeciduousTree6 = love.graphics.newImage("MapDetails/BeechTree1_Summer.png")
+MapController.Details.DeciduousTree1 = love.graphics.newImage("Assets/Images/MapDetails/OakTree1_Summer.png")
+MapController.Details.DeciduousTree2 = love.graphics.newImage("Assets/Images/MapDetails/OakTree2_Summer.png")
+MapController.Details.DeciduousTree3 = love.graphics.newImage("Assets/Images/MapDetails/AshTree1_Summer.png")
+MapController.Details.DeciduousTree4 = love.graphics.newImage("Assets/Images/MapDetails/AshTree2_Summer.png")
+MapController.Details.DeciduousTree5 = love.graphics.newImage("Assets/Images/MapDetails/BirchTree1_Summer.png")
+MapController.Details.DeciduousTree6 = love.graphics.newImage("Assets/Images/MapDetails/BeechTree1_Summer.png")
 
-MapController.Details.EvergreenTree1 = love.graphics.newImage("MapDetails/FirTree1_Summer.png")
-MapController.Details.EvergreenTree2 = love.graphics.newImage("MapDetails/FirTree2_Summer.png")
+MapController.Details.EvergreenTree1 = love.graphics.newImage("Assets/Images/MapDetails/FirTree1_Summer.png")
+MapController.Details.EvergreenTree2 = love.graphics.newImage("Assets/Images/MapDetails/FirTree2_Summer.png")
 
-MapController.Details.House1 = love.graphics.newImage("MapDetails/ty1.png")
-MapController.Details.House2 = love.graphics.newImage("MapDetails/ty2.png")
-MapController.Details.House3 = love.graphics.newImage("MapDetails/ty3.png")
-MapController.Details.House4 = love.graphics.newImage("MapDetails/ty4.png")
-MapController.Details.House5 = love.graphics.newImage("MapDetails/ty5.png")
-MapController.Details.House6 = love.graphics.newImage("MapDetails/ty6.png")
-
+MapController.Details.House1 = love.graphics.newImage("Assets/Images/MapDetails/ty1.png")
+MapController.Details.House2 = love.graphics.newImage("Assets/Images/MapDetails/ty2.png")
+MapController.Details.House3 = love.graphics.newImage("Assets/Images/MapDetails/ty3.png")
+MapController.Details.House4 = love.graphics.newImage("Assets/Images/MapDetails/ty4.png")
+MapController.Details.House5 = love.graphics.newImage("Assets/Images/MapDetails/ty5.png")
+MapController.Details.House6 = love.graphics.newImage("Assets/Images/MapDetails/ty6.png")
 
 MapController.Gameplay = {}
 MapController.Gameplay.TeamABrigadeCount = 0
@@ -55,9 +60,10 @@ MapController.Gameplay.List = {
 "TeamABrigade","TeamBBrigade","Objective"
 }
 
-for i = 1, 16, 1 do MapController.Gameplay["TeamABrigade"..tostring(i)] = love.graphics.newImage("MapGameplay/TeamA_Brigade"..tostring(i)..".png") end
-for i = 1, 16, 1 do MapController.Gameplay["TeamBBrigade"..tostring(i)] = love.graphics.newImage("MapGameplay/TeamB_Brigade"..tostring(i)..".png") end
-for i = 1, 16, 1 do MapController.Gameplay["Objective"..tostring(i)] = love.graphics.newImage("MapGameplay/Objective"..tostring(i)..".png") end
+for i = 1, 16, 1 do MapController.Gameplay["TeamABrigade"..tostring(i)] = love.graphics.newImage("Assets/Images/MapGameplay/TeamA_Brigade"..tostring(i)..".png") end
+for i = 1, 16, 1 do MapController.Gameplay["TeamBBrigade"..tostring(i)] = love.graphics.newImage("Assets/Images/MapGameplay/TeamB_Brigade"..tostring(i)..".png") end
+for i = 1, 16, 1 do MapController.Gameplay["Objective"..tostring(i)] = love.graphics.newImage("Assets/Images/MapGameplay/Objective"..tostring(i)..".png") end
+
 
 MapController.Colours = {}
 MapController.Colours.Grass = Colours.CreateColour({0.3,0.7,0.3,1})
@@ -70,12 +76,50 @@ MapController.Colours.Road = Colours.CreateColour({0.3,0.3,0.3,1})
 
 
 ----//// ##################### ////----
-----//// MAP DRAWING FUNCTIONS ////----
+----//// MAP IMAGING FUNCTIONS ////----
 ----//// ##################### ////----
-function MapController.DrawTiles(camMoved)
 
+-- this method will return the tiles to be drawn in main.lua --
+function MapController.ReturnTiles( )
+    local tileZoom = CameraZoom * graphics.MapScaleFactor
+    local newQ = Queue.New()
+
+    -- loop through the map list --
+    for y = 1, #MapController.CurrentMap.Tiles, 1 do
+        for x = 1, #MapController.CurrentMap.Tiles[y], 1 do
+
+            local indexTile = MapController.CurrentMap.Tiles[y][x]
+            if graphics.CheckIfOnScreen( indexTile ) then 
+                local pos = Vector.New( (x-1) * graphics.MapTileSize, (y-1) * graphics.MapTileSize)
+                pos:ToScreenPosition()
+                indexTile.DrawPos = pos
+                newQ:EnQ( indexTile ) 
+            end
+        end
+    end
+
+    return newQ, tileZoom
 end
 
+
+-- the next method will return a queue of all the details, this is so it can be drawn in-sync with units to get them done in order --
+function MapController.ReturnDetails( camMoved )
+    local detailZoom = CameraZoom * graphics.DetailScaleFactor
+    local newQ = Queue.New()
+
+    -- loop through the details and enq the visible details --
+    for i = 1, #MapController.CurrentMap.Details, 1 do
+        local detail = MapController.CurrentMap.Details[i]
+        if graphics.CheckIfDetailOnScreen( detail ) then 
+            local pos = Vector.New(detail.Pos.X, detail.Pos.Y)
+            pos:ToScreenPosition()
+            detail.DrawPos = pos
+            newQ:EnQ( detail ) 
+        end
+    end
+    
+    return newQ, detailZoom
+end
 
 
 
@@ -221,6 +265,9 @@ function MapController.LoadMap(filepath)
             end
         end
     end
+
+    MapController.ReturnTiles(true)
+    MapController.ReturnDetails(true)
 
     print("Map loaded successfully from: " .. filepath)
     return true

@@ -2,7 +2,7 @@
 graphics = {}
 
 Colours = require("../../Interface/Colours")
-Vector = require("../../Mathematics//Vector")
+Vector = require("../../Mathematics/Vector")
 
 --// ############################## //--
 --// CONSTANT VALUES FOR THE MODULE //--
@@ -67,7 +67,7 @@ end
 local function getTerrainTexture(terrain)
     local textureKey = terrain
     if terrain == "Stream" then textureKey = "BlueWater" end
-    return MapEditor.Textures[textureKey]
+    return MapController.Textures[textureKey]
 end
 
 local function getTexturePixel(texture,pos)
@@ -103,7 +103,7 @@ local function createTile(tileIndexX,tileIndexY)
     return newTile
 end
 
-local function checkIfOnScreen(tile)
+function graphics.CheckIfOnScreen(tile)
     local tileMin = Vector.New(tile.IndexPosition.X,tile.IndexPosition.Y)
     local tileMax = Vector.New(0,0)
 
@@ -125,7 +125,7 @@ local function checkIfOnScreen(tile)
     return checks
 end
 
-local function checkIfDetailOnScreen(detail)
+function graphics.CheckIfDetailOnScreen(detail)
     local posMin = Vector.New( detail.Pos.X, detail.Pos.Y )
     local posMax = Vector.New( detail.Pos.X + ( detail.Image:getWidth() * graphics.DetailScaleFactor ) , detail.Pos.Y + ( detail.Image:getHeight() * graphics.DetailScaleFactor ) )
 
@@ -245,7 +245,7 @@ function graphics.DrawMap(map,camMoved)
             end
         end
 
-        local detailList = MapEditor.CurrentMap.Details
+        local detailList = MapController.CurrentMap.Details
         for i=1,#detailList,1 do
             local detail = detailList[i]
             if checkIfDetailOnScreen(detail) then
@@ -273,10 +273,10 @@ function graphics.DrawMap(map,camMoved)
 
     end 
 
-    for i=1,#MapEditor.CurrentMap.Gameplay,1 do
-        local pos = Vector.New(MapEditor.CurrentMap.Gameplay[i].Pos.X, MapEditor.CurrentMap.Gameplay[i].Pos.Y)
+    for i=1,#MapController.CurrentMap.Gameplay,1 do
+        local pos = Vector.New(MapController.CurrentMap.Gameplay[i].Pos.X, MapController.CurrentMap.Gameplay[i].Pos.Y)
         pos:ToScreenPosition()
-        love.graphics.draw(MapEditor.CurrentMap.Gameplay[i].Image,pos.X,pos.Y,0,cameraZoom,cameraZoom)
+        love.graphics.draw(MapController.CurrentMap.Gameplay[i].Image,pos.X,pos.Y,0,cameraZoom,cameraZoom)
     end
 
 
@@ -310,17 +310,17 @@ end
 function graphics.CreateDetail(pos,detail)
     local newDetail = {}
     newDetail.Type = detail
-    newDetail.Image = MapEditor.Details[detail]
+    newDetail.Image = MapController.Details[detail]
     newDetail.Pos = Vector.New( pos.X - ( ( newDetail.Image:getWidth() * graphics.DetailScaleFactor ) / 2 ), pos.Y - ( ( newDetail.Image:getHeight() * graphics.DetailScaleFactor ) / 1.5 )  )
-    table.insert(MapEditor.CurrentMap.Details,newDetail)
+    table.insert(MapController.CurrentMap.Details,newDetail)
 end
 
 function graphics.CreateGameplay(pos,game)
     local newGame = {}
     newGame.Type = game
-    newGame.Image = MapEditor.Gameplay[game]
+    newGame.Image = MapController.Gameplay[game]
     newGame.Pos = Vector.New( pos.X - newGame.Image:getWidth(), pos.Y -  newGame.Image:getHeight() )
-    table.insert(MapEditor.CurrentMap.Gameplay,newGame)
+    table.insert(MapController.CurrentMap.Gameplay,newGame)
 end
 
 function graphics.RemoveDetail(pos,detailList)

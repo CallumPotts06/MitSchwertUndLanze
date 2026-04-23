@@ -19,8 +19,8 @@ Screen = require("EditorInterface/Screen")
 EditorScreen = require("InterfaceObjects/EditorScreen")
 
 ---/// EDITOR VARIABLES ///---
-MAP_NAME = "testmap1"
-LOAD_MODE = "emptymap"--options, emptymap, loads emptymap, loadmap loads a map given by map name
+MAP_NAME = "Map1"
+LOAD_MODE = "loadmap"--options, emptymap, loads emptymap, loadmap loads a map given by map name
 
 viewMode = "editor"
 forestType = "Deciduous"
@@ -42,7 +42,7 @@ TimeOfDay = 1000
 
 
 --BRUSH AND MAP SCALES--
-BrushSize = 50
+BrushSize = 100
 PreviousBrushSize = BrushSize
 ROAD_WIDTH =  graphics.ROAD_WIDTH 
 PPM = graphics.KILOMETRE / 1000
@@ -56,7 +56,7 @@ MapEditor.CurrentMap.Tiles = {}
 MapEditor.CurrentMap.TileCanvases = {}
 MapEditor.CurrentMap.Details = {}
 MapEditor.CurrentMap.Gameplay = {}
-MapEditor.CurrentMap.MapSize = Vector.New(graphics.KILOMETRE * 2.5, graphics.KILOMETRE * 2.5)---initial size---
+MapEditor.CurrentMap.MapSize = Vector.New(graphics.KILOMETRE * 2.5, graphics.KILOMETRE * 1.5)---initial size---
 
 MapEditor.Textures = {}
 MapEditor.Textures.Grass = love.image.newImageData("MapTextures/GrassTexture.png")
@@ -269,7 +269,7 @@ function love.update(dt)
     ---/// ########################################## ///---
     ---/// ADD PIXEL FROM MOUSE POSITION TO MAP TILES ///---
     ---/// ########################################## ///---
-    if ( mouseDown ) and ( not EditorScreen.Screen.Visible ) and ( #interactions == 0 ) and (not currentMode == "AddDetail") and (not currentMode == "AddGameplay") then
+    if (mouseDown) and (not EditorScreen.Screen.Visible) and (#interactions == 0) and (currentMode ~= "AddDetail") and (currentMode ~= "AddGameplay") then
         local posTable = getBrushIndexes(mousePos)
 
         for i=1,#posTable,1 do
@@ -287,7 +287,7 @@ function love.update(dt)
                 if not found then table.insert(MapEditor.UpdatedTiles,changed) end
 
                 --if the brush type is forest, add tree details randomly--
-                if ( currentMode == "Forest" ) and ( math.random(1, (9000*(CameraZoom*5)) ) == 1 ) then
+                if ( currentMode == "Forest" ) and ( math.random(1, (15000*(CameraZoom*6)) ) == 1 ) then
                     if forestType == "Evergreen" then
                         local treeran = math.random(1,2)
                         graphics.CreateDetail(posTable[i],"EvergreenTree"..tostring(treeran))
