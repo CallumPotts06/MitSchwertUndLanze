@@ -72,12 +72,16 @@ local function findStatsObject(team,unitType)
         teamStats = Stats.GermanUnits
         if unitType == "PreussischerLineninfanterie" then typeStats = teamStats.PrussianLineInfantry end
         if unitType == "PreussischerGardeZuFuss" then typeStats = teamStats.PrussianGuards end
-        if unitType == "Landwehr" then typeStats = teamStats.Landwehr end
+        if unitType == "PreussischerLandwehr" then typeStats = teamStats.Landwehr end
         if unitType == "PreussischerUhlanen" then typeStats = teamStats.Uhlanen end
+        if unitType == "PreussischerHusaren" then typeStats = teamStats.Husaren end
+        if unitType == "PreussischerKuerassiere" then typeStats = teamStats.Kuerassiere end
         if unitType == "PreussischerArtillerie" then typeStats = teamStats.Artillery end
         if unitType == "PreussischerDragoner" then typeStats = teamStats.Dragoons end
         if unitType == "BayerischerLineninfanterie" then typeStats = teamStats.BayerischerLineInfantry end
         if unitType == "HessischLineninfanterie" then typeStats = teamStats.HessianLineInfantry end
+        if unitType == "BadenLineninfanterie" then typeStats = teamStats.BadenLineInfantry end
+        if unitType == "SaechsischLineninfanterie" then typeStats = teamStats.SaxonLineInfantry end
         if unitType == "WuerttemburgLineninfanterie" then typeStats = teamStats.WuerttemburgLineInfantry end
     end
 
@@ -143,6 +147,7 @@ function Battalion.New(name,regiment,team,service,unitType,unitTypeName,startPos
     local newBattalion = {}
 
     --add referential data--
+    newBattalion.UnitClass = "Battalion"
     newBattalion.Name = name
     newBattalion.Regiment = regiment
     newBattalion.Team = team
@@ -152,8 +157,9 @@ function Battalion.New(name,regiment,team,service,unitType,unitTypeName,startPos
 
     --add mathematical data--
     newBattalion.Position = startPos
-    newBattalion.MoveObject = nil
+    newBattalion.MoveTarget = nil
     newBattalion.Moved = true
+    newBattalion.CurrentMoveType = nil
     newBattalion.PositionTable = {}
     newBattalion.Facing = "South"
 
@@ -173,6 +179,7 @@ function Battalion.New(name,regiment,team,service,unitType,unitTypeName,startPos
     newBattalion.ColourBattalion = colour
     newBattalion.CurrentAction = "Idle"
     newBattalion.BuffInfo = {}
+    newBattalion.BattalionNumber = nil
 
     --add appearance data--
     newBattalion.Images = LoadImagesOntoUnit(team,service,unitType)
@@ -180,6 +187,8 @@ function Battalion.New(name,regiment,team,service,unitType,unitTypeName,startPos
     newBattalion.Season = season
     newBattalion.SkirmishOrderSeed = math.random(1,1000)
     newBattalion.MarchSet = INFANTRY_MARCH_ANIMS
+
+    newBattalion.NextFormation = nil
 
     --add game data--
     if service=="Infantry" or service=="Artillery" or service=="Cavalry" then
@@ -358,11 +367,13 @@ function Battalion:FindSquadPositions()
     pos = Mathematics.VectorFromAddition(pos,offset)
     pos.Theta = tempTheta
 
-    --lowers the amount of squads if artillery--
+    --lowers the amount of squads if artillery or cavalry--
     if self.BranchofService == "Artillery" then squadsPerHealth = 1/40 squadCount = (self.Health*squadsPerHealth) end
+    if self.BranchofService == "Cavalry" then squadsPerHealth = 1/25 squadCount = (self.Health*squadsPerHealth) end
 
     --refines the information for the equations later--
     if (self.Formation == "BattleLine") or (self.Formation == "FiringLine") or (self.Formation == "Dismounted") then
+        direction = "Right"
         n1 = - math.floor( squadCount / 2 )
         n2 = math.floor( squadCount / 2 )
 
@@ -372,10 +383,11 @@ function Battalion:FindSquadPositions()
     elseif (self.Formation == "MarchingColumn") or (self.Formation == "Mounted") then
         direction = "Forward"
         n1 = 0
-        n2 = squadCount
+        n2 = squadCount / 2
 
-        if self.BranchofService=="Artillery" then n2 = n2 - 1
-        elseif (self.BranchofService=="Infantry")or(self.BranchofService=="Cavalry") then n2 = math.ceil(n2 / 2)-1 end--infantry squads are 2x the size in this formation--
+        if (self.BranchofService=="Infantry") then n2 = math.ceil(n2 / 2)-1--infantry squads are 2x the size in this formation--
+        else n2 = math.floor(n2 * 1.5) - 1 end
+        if (self.BranchofService=="Artillery") then n2=n2+1 end
         if (pos.Theta>math.rad(90))and(pos.Theta<math.rad(270)) then tempN = n1 n1 = n2 n2 = tempN increment = -1 end
 
     elseif self.Formation == "SkirmishOrder" then
@@ -395,7 +407,7 @@ function Battalion:FindSquadPositions()
                 newPos = Mathematics.VectorFromAddition(pos, Mathematics.RightVector(pos,dx))
                 
             elseif direction == "Forward" then
-                local dy = - ( ( imgH / 2 ) * n )
+                local dy = - ( ( imgH / 1.5 ) * n ) -- changed the denominator from 2 to 1.5 for test --
                 newPos = Mathematics.VectorFromAddition(pos, Mathematics.ForwardVector(pos,dy))
             
             end
@@ -455,9 +467,11 @@ function Battalion:DrawBattalion()
     Colours.SetColour(Effects.LightingColour(Colours.CreateColour({1,1,1,1})),false)
     --draw flag, flagpole and soldiers--
     for i=1,#self.PositionTable,1 do love.graphics.draw(img.Drawable,self.PositionTable[i].X,self.PositionTable[i].Y,0,CameraZoom,CameraZoom) end
-    love.graphics.draw(flagImg,flagPos.X,flagPos.Y,0,CameraZoom,CameraZoom)
-    love.graphics.setLineWidth( 3 * CameraZoom )
-    flagPole:DrawVector(flagPos,Effects.LightingColour(Colours.CreateColour({0.2627,0.1569,0.0941,1})))
+    if self.ColourBattalion then
+        love.graphics.draw(flagImg,flagPos.X,flagPos.Y,0,CameraZoom,CameraZoom)
+        love.graphics.setLineWidth( 3 * CameraZoom )
+        flagPole:DrawVector(flagPos,Effects.LightingColour(Colours.CreateColour({0.2627,0.1569,0.0941,1})))
+    end
 end
 
 
@@ -476,12 +490,12 @@ function Battalion:CheckForClick(mousePos,task)
 
     local clicked = false
 
-    for i = 1,#self.PositionTable,1 do--chech for each squad if mouse is inbetween position--
+    for i = 1,#self.PositionTable,1 do
         if self.PositionTable[i].X<minx then minx = self.PositionTable[i].X end
-        if self.PositionTable[i].X>maxx then maxx = self.PositionTable[i].X end
+        if self.PositionTable[i].X>maxx then maxx = self.PositionTable[i].X + self.CurrentImage.Drawable:getWidth() end
 
         if self.PositionTable[i].Y<miny then miny = self.PositionTable[i].Y end
-        if self.PositionTable[i].Y>maxy then maxy = self.PositionTable[i].Y end
+        if self.PositionTable[i].Y>maxy then maxy = self.PositionTable[i].Y + self.CurrentImage.Drawable:getHeight() end
     end
 
     if (mousePos.X > minx) and (mousePos.X < maxx) and (mousePos.Y > miny) and (mousePos.Y < maxy) then 
@@ -501,6 +515,124 @@ function Battalion:CheckForClick(mousePos,task)
     return false
 end
 
+
+local function shortestAngle(from, to)
+    local diff = (to - from + math.pi) % (2 * math.pi) - math.pi
+    return diff
+end
+
+local function normalizeAngle(a)
+    return (a + math.pi) % (2 * math.pi) - math.pi
+end
+
+
+function Battalion:WheelUnit(theta1, theta2, omega)
+    theta1 = normalizeAngle(theta1)
+    theta2 = normalizeAngle(theta2)
+
+    local dTheta = shortestAngle(theta1, theta2)
+    local direction = dTheta > 0 and 1 or -1
+    local magnitude = math.abs(dTheta)
+
+    --print(dTheta)
+    if magnitude > 0 then print(magnitude.." , "..math.rad( 90 ).."  Form="..self.Formation) end
+    
+    if ( magnitude > math.rad( 90 ) ) and ( self.Formation ~= "MarchingColumn" ) then
+        -- do an about face if that makes the total turn faster, not in marching column though (as per the if statement) --
+        self.Position.Theta = self.Position.Theta + math.rad( 180 )
+    else
+        if magnitude <= omega then
+            self.Position.Theta = theta2
+            return true
+        else
+            self.Position.Theta = normalizeAngle(self.Position.Theta + omega * direction)
+            return false
+        end
+    end
+end
+
+
+
+function Battalion:MoveUnit(speed, theta)
+    if Mathematics.VectorMagnitude( self.Position, self.MoveTarget ) < speed then
+        self.Position.X = self.MoveTarget.X 
+        self.Position.Y = self.MoveTarget.Y
+        return true
+    else
+        local dPos = Mathematics.ForwardVector(self.Position, speed)
+        self.Position = Mathematics.VectorFromAddition( self.Position, dPos )
+        self.Position.Theta = theta
+        return false
+    end 
+end
+
+
+function Battalion:UpdatePosition()
+    local movetype = "normal"
+
+    if ( not self.ColourBattalion ) and ( not self.NextFormation ) and ( self.Formation == "MarchingColumn" ) then
+        movetype = "Wheel"
+        local centerPos = self.Regiment.ColourBattalion.Position
+        dPos = Mathematics.ForwardVector(centerPos,-BattalionMargins[self.BranchofService][self.Formation]*(self.BattalionNumber-1))
+        self.MoveTarget = Mathematics.VectorFromAddition( centerPos, dPos )
+        self.MoveTarget.Theta = self.Regiment.ColourBattalion.Position.Theta
+    end
+
+    local currentSpeed = self.MarchSpeed / 1.35
+    local omega = math.rad(2)
+    local angleTolerance = math.rad(0.5)
+
+    if self.MoveTarget then
+        local oldTheta = self.Position.Theta
+        self.Moved = true
+        self.CurrentAction = "Marching"
+        local theta = Mathematics.AngleFromVector( Mathematics.VectorFromSubtraction(self.MoveTarget, self.Position) )
+
+        -- if they are moving from skirmish order into any other formation, instantly swap formations --
+        if(self.Formation=="SkirmishOrder")and(self.NextFormation)then self.Formation = self.NextFormation self.NextFormation = nil end
+
+
+        if ( self.Position.X ~= self.MoveTarget.X ) or ( self.Position.Y ~= self.MoveTarget.Y ) then
+            
+            if ( movetype == "Wheel" ) and ( self.Formation == "MarchingColumn" ) then
+                -- if the whole regiment is wheeling (rather than bn) the bn is permitted to move and wheel at the same time --
+                --if self.Formation == "MarchingColumn" then
+                self:WheelUnit(oldTheta, theta, omega)
+                self:MoveUnit(currentSpeed * 1.2, theta)
+                --[[else
+                    self:WheelUnit(oldTheta, self.MoveTarget.Theta, omega)
+                    self:MoveUnit(currentSpeed * 1.2, self.MoveTarget.Theta)]]
+                --end
+            else
+                -- regular movement --
+                if self.NextFormation then
+                    if math.abs(shortestAngle(oldTheta, theta)) > angleTolerance then self:WheelUnit(oldTheta, theta, omega)
+                    else self:MoveUnit(currentSpeed, oldTheta) end
+                else
+                    self:MoveUnit(currentSpeed, oldTheta)
+                    self:WheelUnit(oldTheta, theta, omega)
+                end
+            end
+
+        else
+            -- the unit is in the final position --
+            theta = self.MoveTarget.Theta
+
+            -- wheel unit to final roation ( if :wheelunit returns true, final state is reached ) --
+            if self:WheelUnit(oldTheta, theta, omega) then
+                -- finished state --
+                self.Position.X = self.MoveTarget.X
+                self.Position.Y = self.MoveTarget.Y
+                self.Position.Theta = self.MoveTarget.Theta
+                self.MoveTarget = nil
+
+                if self.NextFormation then self.Formation = self.NextFormation self.NextFormation = nil end
+                self.CurrentAction = "Idle"
+                self.CurrentMoveType = nil
+            end
+        end
+    end
+end
 
 --// FINISH UP BY RETURNING THE NEW OBJECT BACK TO MAIN //--
 return Battalion

@@ -119,8 +119,11 @@ function UnitUI.Open(unit)
     local nameFont = Font.Gothic2
     local mainFont = Font.Georgia
 
-    local healthScore = "Health:\n\n"..HEALTH_SCORES[ math.floor( (unit.MaxHealth / unit.Health) * 5 ) ]
-    local moraleScore = "Morale:\n\n"..MORALE_SCORES[ math.floor( (100 / unit.Morale) * 5 ) ]
+    local healthIndex = math.floor((unit.Health / unit.MaxHealth) * (#HEALTH_SCORES - 1)) + 1
+    local healthScore = "Health:\n\n" .. HEALTH_SCORES[healthIndex]
+
+    local moraleIndex = math.floor((unit.Morale / 100) * (#MORALE_SCORES - 1)) + 1
+    local moraleScore = "Morale:\n\n" .. MORALE_SCORES[moraleIndex]
     local currentAction = "Currently:\n\n"..unit.CurrentAction
 
     --create main box--
@@ -171,39 +174,43 @@ function UnitUI:CheckForClicks(mousePos,mouseClick)
     --creates an table of all clicked ui elements--
     clickedObjects = self.Screen:CheckForMouse(mousePos,mouseClick)
 
+    local tempUnit = CurrentUnit
+    if CurrentUnit.UnitClass == "Battalion" then tempUnit=CurrentUnit.Regiment end
+
     local updatedFormation = false
     for i=1,#clickedObjects,1 do 
 
         if clickedObjects[i].Name=="BattleLine" then 
-            CurrentUnit.Formation = "BattleLine"
+            --tempUnit.Formation = "BattleLine"
+            tempUnit:ChangeFormation("BattleLine")
             updatedFormation = true
         
         elseif clickedObjects[i].Name=="MarchingColumn" then 
-            CurrentUnit.Formation = "MarchingColumn"
+            tempUnit:ChangeFormation("MarchingColumn")
             updatedFormation = true
 
         elseif clickedObjects[i].Name=="SkirmishOrder" then 
-            CurrentUnit.Formation = "SkirmishOrder"
+            tempUnit:ChangeFormation("SkirmishOrder")
             updatedFormation = true
 
         elseif clickedObjects[i].Name=="FiringLine" then 
-            CurrentUnit.Formation = "FiringLine"
+            tempUnit:ChangeFormation("FiringLine")
             updatedFormation = true
 
         elseif clickedObjects[i].Name=="Dismounted" then 
-            CurrentUnit.Formation = "Dismounted"
+            tempUnit:ChangeFormation("Dismounted")
             updatedFormation = true
 
         elseif clickedObjects[i].Name=="Mounted" then 
-            CurrentUnit.Formation = "Mounted"
+            tempUnit:ChangeFormation("Mounted")
             updatedFormation = true
 
         end
 
         if updatedFormation then
-            CurrentUnit.CurrentAction = "Idle"
-            CurrentUnit.Moved = true
-            CurrentUnit:UpdateAnimation()
+            --CurrentUnit.CurrentAction = "Idle"
+            --tempUnit.Moved = true
+            tempUnit:UpdateAnimation()
             break
         end
     end

@@ -56,12 +56,39 @@ end
 function InputControl.MoveCamera(input)
     CameraMoved = true
 
-    if input=="Up" then CameraPosition.Y = CameraPosition.Y + 2 
-    elseif input=="Down" then CameraPosition.Y = CameraPosition.Y - 2 
-    elseif input=="Left" then CameraPosition.X = CameraPosition.X + 2 
-    elseif input=="Right" then CameraPosition.X = CameraPosition.X - 2 
-    elseif input=="ZoomIn" then CameraZoom = CameraZoom * 1.01
-    elseif input=="ZoomOut" then CameraZoom = CameraZoom / 1.01 end
+    if input=="Up" then CameraPosition.Y = CameraPosition.Y + 15 
+    elseif input=="Down" then CameraPosition.Y = CameraPosition.Y - 15 
+    elseif input=="Left" then CameraPosition.X = CameraPosition.X + 15 
+    elseif input=="Right" then CameraPosition.X = CameraPosition.X - 15 
+    elseif input=="ZoomIn" then 
+        local sw, sh = love.graphics.getWidth(), love.graphics.getHeight()
+        local screenCenterX, screenCenterY = sw / 2, sh / 2
+        
+        -- World coordinate at screen center before zoom (screenPos = worldPos * zoom + camPos)
+        local worldX = (screenCenterX - CameraPosition.X) / CameraZoom
+        local worldY = (screenCenterY - CameraPosition.Y) / CameraZoom
+        
+        -- Apply zoom
+        CameraZoom = CameraZoom * 1.02
+        
+        -- Adjust camera so world point stays at screen center
+        CameraPosition.X = screenCenterX - (worldX * CameraZoom)
+        CameraPosition.Y = screenCenterY - (worldY * CameraZoom)
+    elseif input=="ZoomOut" then 
+        local sw, sh = love.graphics.getWidth(), love.graphics.getHeight()
+        local screenCenterX, screenCenterY = sw / 2, sh / 2
+        
+        -- World coordinate at screen center before zoom (screenPos = worldPos * zoom + camPos)
+        local worldX = (screenCenterX - CameraPosition.X) / CameraZoom
+        local worldY = (screenCenterY - CameraPosition.Y) / CameraZoom
+        
+        -- Apply zoom
+        CameraZoom = CameraZoom / 1.01
+        
+        -- Adjust camera so world point stays at screen center
+        CameraPosition.X = screenCenterX - (worldX * CameraZoom)
+        CameraPosition.Y = screenCenterY - (worldY * CameraZoom)
+    end
 end
 
 
@@ -95,6 +122,27 @@ function InputControl.ApplyAllInputs()
     for i = 1,#Keybinds.CameraActions,1 do
         local result = InputControl.CheckAction(Keybinds.CameraActions[i])
         if result[1] then InputControl.MoveCamera(result[2]) end
+    end
+end
+
+function InputControl.ControlUnit(mousedata, unit)
+    if not unit then return false end
+
+    if unit.UnitClass == "Battalion" then unit = unit.Regiment end
+
+    --if CurrentUnitScreen then CurrentUnitScreen:CheckForClicks(mousedata.Position,mousedata.LMBDown) end
+
+    local movePos = mousedata.Position
+    movePos:ToGamePosition()
+
+    if mousedata.LMBDown then
+        -- Move Unit To Mouse Position --
+        if CurrentUnitControl == "Move" then
+            print(movePos.X..","..movePos.Y)
+            unit:MoveRegiment(movePos)
+        end
+
+
     end
 end
 
