@@ -203,6 +203,8 @@ end
 
 
 function Regiment:ChangeFormation(newFormation)
+    self.Position = self.ColourBattalion.Position
+
     local lastFormation = self.Formation
     self.Formation = newFormation
     local originPos = self.Battalions[1].Position
@@ -239,9 +241,11 @@ function Regiment:ChangeFormation(newFormation)
     end
 end
 
-function Regiment:MoveRegiment(newPos)
+function Regiment:MoveRegiment(newPos, wheel)
     local form = self.Formation
     local originPos = self.Battalions[1].Position
+
+    self.Position = self.ColourBattalion.Position
 
     local newBnPositions = { Vector.New(0,0), Vector.New(0,0), Vector.New(0,0) }
 
@@ -249,14 +253,21 @@ function Regiment:MoveRegiment(newPos)
     -- Compute new facing and rotation amount
     ------------------------------------------------------------
     local oldTheta = originPos.Theta
-    local newTheta = Mathematics.AngleFromVector(
-        Mathematics.VectorFromSubtraction(originPos, newPos)
-    ) - math.rad(180)
+    local newTheta = newPos.Theta
 
-    newPos.Theta = newTheta
+    if not wheel then
+        newTheta = Mathematics.AngleFromVector(
+        --    Mathematics.VectorFromSubtraction(originPos, newPos)
+        --) - math.rad(180)
+        Mathematics.VectorFromSubtraction( newPos, originPos )
+        )
+        newPos.Theta = newTheta
+    end
 
     local dTheta = math.abs(shortestAngle(oldTheta, newTheta))
     local inverted = dTheta > math.rad(90)
+
+    print("DTheta = "..dTheta..",  Inverted="..tostring(inverted))
 
     ------------------------------------------------------------
     -- Assign center battalion

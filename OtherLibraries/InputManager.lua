@@ -138,8 +138,16 @@ function InputControl.ControlUnit(mousedata, unit)
     if mousedata.LMBDown then
         -- Move Unit To Mouse Position --
         if CurrentUnitControl == "Move" then
-            print(movePos.X..","..movePos.Y)
             unit:MoveRegiment(movePos)
+        end
+
+        if CurrentUnitControl == "Wheel" then
+            local unitPos = unit.Position
+            local angle = Mathematics.AngleFromVector( Mathematics.VectorFromSubtraction( movePos, unitPos ) )
+            local newPos = unitPos newPos.Theta = angle
+
+            print("UNIT_POS="..unitPos.X..","..unitPos.Y..";   newPos="..newPos.X..","..newPos.Y..";   Theta="..newPos.Theta)
+            unit:MoveRegiment(newPos, angle)
         end
 
 

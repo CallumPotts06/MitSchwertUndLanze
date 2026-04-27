@@ -63,6 +63,15 @@ ARTY_MARCH_ANIMS = {"March1","March1","Idle","Idle","March2","March2","Idle","Id
 DRAGOON_MARCH_ANIMS = {"MountedMarch1","MountedMarch1","MountedIdle","MountedIdle","MountedMarch2","MountedMarch2","MountedIdle","MountedIdle"}
 
 
+local function shortestAngle(from, to)
+    local diff = (to - from + math.pi) % (2 * math.pi) - math.pi
+    return diff
+end
+
+local function normalizeAngle(a)
+    return (a + math.pi) % (2 * math.pi) - math.pi
+end
+
 local function findStatsObject(team,unitType)
     local teamStats = nil
     local typeStats = nil
@@ -363,7 +372,8 @@ function Battalion:FindSquadPositions()
     if (self.BranchofService=="Cavalry") and (not (self.Formation=="Dismounted")) then imgW = 70 imgH = 260 offset.Y=-120 end
     if (self.Animation=="Guard") then imgW=110 end
 
-    local tempTheta = pos.Theta
+    local tempTheta = normalizeAngle(pos.Theta)
+    if tempTheta < 0 then tempTheta = tempTheta + math.rad( 360 ) end
     pos = Mathematics.VectorFromAddition(pos,offset)
     pos.Theta = tempTheta
 
@@ -516,16 +526,6 @@ function Battalion:CheckForClick(mousePos,task)
 end
 
 
-local function shortestAngle(from, to)
-    local diff = (to - from + math.pi) % (2 * math.pi) - math.pi
-    return diff
-end
-
-local function normalizeAngle(a)
-    return (a + math.pi) % (2 * math.pi) - math.pi
-end
-
-
 function Battalion:WheelUnit(theta1, theta2, omega)
     theta1 = normalizeAngle(theta1)
     theta2 = normalizeAngle(theta2)
@@ -535,7 +535,7 @@ function Battalion:WheelUnit(theta1, theta2, omega)
     local magnitude = math.abs(dTheta)
 
     --print(dTheta)
-    if magnitude > 0 then print(magnitude.." , "..math.rad( 90 ).."  Form="..self.Formation) end
+    --if magnitude > 0 then print(magnitude.." , "..math.rad( 90 ).."  Form="..self.Formation) end
     
     if ( magnitude > math.rad( 90 ) ) and ( self.Formation ~= "MarchingColumn" ) then
         -- do an about face if that makes the total turn faster, not in marching column though (as per the if statement) --
@@ -611,7 +611,9 @@ function Battalion:UpdatePosition()
                 else
                     self:MoveUnit(currentSpeed, oldTheta)
                     self:WheelUnit(oldTheta, theta, omega)
+                    if self.BattalionNumber == 3 then print("Theta="..self.Position.Theta) end
                 end
+                self.Position.Theta = normalizeAngle(self.Position.Theta)
             end
 
         else
