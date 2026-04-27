@@ -570,12 +570,25 @@ end
 function Battalion:UpdatePosition()
     local movetype = "normal"
 
-    if ( not self.ColourBattalion ) and ( not self.NextFormation ) and ( self.Formation == "MarchingColumn" ) then
+    if ( not self.ColourBattalion ) and ( not self.NextFormation ) then --and ( self.Formation == "MarchingColumn" ) then
         movetype = "Wheel"
         local centerPos = self.Regiment.ColourBattalion.Position
-        dPos = Mathematics.ForwardVector(centerPos,-BattalionMargins[self.BranchofService][self.Formation]*(self.BattalionNumber-1))
-        self.MoveTarget = Mathematics.VectorFromAddition( centerPos, dPos )
-        self.MoveTarget.Theta = self.Regiment.ColourBattalion.Position.Theta
+
+        if self.Formation == "MarchingColumn" then
+            dPos = Mathematics.ForwardVector(centerPos,-BattalionMargins[self.BranchofService][self.Formation]*(self.BattalionNumber-1))
+            self.MoveTarget = Mathematics.VectorFromAddition( centerPos, dPos )
+            self.MoveTarget.Theta = self.Regiment.ColourBattalion.Position.Theta
+        else
+            local bnNo = self.BattalionNumber local invertFlanks = self.Regiment.InvertedFlanks
+
+            if ( ( bnNo == 2 ) and ( not invertFlanks ) ) or ( ( bnNo == 3 ) and ( invertFlanks ) ) then
+                dPos = Mathematics.RightVector(centerPos,BattalionMargins[self.BranchofService][self.Formation])
+            else
+                dPos = Mathematics.RightVector(centerPos,-BattalionMargins[self.BranchofService][self.Formation])
+            end
+            self.MoveTarget = Mathematics.VectorFromAddition( centerPos, dPos )
+            self.MoveTarget.Theta = self.Regiment.ColourBattalion.Position.Theta
+        end
     end
 
     local currentSpeed = self.MarchSpeed / 1.35
@@ -594,25 +607,24 @@ function Battalion:UpdatePosition()
 
         if ( self.Position.X ~= self.MoveTarget.X ) or ( self.Position.Y ~= self.MoveTarget.Y ) then
             
-            if ( movetype == "Wheel" ) and ( self.Formation == "MarchingColumn" ) then
+            if ( movetype == "Wheel" ) then
                 -- if the whole regiment is wheeling (rather than bn) the bn is permitted to move and wheel at the same time --
-                --if self.Formation == "MarchingColumn" then
-                self:WheelUnit(oldTheta, theta, omega)
-                self:MoveUnit(currentSpeed * 1.2, theta)
-                --[[else
-                    self:WheelUnit(oldTheta, self.MoveTarget.Theta, omega)
-                    self:MoveUnit(currentSpeed * 1.2, self.MoveTarget.Theta)]]
-                --end
+                self:WheelUnit(oldTheta, theta, omega * 1.25)
+                self:MoveUnit(currentSpeed * 1.25, theta)
             else
+
                 -- regular movement --
-                if self.NextFormation then
+                if ( self.NextFormation ) or ( self.ColourBattalion ) then
+
                     if math.abs(shortestAngle(oldTheta, theta)) > angleTolerance then self:WheelUnit(oldTheta, theta, omega)
                     else self:MoveUnit(currentSpeed, oldTheta) end
                 else
+
                     self:MoveUnit(currentSpeed, oldTheta)
                     self:WheelUnit(oldTheta, theta, omega)
-                    if self.BattalionNumber == 3 then print("Theta="..self.Position.Theta) end
+
                 end
+                
                 self.Position.Theta = normalizeAngle(self.Position.Theta)
             end
 
@@ -634,6 +646,8 @@ function Battalion:UpdatePosition()
             end
         end
     end
+
+    self.Regiment.Position = self.Regiment.ColourBattalion.Position
 end
 
 --// FINISH UP BY RETURNING THE NEW OBJECT BACK TO MAIN //--

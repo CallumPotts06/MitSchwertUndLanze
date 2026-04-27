@@ -143,6 +143,11 @@ function love.load()
     Regiment7:UpdateCurrentImages()
     Regiment7:CreateFlagMeshes()
 
+    --[[Regiment10 = Regiment.New(
+        "10. Regiment Dragoner",{},"Germany","Cavalry","PreussischerDragoner","PreussischerDragoner",Vector.New(2200,3000),"Summer"
+    )
+    Regiment10:UpdateCurrentImages()
+    Regiment10:CreateFlagMeshes()]]
 
     Regiment3 = Regiment.New(
         "3. Regiment Artillerie",{},"Germany","Artillery","DeutscherArtillerie","PreussischerArtillerie",Vector.New(1200,3200),"Summer"
@@ -150,7 +155,7 @@ function love.load()
     Regiment3:UpdateCurrentImages()
     Regiment3:CreateFlagMeshes()
 
-    Regiments = {Regiment1,Regiment2,Regiment3,Regiment4,Regiment5,Regiment6,Regiment7,Regiment8,Regiment9}
+    Regiments = {Regiment1,Regiment2,Regiment3,Regiment4,Regiment5,Regiment6,Regiment7,Regiment8,Regiment9,Regiment10}
 
     --load map, testing --
     MapController.LoadMap( currentMapPath )

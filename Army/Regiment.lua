@@ -147,7 +147,7 @@ function Regiment.New(name,brigade,team,service,unitType,unitTypeName,startPos,s
     newRegiment.Formations = currentStats.Formations
 
     newRegiment.CurrentAction = "Idle"
-
+    newRegiment.InvertedFlanks = false
     
     --finish up the object--
     setmetatable(newRegiment,{__index=Regiment})--map the new table onto the Battalion class--
@@ -241,11 +241,12 @@ function Regiment:ChangeFormation(newFormation)
     end
 end
 
+
+
+
 function Regiment:MoveRegiment(newPos, wheel)
     local form = self.Formation
     local originPos = self.Battalions[1].Position
-
-    self.Position = self.ColourBattalion.Position
 
     local newBnPositions = { Vector.New(0,0), Vector.New(0,0), Vector.New(0,0) }
 
@@ -265,9 +266,12 @@ function Regiment:MoveRegiment(newPos, wheel)
     end
 
     local dTheta = math.abs(shortestAngle(oldTheta, newTheta))
-    local inverted = dTheta > math.rad(90)
+    local aboutFace = dTheta > math.rad(90)
 
-    print("DTheta = "..dTheta..",  Inverted="..tostring(inverted))
+    -- if an about face has occured, invert the flanks --
+    if aboutFace then self.InvertedFlanks = not self.InvertedFlanks end
+
+    print("DTheta = "..dTheta..",  AboutFace="..tostring(aboutFace))
 
     ------------------------------------------------------------
     -- Assign center battalion
@@ -283,7 +287,7 @@ function Regiment:MoveRegiment(newPos, wheel)
         local dPosRight = Mathematics.RightVector(newPos, spacing)
         local dPosLeft  = Mathematics.RightVector(newPos, -spacing)
 
-        if not inverted then
+        if not self.InvertedFlanks then
             -- Normal orientation
             newBnPositions[2] = Mathematics.VectorFromAddition(newPos, dPosRight)
             newBnPositions[3] = Mathematics.VectorFromAddition(newPos, dPosLeft)
