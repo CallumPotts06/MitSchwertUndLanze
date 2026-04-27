@@ -540,12 +540,13 @@ function Battalion:WheelUnit(theta1, theta2, omega)
     if ( magnitude > math.rad( 90 ) ) and ( self.Formation ~= "MarchingColumn" ) then
         -- do an about face if that makes the total turn faster, not in marching column though (as per the if statement) --
         self.Position.Theta = self.Position.Theta + math.rad( 180 )
+        return false
     else
         if magnitude <= omega then
             self.Position.Theta = theta2
             return true
         else
-            self.Position.Theta = normalizeAngle(self.Position.Theta + omega * direction)
+            self.Position.Theta = normalizeAngle(self.Position.Theta + ( omega * direction) )
             return false
         end
     end
@@ -618,6 +619,7 @@ function Battalion:UpdatePosition()
 
                     if math.abs(shortestAngle(oldTheta, theta)) > angleTolerance then self:WheelUnit(oldTheta, theta, omega)
                     else self:MoveUnit(currentSpeed, oldTheta) end
+                    
                 else
 
                     self:MoveUnit(currentSpeed, oldTheta)
@@ -631,6 +633,8 @@ function Battalion:UpdatePosition()
         else
             -- the unit is in the final position --
             theta = self.MoveTarget.Theta
+
+            if self.ColourBattalion then print("wheel before finish:     dTheta="..shortestAngle(oldTheta, theta)) end
 
             -- wheel unit to final roation ( if :wheelunit returns true, final state is reached ) --
             if self:WheelUnit(oldTheta, theta, omega) then

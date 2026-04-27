@@ -30,6 +30,7 @@ Screen = require("Interface/Screen")
 Squad = require("Army/Squad")
 Battalion = require("Army/Battalion")
 Regiment = require("Army/Regiment")
+Brigade = require("Army/Brigade")
 
 --// IMPORT MENUS //--
 MenuController = require("GameStates/Menu/MenuController")
@@ -79,20 +80,8 @@ function love.load()
     --load squads for gameplay--
     Squad.LoadAllSquads()
 
-    --battalion1 = Battalion.New("Battalion 1",{},"Germany","Artillery","DeutscherArtillerie","PreussischerArtillerie",Vector.New(500,200,math.rad(90)),"None",true)
-    --battalion1 = Battalion.New("Battalion 1",{},"Germany","Cavalry","PreussischerUhlanen","PreussischerUhlanen",Vector.New(350,300,math.rad(290)),"None",true)
-    --battalion1 = Battalion.New("Battalion 1",{},"Germany","Cavalry","PreussischerDragoner","PreussischerDragoner",Vector.New(500,400,math.rad(290)),"None",true)
-    --battalion1 = Battalion.New("Battalion 1",{},"Germany","Infantry","BayerischerLineninfanterie","BayerischerLineninfanterie",Vector.New(500,200,math.rad(290)),"Summer",true)
-    
-    --[[battalion1 = Battalion.New("Battalion 1",{},"Germany","Infantry","DeutscherGardeZuFuss","PreussischerGardeZuFuss",Vector.New(500,300,math.rad(0)),"Summer",true)
 
-    battalion1.Position.Theta=math.rad(120)
-    battalion1.Formation = "BattleLine"
-    battalion1.CurrentAction = "Aiming"
-    battalion1:UpdateCurrentImage()
-    battalion1:CreateFlagMeshes()]]
-
-    Regiment1 = Regiment.New(
+    --[[Regiment1 = Regiment.New(
         --"1. Regiment Zu Fuss",{},"Germany","Infantry","DeutscherGardeZuFuss","PreussischerGardeZuFuss",Vector.New(1200,2000),"Summer"
         "1. Regiment Zu Fuss",{},"Germany","Infantry","DeutscherGardeZuFuss","PreussischerGardeZuFuss",Vector.New(4000,4000),"Summer"
     )
@@ -147,7 +136,7 @@ function love.load()
         "10. Regiment Dragoner",{},"Germany","Cavalry","PreussischerDragoner","PreussischerDragoner",Vector.New(2200,3000),"Summer"
     )
     Regiment10:UpdateCurrentImages()
-    Regiment10:CreateFlagMeshes()]]
+    Regiment10:CreateFlagMeshes()
 
     Regiment3 = Regiment.New(
         "3. Regiment Artillerie",{},"Germany","Artillery","DeutscherArtillerie","PreussischerArtillerie",Vector.New(1200,3200),"Summer"
@@ -155,7 +144,25 @@ function love.load()
     Regiment3:UpdateCurrentImages()
     Regiment3:CreateFlagMeshes()
 
-    Regiments = {Regiment1,Regiment2,Regiment3,Regiment4,Regiment5,Regiment6,Regiment7,Regiment8,Regiment9,Regiment10}
+    Regiments = {Regiment1,Regiment2,Regiment3,Regiment4,Regiment5,Regiment6,Regiment7,Regiment8,Regiment9,Regiment10}]]
+
+    local tempReg1 = {}
+    tempReg1.Name = "1. Regiment Zu Fuss" tempReg1.UnitType = "DeutscherLineninfanterie" tempReg1.UnitTypeName = "PreussischerLineninfanterie"
+
+    local tempReg2 = {}
+    tempReg2.Name = "2. Regiment Zu Fuss" tempReg2.UnitType = "DeutscherLineninfanterie" tempReg2.UnitTypeName = "HessischLineninfanterie"
+
+    local tempReg3 = {}
+    tempReg3.Name = "3. Regiment Zu Fuss" tempReg3.UnitType = "DeutscherLineninfanterie" tempReg3.UnitTypeName = "SaechsischLineninfanterie"
+
+    local tempReg4 = {}
+    tempReg4.Name = "4. Regiment Zu Fuss" tempReg4.UnitType = "DeutscherLineninfanterie" tempReg4.UnitTypeName = "BadenLineninfanterie"
+
+    RegimentsNamesAndTypes = { tempReg1, tempReg2, tempReg3, tempReg4 }
+
+    Brigade1 = Brigade.New("1. Brigade",RegimentsNamesAndTypes,"Germany","Infantry",Vector.New(2000,2000),"Summer")
+
+
 
     --load map, testing --
     MapController.LoadMap( currentMapPath )
@@ -185,7 +192,7 @@ function love.update(dt)
         fps = frameCounter / 0.1
         frameCounter = 0
 
-        for i=1,#Regiments,1 do Regiments[i]:UpdatePosition() end
+        Brigade1:UpdatePosition()
     end
 
     if unitAnimTimer>=0.125 then 
@@ -195,7 +202,7 @@ function love.update(dt)
 
         if AnimTick > 8 then AnimTick = 1  end
 
-        for i=1,#Regiments,1 do Regiments[i]:UpdateAnimation() end
+        Brigade1:UpdateAnimation()
     end
     
     local mouseData = Mouse.GetData(true,cumulativeTime)
@@ -203,7 +210,9 @@ function love.update(dt)
     if CurrentUnitScreen then CurrentUnitScreen:CheckForClicks(mouseData.Position,mouseData.LMBDown) end
     if mouseData.LMBDown then
         local ui = false
-        for i=1,#Regiments,1 do ui = Regiments[i]:CheckForClick(mouseData.Position,"Select") if ui then break end end
+
+        if love.keyboard.isDown("lshift") then ui = Brigade1:CheckForClick(mouseData.Position,"Select") 
+        else for i=1,#Brigade1.Regiments,1 do ui = Brigade1.Regiments[i]:CheckForClick(mouseData.Position,"Select") if ui then break end end end
         if ui then CurrentUnitScreen = ui end
     end
 
@@ -211,7 +220,7 @@ function love.update(dt)
     InputControl.ControlUnit(mouseData, CurrentUnit)
 
     --apply to armies when coded--
-    if CameraMoved then for i=1,#Regiments,1 do Regiments[i]:Moved() end end
+    if CameraMoved then Brigade1:Moved() Brigade1:UpdatePosition() end
 end
 
 
@@ -244,7 +253,7 @@ function love.draw()
         Renderer.DrawWithLightingAndShadow( index.Image, index.DrawPos, DetailZoom )
     end
 
-    for i=1,#Regiments,1 do Regiments[i]:DrawRegiment() end
+    Brigade1:DrawBrigade()
 
 
      if CurrentUnitScreen and CurrentUnit then CurrentUnitScreen.Screen:DrawScreen() end

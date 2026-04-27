@@ -130,6 +130,7 @@ function Regiment.New(name,brigade,team,service,unitType,unitTypeName,startPos,s
     newRegiment.Formation = "MarchingColumn"
     newRegiment.BranchofService = service
     newRegiment.ColourBattalion = newBns[1]
+    newRegiment.BrigadePosition = 0
 
     --add mathematical data--
     newRegiment.Position = startPos
@@ -148,6 +149,7 @@ function Regiment.New(name,brigade,team,service,unitType,unitTypeName,startPos,s
 
     newRegiment.CurrentAction = "Idle"
     newRegiment.InvertedFlanks = false
+    newRegiment.RemainingWheel = nil
     
     --finish up the object--
     setmetatable(newRegiment,{__index=Regiment})--map the new table onto the Battalion class--
@@ -245,6 +247,8 @@ end
 
 
 function Regiment:MoveRegiment(newPos, wheel)
+    self.RemainingWheel = wheel
+
     local form = self.Formation
     local originPos = self.Battalions[1].Position
 
@@ -255,6 +259,8 @@ function Regiment:MoveRegiment(newPos, wheel)
     ------------------------------------------------------------
     local oldTheta = originPos.Theta
     local newTheta = newPos.Theta
+
+    
 
     if not wheel then
         newTheta = Mathematics.AngleFromVector(
@@ -270,8 +276,6 @@ function Regiment:MoveRegiment(newPos, wheel)
 
     -- if an about face has occured, invert the flanks --
     if aboutFace then self.InvertedFlanks = not self.InvertedFlanks end
-
-    print("DTheta = "..dTheta..",  AboutFace="..tostring(aboutFace))
 
     ------------------------------------------------------------
     -- Assign center battalion
@@ -329,7 +333,7 @@ end
 
 function Regiment:UpdatePosition()
     for i=1,#self.Battalions,1 do
-        self.Battalions[i]:UpdatePosition()
+        self.Battalions[i]:UpdatePosition( self.RemainingWheel )
     end
 end
 
