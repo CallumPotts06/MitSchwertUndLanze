@@ -51,6 +51,7 @@ local function findStatsObject(team,unitType)
         teamStats = Stats.GermanUnits
         if unitType == "PreussischerLineninfanterie" then typeStats = teamStats.PrussianLineInfantry end
         if unitType == "PreussischerGardeZuFuss" then typeStats = teamStats.PrussianGuards end
+        if unitType == "PreussischerJaegers" then typeStats = teamStats.PrussianJaegers end
         if unitType == "PreussischerLandwehr" then typeStats = teamStats.Landwehr end
         if unitType == "PreussischerUhlanen" then typeStats = teamStats.Uhlanen end
         if unitType == "PreussischerHusaren" then typeStats = teamStats.Husaren end
@@ -62,6 +63,11 @@ local function findStatsObject(team,unitType)
         if unitType == "BadenLineninfanterie" then typeStats = teamStats.BadenLineInfantry end
         if unitType == "SaechsischLineninfanterie" then typeStats = teamStats.SaxonLineInfantry end
         if unitType == "WuerttemburgLineninfanterie" then typeStats = teamStats.WuerttemburgLineInfantry end
+    end
+
+    if team == "France" then
+        teamStats = Stats.FrenchUnits
+        if unitType == "FrenchLineInfantry" then typeStats = teamStats.FrenchLineInfantry end
     end
 
     return typeStats
@@ -79,13 +85,13 @@ BattalionMargins.Infantry.SkirmishOrder = 700
 
 -- CAVALRY MARGINS --
 BattalionMargins.Cavalry = {}
-BattalionMargins.Cavalry.MarchingColumn = 350
+BattalionMargins.Cavalry.MarchingColumn = 220
 BattalionMargins.Cavalry.BattleLine = 240
 
 -- ARTILLERY MARGINS --
 BattalionMargins.Artillery = {}
-BattalionMargins.Artillery.MarchingColumn = 500
-BattalionMargins.Artillery.FiringLine = 325
+BattalionMargins.Artillery.MarchingColumn = 250
+BattalionMargins.Artillery.FiringLine = 160
 
 
 -- Local function that sets up the battalions on instantiation --
@@ -192,7 +198,7 @@ end
 function Regiment:CheckForClick(mPos,mode)
     for i=1,#self.Battalions,1 do
         local ui = self.Battalions[i]:CheckForClick(mPos,mode)
-        if ui then return self:SelectUnit() end
+        if ui then CurrentUnit = self return self:SelectUnit() end
     end
     return false
 end
@@ -204,12 +210,14 @@ function Regiment:SelectUnit()
 end
 
 
-function Regiment:ChangeFormation(newFormation)
+function Regiment:ChangeFormation(newFormation, newPos)
     self.Position = self.ColourBattalion.Position
 
     local lastFormation = self.Formation
     self.Formation = newFormation
     local originPos = self.Battalions[1].Position
+
+    if newPos then originPos = newPos end
 
     local newBnPositions = { Vector.New(0,0), Vector.New(0,0), Vector.New(0,0)}
 

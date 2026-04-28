@@ -81,6 +81,7 @@ local function findStatsObject(team,unitType)
         teamStats = Stats.GermanUnits
         if unitType == "PreussischerLineninfanterie" then typeStats = teamStats.PrussianLineInfantry end
         if unitType == "PreussischerGardeZuFuss" then typeStats = teamStats.PrussianGuards end
+        if unitType == "PreussischerJaegers" then typeStats = teamStats.PrussianJaegers end
         if unitType == "PreussischerLandwehr" then typeStats = teamStats.Landwehr end
         if unitType == "PreussischerUhlanen" then typeStats = teamStats.Uhlanen end
         if unitType == "PreussischerHusaren" then typeStats = teamStats.Husaren end
@@ -92,6 +93,11 @@ local function findStatsObject(team,unitType)
         if unitType == "BadenLineninfanterie" then typeStats = teamStats.BadenLineInfantry end
         if unitType == "SaechsischLineninfanterie" then typeStats = teamStats.SaxonLineInfantry end
         if unitType == "WuerttemburgLineninfanterie" then typeStats = teamStats.WuerttemburgLineInfantry end
+    end
+
+    if team == "France" then
+        teamStats = Stats.FrenchUnits
+        if unitType == "FrenchLineInfantry" then typeStats = teamStats.FrenchLineInfantry end
     end
 
     return typeStats
@@ -108,6 +114,7 @@ function LoadImagesOntoUnit(team,unitservice,unittype)
 
     --find the necessary object for the relevant nation--
     if team=="Germany" then nationSet = Squad.ImageLibrary.GermanUnits end
+    if team=="France" then nationSet = Squad.ImageLibrary.FrenchUnits end
 
     --find the branch of service related to unit type--
     if unitservice=="Infantry" then imgSet = nationSet.Infantry
@@ -281,25 +288,31 @@ end
 
 --Function maps the current action to the correct animation--
 function Battalion:UpdateAnimation()
-    local marchAnims = {}
+    if self.CurrentAction == "Marching" then
+        self.Animation=INFANTRY_MARCH_ANIMS[AnimTick]
+        self:UpdateCurrentImage()
+        return true
+    else
 
-    if self.CurrentAction=="Idle" then self.Animation="Idle"
+        if self.CurrentAction=="Idle" then self.Animation="Idle"
 
-    elseif self.CurrentAction=="Marching" then
-        if self.Formation=="Mounted" then self.MarchSet = DRAGOON_MARCH_ANIMS
-        elseif self.Formation=="Dismounted" then self.MarchSet = INFANTRY_MARCH_ANIMS end
+        elseif self.CurrentAction=="Marching" then
+            if self.Formation=="Mounted" then self.MarchSet = DRAGOON_MARCH_ANIMS
+            elseif self.Formation=="Dismounted" then self.MarchSet = INFANTRY_MARCH_ANIMS end
 
-        self.Animation=self.MarchSet[AnimTick]
-    
-    elseif self.CurrentAction=="Aiming" then self.Animation="Aiming"
+            self.Animation=self.MarchSet[AnimTick]
 
-    elseif self.CurrentAction=="Firing" then self.Animation="Firing"
+        elseif self.CurrentAction=="Aiming" then self.Animation="Aiming"
 
-    elseif self.CurrentAction=="Guard" then self.Animation="Guard"
+        elseif self.CurrentAction=="Firing" then self.Animation="Firing"
+
+        elseif self.CurrentAction=="Guard" then self.Animation="Guard"
+
+        end
+
+        self:UpdateCurrentImage()
 
     end
-
-    self:UpdateCurrentImage()
 end
 
 function Battalion:CreateFlagMeshes()
@@ -309,6 +322,7 @@ function Battalion:CreateFlagMeshes()
         local flagSet = nil
         local nationSet = nil
         if self.Team=="Germany" then nationSet=Squad.ImageLibrary.GermanUnits.Flags end
+        if self.Team=="France" then nationSet=Squad.ImageLibrary.FrenchUnits.Flags end
 
         for i=1,#nationSet,1 do
             if nationSet[i][2]==self.UnitTypeName then
@@ -378,11 +392,11 @@ function Battalion:FindSquadPositions()
     pos.Theta = tempTheta
 
     --lowers the amount of squads if artillery or cavalry--
-    if self.BranchofService == "Artillery" then squadsPerHealth = 1/40 squadCount = (self.Health*squadsPerHealth) end
+    if self.BranchofService == "Artillery" then squadsPerHealth = 1/45 squadCount = (self.Health*squadsPerHealth) end
     if self.BranchofService == "Cavalry" then squadsPerHealth = 1/25 squadCount = (self.Health*squadsPerHealth) end
 
     --refines the information for the equations later--
-    if (self.Formation == "BattleLine") or (self.Formation == "FiringLine") or (self.Formation == "Dismounted") then
+    if (self.Formation == "BattleLine") or (self.Formation == "FiringLine") or (self.Formation == "Dismounted") or (self.BranchofService == "Cavalry") then
         direction = "Right"
         n1 = - math.floor( squadCount / 2 )
         n2 = math.floor( squadCount / 2 )
@@ -546,7 +560,7 @@ function Battalion:WheelUnit(theta1, theta2, omega)
             self.Position.Theta = theta2
             return true
         else
-            self.Position.Theta = normalizeAngle(self.Position.Theta + ( omega * direction) )
+            self.Position.Theta = self.Position.Theta + ( omega * direction) --normalizeAngle(self.Position.Theta + ( omega * direction) )
             return false
         end
     end
@@ -596,62 +610,62 @@ function Battalion:UpdatePosition()
     local omega = math.rad(2)
     local angleTolerance = math.rad(0.5)
 
-    if self.MoveTarget then
-        local oldTheta = self.Position.Theta
-        self.Moved = true
-        self.CurrentAction = "Marching"
-        local theta = Mathematics.AngleFromVector( Mathematics.VectorFromSubtraction(self.MoveTarget, self.Position) )
+    if (self.Formation ~= self.Regiment.ColourBattalion.NextFormation) then
+        if ( self.MoveTarget ) and ( self.NextFormation ~= self.Formation ) then
+            self:UpdateAnimation()
+            local oldTheta = self.Position.Theta
+            self.Moved = true
+            self.CurrentAction = "Marching"
+            local theta = Mathematics.AngleFromVector( Mathematics.VectorFromSubtraction(self.MoveTarget, self.Position) )
 
-        -- if they are moving from skirmish order into any other formation, instantly swap formations --
-        if(self.Formation=="SkirmishOrder")and(self.NextFormation)then self.Formation = self.NextFormation self.NextFormation = nil end
+            -- if they are moving from skirmish order into any other formation, instantly swap formations --
+            if(self.Formation=="SkirmishOrder")and(self.NextFormation)then self.Formation = self.NextFormation self.NextFormation = nil end
 
 
-        if ( self.Position.X ~= self.MoveTarget.X ) or ( self.Position.Y ~= self.MoveTarget.Y ) then
-            
-            if ( movetype == "Wheel" ) then
-                -- if the whole regiment is wheeling (rather than bn) the bn is permitted to move and wheel at the same time --
-                self:WheelUnit(oldTheta, theta, omega * 1.25)
-                self:MoveUnit(currentSpeed * 1.25, theta)
-            else
-
-                -- regular movement --
-                if ( self.NextFormation ) or ( self.ColourBattalion ) then
-
-                    if math.abs(shortestAngle(oldTheta, theta)) > angleTolerance then self:WheelUnit(oldTheta, theta, omega)
-                    else self:MoveUnit(currentSpeed, oldTheta) end
-                    
+            if ( self.Position.X ~= self.MoveTarget.X ) or ( self.Position.Y ~= self.MoveTarget.Y ) then
+                
+                if ( movetype == "Wheel" ) then
+                    -- if the whole regiment is wheeling (rather than bn) the bn is permitted to move and wheel at the same time --
+                    self:WheelUnit(oldTheta, theta, omega * 1.25)
+                    self:MoveUnit(currentSpeed * 1.25, theta)
                 else
 
-                    self:MoveUnit(currentSpeed, oldTheta)
-                    self:WheelUnit(oldTheta, theta, omega)
+                    -- regular movement --
+                    if ( self.NextFormation ) or ( self.ColourBattalion ) then
 
+                        if math.abs(shortestAngle(oldTheta, theta)) > angleTolerance then self:WheelUnit(oldTheta, theta, omega)
+                        else self:MoveUnit(currentSpeed, oldTheta) end
+                        
+                    else
+
+                        self:MoveUnit(currentSpeed, oldTheta)
+                        self:WheelUnit(oldTheta, theta, omega)
+
+                    end
+                    
+                    self.Position.Theta = normalizeAngle(self.Position.Theta)
                 end
-                
-                self.Position.Theta = normalizeAngle(self.Position.Theta)
-            end
 
-        else
-            -- the unit is in the final position --
-            theta = self.MoveTarget.Theta
+            else
+                -- the unit is in the final position --
+                theta = self.MoveTarget.Theta
 
-            if self.ColourBattalion then print("wheel before finish:     dTheta="..shortestAngle(oldTheta, theta)) end
+                -- wheel unit to final roation ( if :wheelunit returns true, final state is reached ) --
+                if self:WheelUnit(oldTheta, theta, omega) then
+                    -- finished state --
+                    self.Position.X = self.MoveTarget.X
+                    self.Position.Y = self.MoveTarget.Y
+                    self.Position.Theta = self.MoveTarget.Theta
+                    self.MoveTarget = nil
 
-            -- wheel unit to final roation ( if :wheelunit returns true, final state is reached ) --
-            if self:WheelUnit(oldTheta, theta, omega) then
-                -- finished state --
-                self.Position.X = self.MoveTarget.X
-                self.Position.Y = self.MoveTarget.Y
-                self.Position.Theta = self.MoveTarget.Theta
-                self.MoveTarget = nil
-
-                if self.NextFormation then self.Formation = self.NextFormation self.NextFormation = nil end
-                self.CurrentAction = "Idle"
-                self.CurrentMoveType = nil
+                    if self.NextFormation then self.Formation = self.NextFormation self.NextFormation = nil end
+                    self.CurrentAction = "Idle"
+                    self.CurrentMoveType = nil
+                end
             end
         end
     end
-
-    self.Regiment.Position = self.Regiment.ColourBattalion.Position
+    if self.ColourBattalion then self.Regiment.Position = self.Regiment.ColourBattalion.Position end
 end
 
 --// FINISH UP BY RETURNING THE NEW OBJECT BACK TO MAIN //--

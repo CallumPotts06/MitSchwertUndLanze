@@ -15,7 +15,7 @@ Formation Types:
     Infantry:
         Marching Column (4x Regiment In Column)
         Full Battle Line (4x Regiment Deployed In Line)
-        Battle Line (3x Regiment Deployed In Line, 1x Regiment In Reserve)
+        Battle Line (2x Regiment Deployed In Line, 2x Regiment In Reserve)
         Skirmish Line (2x Regiment Deployed In Skirmish, 2x Regiment In Reserve)
 
     Artillery:
@@ -29,29 +29,102 @@ Formation Types:
         
 ]]--
 
+local ActionTypes = {}
+ActionTypes.Infantry = {"Move","Double","Target","Charge"}
+ActionTypes.Cavalry = {"Move","Double","Charge"}
+ActionTypes.Artillery = {"Move","Target"}
+
+local FormationTypes = {}
+FormationTypes.Infantry = {"MarchingColumn","FullBattleLine","BattleLine","SkirmishOrder"}
+FormationTypes.Artillery = {"MarchingColumn","Deployed"}
+FormationTypes.Cavalry = {"MarchingColumn","FullBattleLine","BattleLine"}
+
 Brigade = {}
 
-local function getFormationPositions( service, formation, o )
-    local newPositions = {o,o,o,o}
+local function getFormationPositions( service, formation, o, anglePos  )
+    local theta = o.Theta
+    if anglePos then theta = Mathematics.AngleFromVector( Mathematics.VectorFromSubtraction( o, anglePos ) ) end
+    o = Mathematics.VectorFromAddition( o, Mathematics.ForwardVector( o, 15 ) )
+    o.Theta = theta
 
-    if service == "Infantry" then
-        
-        if formation == "MarchingColumn" then
+    local returnSet = {}
+    returnSet.Position = o
+    returnSet.Formation = "MarchingColumn"
 
-            local frontmargin = BattalionMargins[ service ][ "MarchingColumn" ] * 3.2
-            local rightmargin = BattalionMargins[ service ][ "MarchingColumn" ] * 2.2
+    local newPositions = {returnSet,returnSet,returnSet,returnSet}
 
-            local pos1 = o
-            local pos2 = Mathematics.VectorFromAddition( pos1, Mathematics.RightVector( pos1, rightmargin ) )
-            local pos3 = Mathematics.VectorFromAddition( pos1, Mathematics.ForwardVector( pos1, -frontmargin ) )
-            local pos4 = Mathematics.VectorFromAddition( pos3, Mathematics.RightVector( pos3, rightmargin ) )
+    if formation == "MarchingColumn" then
 
-            return {pos1,pos2,pos3,pos4}
+        local frontmargin = BattalionMargins[ service ][ "MarchingColumn" ] * 3.2
+        local rightmargin = BattalionMargins[ service ][ "MarchingColumn" ] * 2.2
+
+        local pos1 = o
+        local pos2 = Mathematics.VectorFromAddition( pos1, Mathematics.RightVector( pos1, rightmargin ) )
+        local pos3 = Mathematics.VectorFromAddition( pos1, Mathematics.ForwardVector( pos1, -frontmargin ) )
+        local pos4 = Mathematics.VectorFromAddition( pos3, Mathematics.RightVector( pos3, rightmargin ) )
+
+        returnSet1 = {} returnSet1.Position = pos1 returnSet1.Formation = "MarchingColumn"
+        returnSet2 = {} returnSet2.Position = pos2 returnSet2.Formation = "MarchingColumn"
+        returnSet3 = {} returnSet3.Position = pos3 returnSet3.Formation = "MarchingColumn"
+        returnSet4 = {} returnSet4.Position = pos4 returnSet4.Formation = "MarchingColumn"
+
+        return {returnSet1,returnSet2,returnSet3,returnSet4}
+
+    elseif ( formation == "FullBattleLine" ) or ( formation == "Deployed" ) then
+
+        local margin = BattalionMargins[ service ][ "BattleLine" ] * 3.2
+
+        local pos2 = o
+        local pos1 = Mathematics.VectorFromAddition( pos2, Mathematics.RightVector( pos2, -margin ) )
+        local pos3 = Mathematics.VectorFromAddition( pos1, Mathematics.RightVector( pos1, margin ) )
+        local pos4 = Mathematics.VectorFromAddition( pos1, Mathematics.RightVector( pos1, margin*2 ) )
+
+        returnSet1 = {} returnSet1.Position = pos1 returnSet1.Formation = "BattleLine"
+        returnSet2 = {} returnSet2.Position = pos2 returnSet2.Formation = "BattleLine"
+        returnSet3 = {} returnSet3.Position = pos3 returnSet3.Formation = "BattleLine"
+        returnSet4 = {} returnSet4.Position = pos4 returnSet4.Formation = "BattleLine"
+
+        return {returnSet1,returnSet2,returnSet3,returnSet4}
+
+    elseif formation == "BattleLine" then
+
+        local margin = BattalionMargins[ service ][ "BattleLine" ] * 3.2
+
+        local pos1 = Mathematics.VectorFromAddition( o, Mathematics.RightVector( o, -margin/2 ) )
+        local pos2 = Mathematics.VectorFromAddition( o, Mathematics.RightVector( o, margin/2 ) )
+        local pos3 = Mathematics.VectorFromAddition( pos1, Mathematics.ForwardVector( pos1, -margin ) )
+        local pos4 = Mathematics.VectorFromAddition( pos2, Mathematics.ForwardVector( pos2, -margin ) )
+
+        returnSet1 = {} returnSet1.Position = pos1 returnSet1.Formation = "BattleLine"
+        returnSet2 = {} returnSet2.Position = pos2 returnSet2.Formation = "BattleLine"
+        returnSet3 = {} returnSet3.Position = pos3 returnSet3.Formation = "MarchingColumn"
+        returnSet4 = {} returnSet4.Position = pos4 returnSet4.Formation = "MarchingColumn"
+        if service == "Cavalry" then
+            returnSet3 = {} returnSet3.Position = pos3 returnSet3.Formation = "BattleLine"
+            returnSet4 = {} returnSet4.Position = pos4 returnSet4.Formation = "BattleLine"
         end
 
-        -- ... --
+        return {returnSet1,returnSet2,returnSet3,returnSet4}
+
+
+    elseif formation == "SkirmishOrder" then
+
+        local skirmishmargin = BattalionMargins[ service ][ "SkirmishOrder" ] * 3.2
+        local battlemargin = BattalionMargins[ service ][ "BattleLine" ] * 3.2
+
+        local pos1 = Mathematics.VectorFromAddition( o, Mathematics.RightVector( o, -skirmishmargin/2 ) )
+        local pos2 = Mathematics.VectorFromAddition( o, Mathematics.RightVector( o, skirmishmargin/2 ) )
+        local pos3 = Mathematics.VectorFromAddition( pos1, Mathematics.ForwardVector( pos1, -battlemargin ) )
+        local pos4 = Mathematics.VectorFromAddition( pos2, Mathematics.ForwardVector( pos2, -battlemargin ) )
+
+        returnSet1 = {} returnSet1.Position = pos1 returnSet1.Formation = "SkirmishOrder"
+        returnSet2 = {} returnSet2.Position = pos2 returnSet2.Formation = "SkirmishOrder"
+        returnSet3 = {} returnSet3.Position = pos3 returnSet3.Formation = "BattleLine"
+        returnSet4 = {} returnSet4.Position = pos4 returnSet4.Formation = "BattleLine"
+
+        return {returnSet1,returnSet2,returnSet3,returnSet4}
+
     end
-    -- ... --
 end
 
 
@@ -59,12 +132,12 @@ end
 local function setupRegiments(nametypes,initbrigade,team,service,startPos,season)
     local formation = "MarchingColumn"
 
-    local pos = getFormationPositions( service, "MarchingColumn", startPos )
+    local pos = getFormationPositions( service, "MarchingColumn", startPos, false )
 
-    local reg1 = Regiment.New(nametypes[1].Name,initbrigade,team,service,nametypes[1].UnitType,nametypes[1].UnitTypeName,pos[1],season)
-    local reg2 = Regiment.New(nametypes[2].Name,initbrigade,team,service,nametypes[2].UnitType,nametypes[2].UnitTypeName,pos[2],season)
-    local reg3 = Regiment.New(nametypes[3].Name,initbrigade,team,service,nametypes[3].UnitType,nametypes[3].UnitTypeName,pos[3],season)
-    local reg4 = Regiment.New(nametypes[4].Name,initbrigade,team,service,nametypes[4].UnitType,nametypes[4].UnitTypeName,pos[4],season)
+    local reg1 = Regiment.New(nametypes[1].Name,initbrigade,team,service,nametypes[1].UnitType,nametypes[1].UnitTypeName,pos[1].Position,season)
+    local reg2 = Regiment.New(nametypes[2].Name,initbrigade,team,service,nametypes[2].UnitType,nametypes[2].UnitTypeName,pos[2].Position,season)
+    local reg3 = Regiment.New(nametypes[3].Name,initbrigade,team,service,nametypes[3].UnitType,nametypes[3].UnitTypeName,pos[3].Position,season)
+    local reg4 = Regiment.New(nametypes[4].Name,initbrigade,team,service,nametypes[4].UnitType,nametypes[4].UnitTypeName,pos[4].Position,season)
 
     regs = { reg1, reg2, reg3, reg4 }
     
@@ -93,6 +166,9 @@ function Brigade.New(name,nametypes,team,service,startPos,season)
     newBrigade.Position = startPos
     newBrigade.Team = team
     newBrigade.Formation = "MarchingColumn"
+    newBrigade.Actions = ActionTypes[service]
+    newBrigade.Formations = FormationTypes[service]
+    newBrigade.UnitClass = "Brigade"
 
 
     --finish up the object--
@@ -110,6 +186,22 @@ end
 ----//// ###################### ////----
 ----//// METHODS FOR THE OBJECT ////----
 ----//// ###################### ////----
+function Brigade:ChangeFormation( newFormation )
+    self.Formation = newFormation
+    local newPos = getFormationPositions( self.BranchOfService, newFormation, self.Regiments[1].Position, false )
+    for i=1,#self.Regiments,1 do
+        self.Regiments[i]:ChangeFormation(newPos[i].Formation, newPos[i].Position)
+    end
+end
+
+function Brigade:MoveBrigade( newPos )
+    local newPos = getFormationPositions( self.BranchOfService, self.Formation, newPos, self.Regiments[1].Position )
+    for i=1,#self.Regiments,1 do
+        self.Regiments[i]:MoveRegiment( newPos[i].Position )
+    end
+end
+
+
 function Brigade:UpdateCurrentImages()
     for i=1,#self.Regiments,1 do
         self.Regiments[i]:UpdateCurrentImage()
@@ -151,7 +243,7 @@ end
 function Brigade:CheckForClick(mPos,mode)
     for i=1,#self.Regiments,1 do
         local ui = self.Regiments[i]:CheckForClick(mPos,mode)
-        if ui then return self:SelectUnit() end
+        if ui then CurrentUnit = self return self:SelectUnit() end
     end
     return false
 end

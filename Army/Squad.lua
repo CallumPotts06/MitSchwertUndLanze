@@ -224,8 +224,8 @@ function Squads.CreateSquad(team,unitTypeName,unitType,dress,facing,animation,fo
     elseif unitType=="Cavalry" then
         if formation=="BattleLine" then soldierCount = Vector.New(2,2)
         else 
-            if (facing == "East") or (facing == "West") then soldierCount = Vector.New(2,4) soldierSize.Y = soldierSize.Y / 1.75
-            else soldierCount = Vector.New(4,2) end
+            if (facing == "East") or (facing == "West") then soldierCount = Vector.New(2,2) soldierSize.Y = soldierSize.Y / 1.75
+            else soldierCount = Vector.New(2,2) end
         end
 
     elseif unitType=="Dragoon" then
@@ -283,6 +283,14 @@ Squads.ImageLibrary.GermanUnits.Cavalry = {}
 Squads.ImageLibrary.GermanUnits.Artillery = {}
 
 
+Squads.ImageLibrary.FrenchUnits = {}
+
+Squads.ImageLibrary.FrenchUnits.Flags = {}
+Squads.ImageLibrary.FrenchUnits.Infantry = {}
+Squads.ImageLibrary.FrenchUnits.Cavalry = {}
+Squads.ImageLibrary.FrenchUnits.Artillery = {}
+
+
 
 
 
@@ -308,8 +316,11 @@ function Squads.LoadAllSquads()
         {"PreussischerArtillerie","DeutscherArtillerie","Artillery","None"},
     }
 
+    local frenchUnits = {
+        {"FrenchLineInfantry","FrenchLineInfantry","Infantry","Seasonal"},
+    }
 
-    local nations = {germanUnits}
+    local nations = {germanUnits,frenchUnits}
 
     local InfantryFormations = {"BattleLine","MarchingColumn","SkirmishOrder"}
     local InfantryAnimations = {"Idle","Aiming","March1","March2","March3","March4"}
@@ -338,6 +349,7 @@ function Squads.LoadAllSquads()
 
     for i1 = 1,#nations,1 do
         if nations[i1]==germanUnits then team="Germany" end
+        if nations[i1]==frenchUnits then team="France" end
 
 
         for i2 = 1,#nations[i1],1 do
@@ -349,6 +361,7 @@ function Squads.LoadAllSquads()
 
             local newFlag = love.graphics.newImage("Assets/Images/Units/"..team.."/Flags/"..nations[i1][i2][1]..".png", {mipmaps = false, linear = false})
             if team=="Germany" then table.insert(Squads.ImageLibrary.GermanUnits.Flags,{newFlag,nations[i1][i2][1],Vector.New(1,1)}) end
+            if team=="France" then table.insert(Squads.ImageLibrary.FrenchUnits.Flags,{newFlag,nations[i1][i2][1],Vector.New(1,1)}) end
 
             for i3 = 1,#forms,1 do
                 if (nations[i1][i2][3]=="Dragoon") then 
@@ -377,6 +390,9 @@ function Squads.LoadAllSquads()
                                 local nationImgSet = "None"
                                 if team=="Germany" then
                                     nationImgSet = Squads.ImageLibrary.GermanUnits
+                                end
+                                if team=="France" then
+                                    nationImgSet = Squads.ImageLibrary.FrenchUnits
                                 end
 
                                 local ImgSet = "None"

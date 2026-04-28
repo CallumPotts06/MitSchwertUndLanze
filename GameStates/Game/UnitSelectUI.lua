@@ -36,6 +36,29 @@ HEALTH_SCORES = {
 
 UnitUI = {}
 
+function UnitUI.CheckForUnitClicks( shift, Armies, mouseData )
+    if shift then
+        for i2 = 1, #Armies do
+            for i = 1, #Armies[i2] do
+                ui = Armies[i2][i]:CheckForClick(mouseData.Position, "Select")
+                if ui then return ui end
+            end
+        end
+    else
+        for i2 = 1, #Armies do
+            for i = 1, #Armies[i2] do
+                for r = 1, #Armies[i2][i].Regiments do
+                    ui = Armies[i2][i].Regiments[r]:CheckForClick(mouseData.Position, "Select")
+                    if ui then return ui end
+                end
+            end
+        end
+    end
+
+    return false
+end
+
+
 function UnitUI.Open(unit)
     local newUnitUI = {}
 
@@ -106,7 +129,7 @@ function UnitUI.Open(unit)
     end
 
     --formation positions--
-    local formationSize = Mathematics.ScreenScaleVector(innerbox_x-(2*innerbox_pad),(innerbox_y/3-(innerbox_pad*4)))
+    local formationSize = Mathematics.ScreenScaleVector(innerbox_x-(2*innerbox_pad),(innerbox_y/4-(innerbox_pad*3)))
     formationSize.X = formationSize.X - 20
     local formationPositions = {}
     for i=1,#unit.Formations do
@@ -119,12 +142,18 @@ function UnitUI.Open(unit)
     local nameFont = Font.Gothic2
     local mainFont = Font.Georgia
 
-    local healthIndex = math.floor((unit.Health / unit.MaxHealth) * (#HEALTH_SCORES - 1)) + 1
-    local healthScore = "Health:\n\n" .. HEALTH_SCORES[healthIndex]
+    --initialise some variables (that are only necessary for regiment--
+    local healthIndex local healthScore local moraleIndex local moraleScore
+    local health local morale local currentActionTxt local currentAction 
 
-    local moraleIndex = math.floor((unit.Morale / 100) * (#MORALE_SCORES - 1)) + 1
-    local moraleScore = "Morale:\n\n" .. MORALE_SCORES[moraleIndex]
-    local currentAction = "Currently:\n\n"..unit.CurrentAction
+    if unit.UnitClass ~= "Brigade" then
+        healthIndex = math.floor((unit.Health / unit.MaxHealth) * (#HEALTH_SCORES - 1)) + 1
+        healthScore = "Health:\n\n" .. HEALTH_SCORES[healthIndex]
+
+        moraleIndex = math.floor((unit.Morale / 100) * (#MORALE_SCORES - 1)) + 1
+        moraleScore = "Morale:\n\n" .. MORALE_SCORES[moraleIndex]
+        currentAction = "Currently:\n\n"..unit.CurrentAction
+    end
 
     --create main box--
     local unitUIBox=TextBox.New("Back"," ",boxPos,boxSize,1,4,1,mainFont,1,black,teamColour,black,false,false)
@@ -134,9 +163,11 @@ function UnitUI.Open(unit)
     local formationsBox=TextBox.New("Inner2"," ",formationsPos,formationsSize,1,3,1,mainFont,1,black,offwhite,black,false,false)
     local actionsBox=TextBox.New("Inner3"," ",buttonsPos,buttonsSize,1,3,1,mainFont,1,black,offwhite,black,false,false)
 
-    local health=TextBox.New("HpTitle",healthScore,stat1Pos,statSize,30,0,0,mainFont,1,white,transparent,transparent,false,false)
-    local morale=TextBox.New("HpTitle",moraleScore,stat2Pos,statSize,30,0,0,mainFont,1,white,transparent,transparent,false,false)
-    local currentActionTxt=TextBox.New("HpTitle",currentAction,stat3Pos,statSize,30,0,0,mainFont,1,white,transparent,transparent,false,false)
+    if unit.UnitClass ~= "Brigade" then
+        health=TextBox.New("HpTitle",healthScore,stat1Pos,statSize,30,0,0,mainFont,1,white,transparent,transparent,false,false)
+        morale=TextBox.New("HpTitle",moraleScore,stat2Pos,statSize,30,0,0,mainFont,1,white,transparent,transparent,false,false)
+        currentActionTxt=TextBox.New("HpTitle",currentAction,stat3Pos,statSize,30,0,0,mainFont,1,white,transparent,transparent,false,false)
+    end
 
     --create action buttons--
     local actionBtns = {}
@@ -160,7 +191,11 @@ function UnitUI.Open(unit)
 
     --create a new screen to return--
     local newScreen = Screen.New(1)
-    newScreen.UiObjects = {unitUIBox,statsBox,formationsBox,actionsBox,health,morale,currentActionTxt}
+    if unit.UnitClass ~= "Brigade" then
+        newScreen.UiObjects = {unitUIBox,statsBox,formationsBox,actionsBox,health,morale,currentActionTxt}
+    else
+        newScreen.UiObjects = {unitUIBox,statsBox,formationsBox,actionsBox}
+    end
     for i=1,#actionBtns do table.insert(newScreen.UiObjects, actionBtns[i]) end
     for i=1,#formationBtns do table.insert(newScreen.UiObjects, formationBtns[i]) end
 
@@ -180,8 +215,8 @@ function UnitUI:CheckForClicks(mousePos,mouseClick)
     local updatedFormation = false
     for i=1,#clickedObjects,1 do 
 
+        -- REGULAR FORMATIONS --
         if clickedObjects[i].Name=="BattleLine" then 
-            --tempUnit.Formation = "BattleLine"
             tempUnit:ChangeFormation("BattleLine")
             updatedFormation = true
         
@@ -205,11 +240,14 @@ function UnitUI:CheckForClicks(mousePos,mouseClick)
             tempUnit:ChangeFormation("Mounted")
             updatedFormation = true
 
+        -- BRIGADE FORMATIONS --
+        elseif clickedObjects[i].Name=="FullBattleLine" then 
+            tempUnit:ChangeFormation("FullBattleLine")
+            updatedFormation = true
+
         end
 
         if updatedFormation then
-            --CurrentUnit.CurrentAction = "Idle"
-            --tempUnit.Moved = true
             tempUnit:UpdateAnimation()
             break
         end

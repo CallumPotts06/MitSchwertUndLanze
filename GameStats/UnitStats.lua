@@ -83,6 +83,19 @@ UnitStats.GermanUnits.PrussianGuards.Actions = {"Move","Double","Wheel","Target"
 UnitStats.GermanUnits.PrussianGuards.Formations = {"BattleLine","MarchingColumn","SkirmishOrder"}
 
 
+---/// PRUSSIAN JAEGERS ///---
+UnitStats.GermanUnits.PrussianJaegers = {}
+UnitStats.GermanUnits.PrussianJaegers.Health = 100
+UnitStats.GermanUnits.PrussianJaegers.Damage = 2
+UnitStats.GermanUnits.PrussianJaegers.Accuracy = 5/10
+UnitStats.GermanUnits.PrussianJaegers.MarchSpeed = 7
+UnitStats.GermanUnits.PrussianJaegers.Morale = 75
+UnitStats.GermanUnits.PrussianJaegers.Energy = 100
+UnitStats.GermanUnits.PrussianJaegers.ChargeEnabled = true
+UnitStats.GermanUnits.PrussianJaegers.Actions = {"Move","Double","Wheel","Target","Charge"}
+UnitStats.GermanUnits.PrussianJaegers.Formations = {"BattleLine","MarchingColumn","SkirmishOrder"}
+
+
 ---/// LANDWEHR LINE INFANTRY ///---
 UnitStats.GermanUnits.Landwehr = {}
 UnitStats.GermanUnits.Landwehr.Health = 90
@@ -120,7 +133,7 @@ UnitStats.GermanUnits.Uhlanen.MarchSpeed = 14
 UnitStats.GermanUnits.Uhlanen.Morale = 95
 UnitStats.GermanUnits.Uhlanen.Energy = 100
 UnitStats.GermanUnits.Uhlanen.ChargeEnabled = true
-UnitStats.GermanUnits.Uhlanen.Actions = {"Move","Wheel","Charge"}
+UnitStats.GermanUnits.Uhlanen.Actions = {"Move","Double","Wheel","Charge"}
 UnitStats.GermanUnits.Uhlanen.Formations = {"BattleLine","MarchingColumn"}
 
 ---/// PRUSSIAN HUSAREN ///---
@@ -132,7 +145,7 @@ UnitStats.GermanUnits.Husaren.MarchSpeed = 14
 UnitStats.GermanUnits.Husaren.Morale = 95
 UnitStats.GermanUnits.Husaren.Energy = 100
 UnitStats.GermanUnits.Husaren.ChargeEnabled = true
-UnitStats.GermanUnits.Husaren.Actions = {"Move","Wheel","Charge"}
+UnitStats.GermanUnits.Husaren.Actions = {"Move","Double","Wheel","Charge"}
 UnitStats.GermanUnits.Husaren.Formations = {"BattleLine","MarchingColumn"}
 
 ---/// PRUSSIAN KUERASSIERE ///---
@@ -144,7 +157,7 @@ UnitStats.GermanUnits.Kuerassiere.MarchSpeed = 14
 UnitStats.GermanUnits.Kuerassiere.Morale = 95
 UnitStats.GermanUnits.Kuerassiere.Energy = 100
 UnitStats.GermanUnits.Kuerassiere.ChargeEnabled = true
-UnitStats.GermanUnits.Kuerassiere.Actions = {"Move","Wheel","Charge"}
+UnitStats.GermanUnits.Kuerassiere.Actions = {"Move","Double","Wheel","Charge"}
 UnitStats.GermanUnits.Kuerassiere.Formations = {"BattleLine","MarchingColumn"}
 
 ---/// PRUSSIAN DRAGOONS ///---
@@ -156,7 +169,7 @@ UnitStats.GermanUnits.Dragoons.MarchSpeed = 14
 UnitStats.GermanUnits.Dragoons.Morale = 80
 UnitStats.GermanUnits.Dragoons.Energy = 100
 UnitStats.GermanUnits.Dragoons.ChargeEnabled = false
-UnitStats.GermanUnits.Dragoons.Actions = {"Move","Wheel"}
+UnitStats.GermanUnits.Dragoons.Actions = {"Move","Double","Wheel"}
 UnitStats.GermanUnits.Dragoons.Formations = {"Mounted","Dismounted"}
 
 UnitStats.GermanUnits.DismountedDragoons = {}
@@ -183,6 +196,32 @@ UnitStats.GermanUnits.Artillery.ChargeEnabled = false
 UnitStats.GermanUnits.Artillery.Actions = {"Move","Wheel","Target"}
 UnitStats.GermanUnits.Artillery.Formations = {"FiringLine","MarchingColumn"}
 
+
+
+
+
+
+
+
+
+
+
+--------//////// FRENCH UNITS -- FRENCH UNITS -- FRENCH UNITS ////////--------
+UnitStats.FrenchUnits = {}
+
+
+----//// INFANTRY -- INFANTRY -- INFANTRY ////----
+---/// FRENCH LINE INFANTRY ///---
+UnitStats.FrenchUnits.FrenchLineInfantry = {}
+UnitStats.FrenchUnits.FrenchLineInfantry.Health = 100
+UnitStats.FrenchUnits.FrenchLineInfantry.Damage = 2
+UnitStats.FrenchUnits.FrenchLineInfantry.Accuracy = 5/10
+UnitStats.FrenchUnits.FrenchLineInfantry.MarchSpeed = 6
+UnitStats.FrenchUnits.FrenchLineInfantry.Morale = 75
+UnitStats.FrenchUnits.FrenchLineInfantry.Energy = 100
+UnitStats.FrenchUnits.FrenchLineInfantry.ChargeEnabled = true
+UnitStats.FrenchUnits.FrenchLineInfantry.Actions = {"Move","Double","Wheel","Target","Charge"}
+UnitStats.FrenchUnits.FrenchLineInfantry.Formations = {"BattleLine","MarchingColumn","SkirmishOrder"}
 
 
 return UnitStats

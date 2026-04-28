@@ -56,10 +56,10 @@ end
 function InputControl.MoveCamera(input)
     CameraMoved = true
 
-    if input=="Up" then CameraPosition.Y = CameraPosition.Y + 15 
-    elseif input=="Down" then CameraPosition.Y = CameraPosition.Y - 15 
-    elseif input=="Left" then CameraPosition.X = CameraPosition.X + 15 
-    elseif input=="Right" then CameraPosition.X = CameraPosition.X - 15 
+    if input=="Up" then CameraPosition.Y = CameraPosition.Y + 20 
+    elseif input=="Down" then CameraPosition.Y = CameraPosition.Y - 20 
+    elseif input=="Left" then CameraPosition.X = CameraPosition.X + 20 
+    elseif input=="Right" then CameraPosition.X = CameraPosition.X - 20 
     elseif input=="ZoomIn" then 
         local sw, sh = love.graphics.getWidth(), love.graphics.getHeight()
         local screenCenterX, screenCenterY = sw / 2, sh / 2
@@ -118,12 +118,11 @@ function InputControl.ApplyAllInputs()
         if result[1] then InputControl.ChangeUnitControl(result[2]) end
     end
 
-
     for i = 1,#Keybinds.CameraActions,1 do
         local result = InputControl.CheckAction(Keybinds.CameraActions[i])
         if result[1] then InputControl.MoveCamera(result[2]) end
     end
-end
+end 
 
 function InputControl.ControlUnit(mousedata, unit)
     if not unit then return false end
@@ -138,7 +137,11 @@ function InputControl.ControlUnit(mousedata, unit)
     if mousedata.LMBDown then
         -- Move Unit To Mouse Position --
         if CurrentUnitControl == "Move" then
-            unit:MoveRegiment(movePos)
+            if unit.UnitClass == "Regiment" then
+                unit:MoveRegiment(movePos)
+            else
+                unit:MoveBrigade(movePos)
+            end
         end
 
         if CurrentUnitControl == "Wheel" then
@@ -146,8 +149,9 @@ function InputControl.ControlUnit(mousedata, unit)
             local angle = Mathematics.AngleFromVector( Mathematics.VectorFromSubtraction( movePos, unitPos ) )
             local newPos = unitPos newPos.Theta = angle
 
-            print("UNIT_POS="..unitPos.X..","..unitPos.Y..";   newPos="..newPos.X..","..newPos.Y..";   Theta="..newPos.Theta)
-            unit:MoveRegiment(newPos, angle)
+            if unit.UnitClass == "Regiment" then
+                unit:MoveRegiment(newPos, angle)
+            end
         end
 
 
