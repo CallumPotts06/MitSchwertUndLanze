@@ -66,6 +66,10 @@ DetailQ = Queue.New()
 TileZoom = 1
 DetailZoom = 1
 
+unitUpdateTick = 1
+unitUpdateTime = 0
+UnitUpdateTickAllocator = 1
+
 
 
 ----//// ** LOVE LOAD FUNCTION ** ////----
@@ -156,12 +160,21 @@ function love.update(dt)
     frameCounter = frameCounter + 1
     unitAnimTimer=unitAnimTimer+dt
     cumulativeTime = cumulativeTime + dt
+    unitUpdateTime = unitUpdateTime + dt
 
+    
     if fpsCounterTimer>=0.1 then 
         fpsCounterTimer=fpsCounterTimer-0.1
         fps = frameCounter / 0.1
         frameCounter = 0 
+        unitUpdateTick = unitUpdateTick + 1
+
+        if unitUpdateTick > 5 then unitUpdateTick = 0 end
+
+        for i=1,#GermanyArmy,1 do GermanyArmy[i]:UpdatePosition() end
+        for i=1,#FrenchArmy,1 do FrenchArmy[i]:UpdatePosition() end
     end
+
 
     if unitAnimTimer>=0.125 then 
         unitAnimTimer=unitAnimTimer-0.125 FlagTick=FlagTick+flagIncrement TimeOfDay=TimeOfDay+0.5 AnimTick=AnimTick+1
@@ -170,8 +183,8 @@ function love.update(dt)
 
         if AnimTick > 8 then AnimTick = 1  end
 
-        for i=1,#GermanyArmy,1 do GermanyArmy[i]:UpdatePosition() end
-        for i=1,#FrenchArmy,1 do FrenchArmy[i]:UpdatePosition() end
+        for i=1,#GermanyArmy,1 do GermanyArmy[i]:UpdateAnimation() end
+        for i=1,#FrenchArmy,1 do FrenchArmy[i]:UpdateAnimation() end
     end
     
     local mouseData = Mouse.GetData(true,cumulativeTime)

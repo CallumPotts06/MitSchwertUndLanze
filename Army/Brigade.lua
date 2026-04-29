@@ -170,6 +170,15 @@ function Brigade.New(name,nametypes,team,service,startPos,season)
     newBrigade.Formations = FormationTypes[service]
     newBrigade.UnitClass = "Brigade"
 
+    newBrigade.AnimsToUpdate = {}
+    newBrigade.BattalionsToDraw = {}
+
+    newBrigade.UpdateTick = UnitUpdateTickAllocator
+    UnitUpdateTickAllocator = UnitUpdateTickAllocator + 1
+    if UnitUpdateTickAllocator > 5 then
+        UnitUpdateTickAllocator = 1
+    end
+
 
     --finish up the object--
     setmetatable(newBrigade,{__index=Brigade})--map the new table onto the Battalion class--
@@ -215,9 +224,25 @@ function Brigade:CreateFlagMeshes()
 end
 
 function Brigade:DrawBrigade()
-    for i=1,#self.Regiments,1 do
+    --[[for i=1,#self.Regiments,1 do
         self.Regiments[i]:DrawRegiment()
+    end]]
+
+    for i=#self.BattalionsToDraw,1,-1 do
+        --print("Drawn: "..self.BattalionsToDraw[i].Name)
+        self.BattalionsToDraw[i]:DrawBattalion()
     end
+end
+
+function Brigade:FindSquadPositions()
+    if CameraMoved or ( self.UpdateTick == unitUpdateTick)  then
+        for i=1,#self.Regiments,1 do
+            for i2=1,#self.Regiments[i].Battalions,1 do
+                self.Regiments[i].Battalions[i2]:FindSquadPositions()
+            end
+        end
+    end
+
 end
 
 function Brigade:Moved()
@@ -231,11 +256,16 @@ function Brigade:UpdatePosition()
     for i=1,#self.Regiments,1 do
         self.Regiments[i]:UpdatePosition()
     end
+    self:FindSquadPositions()
 end
 
 function Brigade:UpdateAnimation()
-    for i=1,#self.Regiments,1 do
-        self.Regiments[i]:UpdateAnimation()
+    for i=#self.AnimsToUpdate,1,-1 do
+        self.AnimsToUpdate[i]:UpdateAnimation()
+        if self.AnimsToUpdate[i].CurrentAction ~= "Marching" then 
+            self.AnimsToUpdate[i].ToUpdateAnim = false 
+            table.remove(self.AnimsToUpdate, i)
+        end
     end
 end
 

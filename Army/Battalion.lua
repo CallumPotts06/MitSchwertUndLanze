@@ -63,6 +63,36 @@ ARTY_MARCH_ANIMS = {"March1","March1","Idle","Idle","March2","March2","Idle","Id
 DRAGOON_MARCH_ANIMS = {"MountedMarch1","MountedMarch1","MountedIdle","MountedIdle","MountedMarch2","MountedMarch2","MountedIdle","MountedIdle"}
 
 
+local function checkIfOnScreen(unitPos, service, formation)
+    -- Compute world‑space bounding box
+    local margin = BattalionMargins[service][formation] * 2
+
+    local minPos = Vector.New(unitPos.X - margin, unitPos.Y - margin)
+    local maxPos = Vector.New(unitPos.X + margin, unitPos.Y + margin)
+
+    -- Convert copies to screen space (your method mutates the vector)
+    minPos:ToScreenPosition()
+    maxPos:ToScreenPosition()
+
+    -- Screen bounds
+    local screenW = ScreenX
+    local screenH = ScreenY
+
+    -- OFF‑SCREEN TEST
+    local offScreen =
+        maxPos.X < 0 or          -- left of screen
+        minPos.X > screenW or    -- right of screen
+        maxPos.Y < 0 or          -- above screen
+        minPos.Y > screenH       -- below screen
+
+    -- CULL
+    if offScreen then
+        return false
+    else 
+        return true
+    end
+end
+
 local function shortestAngle(from, to)
     local diff = (to - from + math.pi) % (2 * math.pi) - math.pi
     return diff
@@ -203,8 +233,13 @@ function Battalion.New(name,regiment,team,service,unitType,unitTypeName,startPos
     newBattalion.Season = season
     newBattalion.SkirmishOrderSeed = math.random(1,1000)
     newBattalion.MarchSet = INFANTRY_MARCH_ANIMS
-
+    newBattalion.ToUpdateAnim = false
     newBattalion.NextFormation = nil
+    newBattalion.OnScreen = false
+    newBattalion.OnScreenIndex = 0
+
+    newBattalion.MinPos = Vector.New(0,0,0)
+    newBattalion.MaxPos = Vector.New(0,0,0)
 
     --add game data--
     if service=="Infantry" or service=="Artillery" or service=="Cavalry" then
@@ -361,108 +396,126 @@ end
 
 
 function Battalion:FindSquadPositions()
-    self.Moved = false
-    self:UpdateCurrentImage()
-    local img = self.CurrentImage.Drawable
 
-    --setup data--
-    local n1 = 1
-    local n2 = 2 
-    local direction = "Right"
-    local squadsPerHealth = 1/15 
-    local squadCount = self.Health*squadsPerHealth
-    local positionTable = {}
-    local pos = self.Position 
-    local imgW = img:getWidth()
-    local imgH = img:getHeight()
+    local onScreen = checkIfOnScreen(self.Position, self.BranchofService, self.Formation)
 
-    local tempN = 0
-    local increment = 1
-
-    local offset = Vector.New(0,0)
-
-    if (self.BranchofService=="Artillery") then offset.Y = -60 imgW=150 imgH=400 end
-    if (self.BranchofService=="Infantry") or (self.Formation=="Dismounted") then imgW = 40 imgH = 110 end
-    if (self.BranchofService=="Cavalry") and (not (self.Formation=="Dismounted")) then imgW = 70 imgH = 260 offset.Y=-120 end
-    if (self.Animation=="Guard") then imgW=110 end
-
-    local tempTheta = normalizeAngle(pos.Theta)
-    if tempTheta < 0 then tempTheta = tempTheta + math.rad( 360 ) end
-    pos = Mathematics.VectorFromAddition(pos,offset)
-    pos.Theta = tempTheta
-
-    --lowers the amount of squads if artillery or cavalry--
-    if self.BranchofService == "Artillery" then squadsPerHealth = 1/45 squadCount = (self.Health*squadsPerHealth) end
-    if self.BranchofService == "Cavalry" then squadsPerHealth = 1/25 squadCount = (self.Health*squadsPerHealth) end
-
-    --refines the information for the equations later--
-    if (self.Formation == "BattleLine") or (self.Formation == "FiringLine") or (self.Formation == "Dismounted") or (self.BranchofService == "Cavalry") then
-        direction = "Right"
-        n1 = - math.floor( squadCount / 2 )
-        n2 = math.floor( squadCount / 2 )
-
-        if self.BranchofService=="Artillery" then n1 = 0 end
-        if (pos.Theta > math.rad(180)) and (pos.Theta < math.rad(360)) then tempN = n1 n1 = n2 n2 = tempN increment = -1 end
-
-    elseif (self.Formation == "MarchingColumn") or (self.Formation == "Mounted") then
-        direction = "Forward"
-        n1 = 0
-        n2 = squadCount / 2
-
-        if (self.BranchofService=="Infantry") then n2 = math.ceil(n2 / 2)-1--infantry squads are 2x the size in this formation--
-        else n2 = math.floor(n2 * 1.5) - 1 end
-        if (self.BranchofService=="Artillery") then n2=n2+1 end
-        if (pos.Theta>math.rad(90))and(pos.Theta<math.rad(270)) then tempN = n1 n1 = n2 n2 = tempN increment = -1 end
-
-    elseif self.Formation == "SkirmishOrder" then
-        squadCount = squadCount * 1.5
-        n1 = - math.floor( squadCount / 2 )
-        n2 = math.floor( squadCount / 2 )
-
-    end
-
-    --get to locating the positions of the squads--
-    for n = n1,n2,increment do
-        local newPos = Vector.New(0,0)
-        
-        if not (self.Formation == "SkirmishOrder") then
-            if direction == "Right" then
-                local dx = imgW * n
-                newPos = Mathematics.VectorFromAddition(pos, Mathematics.RightVector(pos,dx))
-                
-            elseif direction == "Forward" then
-                local dy = - ( ( imgH / 1.5 ) * n ) -- changed the denominator from 2 to 1.5 for test --
-                newPos = Mathematics.VectorFromAddition(pos, Mathematics.ForwardVector(pos,dy))
-            
-            end
-        else
-            math.randomseed(self.SkirmishOrderSeed+n)
-            --Front Rank--
-            newPos = Mathematics.VectorFromAddition(Mathematics.RightVector(pos,(n*50)+math.random(-16,16)),pos)
-            newPos = Mathematics.VectorFromAddition(Mathematics.ForwardVector(pos,math.random(-24,24)),newPos)
-
-            math.randomseed(self.SkirmishOrderSeed+(n*2))
-            --Rear Rank--
-            local theta=pos.Theta
-            newPos2 = Vector.New(0,0)
-            newPos2.Theta=theta
-            if n~=0 then
-                --update theta accordingly--
-                if n<0 then theta = Mathematics.AngleFromVector(Mathematics.VectorFromSubtraction(newPos,pos))
-                else theta = Mathematics.AngleFromVector(Mathematics.VectorFromSubtraction(pos,newPos)) end
-                newPos2.Theta=theta
-                newPos2 = Mathematics.VectorFromAddition(Mathematics.RightVector(newPos,(-125)+math.random(-16,16)),newPos)
-            else
-                newPos2 = Mathematics.VectorFromAddition(Mathematics.ForwardVector(newPos,(-125)+math.random(-24,24)),newPos)
-            end
-            newPos2:ToScreenPosition()
-            table.insert(positionTable,newPos2)
+    --// ON SCREEN //--
+    if not onScreen then
+        if self.OnScreen then
+            table.remove(self.Regiment.Brigade.BattalionsToDraw, self.OnScreenIndex)
+            self.OnScreen = false
         end
-        newPos:ToScreenPosition()
-        table.insert(positionTable, newPos)
-    end
+    else
+        if not self.OnScreen then
+            table.insert(self.Regiment.Brigade.BattalionsToDraw, self)
+            self.OnScreen = true
+            self.OnScreenIndex = #self.Regiment.Brigade.BattalionsToDraw
+        end
+        
+        --// CODE THAT DETERMINES WHERE THE SQUADS SHOULD BE DRAWN ON THE SCREEN //--
+        self.Moved = false
+        self:UpdateCurrentImage()
+        local img = self.CurrentImage.Drawable
 
-    self.PositionTable = positionTable
+        --setup data--
+        local n1 = 1
+        local n2 = 2 
+        local direction = "Right"
+        local squadsPerHealth = 1/15 
+        local squadCount = self.Health*squadsPerHealth
+        local positionTable = {}
+        local pos = self.Position 
+        local imgW = img:getWidth()
+        local imgH = img:getHeight()
+
+        local tempN = 0
+        local increment = 1
+
+        local offset = Vector.New(0,0)
+
+        if (self.BranchofService=="Artillery") then offset.Y = -60 imgW=150 imgH=400 end
+        if (self.BranchofService=="Infantry") or (self.Formation=="Dismounted") then imgW = 40 imgH = 110 end
+        if (self.BranchofService=="Cavalry") and (not (self.Formation=="Dismounted")) then imgW = 70 imgH = 260 offset.Y=-120 end
+        if (self.Animation=="Guard") then imgW=110 end
+
+        local tempTheta = normalizeAngle(pos.Theta)
+        if tempTheta < 0 then tempTheta = tempTheta + math.rad( 360 ) end
+        pos = Mathematics.VectorFromAddition(pos,offset)
+        pos.Theta = tempTheta
+
+        --lowers the amount of squads if artillery or cavalry--
+        if self.BranchofService == "Artillery" then squadsPerHealth = 1/45 squadCount = (self.Health*squadsPerHealth) end
+        if self.BranchofService == "Cavalry" then squadsPerHealth = 1/25 squadCount = (self.Health*squadsPerHealth) end
+
+        --refines the information for the equations later--
+        if (self.Formation == "BattleLine") or (self.Formation == "FiringLine") or (self.Formation == "Dismounted") or (self.BranchofService == "Cavalry") then
+            direction = "Right"
+            n1 = - math.floor( squadCount / 2 )
+            n2 = math.floor( squadCount / 2 )
+
+            if self.BranchofService=="Artillery" then n1 = 0 end
+            if (pos.Theta > math.rad(180)) and (pos.Theta < math.rad(360)) then tempN = n1 n1 = n2 n2 = tempN increment = -1 end
+
+        elseif (self.Formation == "MarchingColumn") or (self.Formation == "Mounted") then
+            direction = "Forward"
+            n1 = 0
+            n2 = squadCount / 2
+
+            if (self.BranchofService=="Infantry") then n2 = math.ceil(n2 / 2)-1--infantry squads are 2x the size in this formation--
+            else n2 = math.floor(n2 * 1.5) - 1 end
+            if (self.BranchofService=="Artillery") then n2=n2+1 end
+            if (pos.Theta>math.rad(90))and(pos.Theta<math.rad(270)) then tempN = n1 n1 = n2 n2 = tempN increment = -1 end
+
+        elseif self.Formation == "SkirmishOrder" then
+            squadCount = squadCount * 1.5
+            n1 = - math.floor( squadCount / 2 )
+            n2 = math.floor( squadCount / 2 )
+
+        end
+
+        --get to locating the positions of the squads--
+        for n = n1,n2,increment do
+            local newPos = Vector.New(0,0)
+            
+            if not (self.Formation == "SkirmishOrder") then
+                if direction == "Right" then
+                    local dx = imgW * n
+                    newPos = Mathematics.VectorFromAddition(pos, Mathematics.RightVector(pos,dx))
+                    
+                elseif direction == "Forward" then
+                    local dy = - ( ( imgH / 1.5 ) * n ) -- changed the denominator from 2 to 1.5 for test --
+                    newPos = Mathematics.VectorFromAddition(pos, Mathematics.ForwardVector(pos,dy))
+                
+                end
+            else
+                math.randomseed(self.SkirmishOrderSeed+n)
+                --Front Rank--
+                newPos = Mathematics.VectorFromAddition(Mathematics.RightVector(pos,(n*50)+math.random(-16,16)),pos)
+                newPos = Mathematics.VectorFromAddition(Mathematics.ForwardVector(pos,math.random(-24,24)),newPos)
+
+                math.randomseed(self.SkirmishOrderSeed+(n*2))
+                --Rear Rank--
+                local theta=pos.Theta
+                newPos2 = Vector.New(0,0)
+                newPos2.Theta=theta
+                if n~=0 then
+                    --update theta accordingly--
+                    if n<0 then theta = Mathematics.AngleFromVector(Mathematics.VectorFromSubtraction(newPos,pos))
+                    else theta = Mathematics.AngleFromVector(Mathematics.VectorFromSubtraction(pos,newPos)) end
+                    newPos2.Theta=theta
+                    newPos2 = Mathematics.VectorFromAddition(Mathematics.RightVector(newPos,(-125)+math.random(-16,16)),newPos)
+                else
+                    newPos2 = Mathematics.VectorFromAddition(Mathematics.ForwardVector(newPos,(-125)+math.random(-24,24)),newPos)
+                end
+                newPos2:ToScreenPosition()
+                table.insert(positionTable,newPos2)
+            end
+            newPos:ToScreenPosition()
+            table.insert(positionTable, newPos)
+        end
+
+        self.PositionTable = positionTable
+    end
 end
 
 
@@ -471,30 +524,32 @@ function Battalion:DrawBattalion()
     --update squad positions if necessary--
     if self.Moved then self:FindSquadPositions() end
 
-    --setup local necessary variables--
-    local img = self.CurrentImage
-    local imgSize = Vector.New(img.Drawable:getWidth(),img.Drawable:getHeight())
-    local pos = self.Position
+    if self.OnScreen then
+        --setup local necessary variables--
+        local img = self.CurrentImage
+        local imgSize = Vector.New(img.Drawable:getWidth(),img.Drawable:getHeight())
+        local pos = self.Position
 
-    --create data for flag--
-    local flagPole = Vector.New(0,120*CameraZoom)
-    local flagPos = Vector.New(pos.X+(imgSize.X/2),pos.Y-(imgSize.Y))
-    local flagImg = self.Images.Flags[FlagTick+7]
+        --create data for flag--
+        local flagPole = Vector.New(0,120*CameraZoom)
+        local flagPos = Vector.New(pos.X+(imgSize.X/2),pos.Y-(imgSize.Y))
+        local flagImg = self.Images.Flags[FlagTick+7]
 
-    flagPos:ToScreenPosition()
+        flagPos:ToScreenPosition()
 
-    --draw all the troops' shadows--
-    for i=1,#self.PositionTable,1 do Effects.DrawShadow(img.Drawable,self.PositionTable[i],"Image") end
-    
+        --draw all the troops' shadows--
+        for i=1,#self.PositionTable,1 do Effects.DrawShadow(img.Drawable,self.PositionTable[i],"Image") end
+        
 
-    --set a lighting colour for the troops--
-    Colours.SetColour(Effects.LightingColour(Colours.CreateColour({1,1,1,1})),false)
-    --draw flag, flagpole and soldiers--
-    for i=1,#self.PositionTable,1 do love.graphics.draw(img.Drawable,self.PositionTable[i].X,self.PositionTable[i].Y,0,CameraZoom,CameraZoom) end
-    if self.ColourBattalion then
-        love.graphics.draw(flagImg,flagPos.X,flagPos.Y,0,CameraZoom,CameraZoom)
-        love.graphics.setLineWidth( 3 * CameraZoom )
-        flagPole:DrawVector(flagPos,Effects.LightingColour(Colours.CreateColour({0.2627,0.1569,0.0941,1})))
+        --set a lighting colour for the troops--
+        Colours.SetColour(Effects.LightingColour(Colours.CreateColour({1,1,1,1})),false)
+        --draw flag, flagpole and soldiers--
+        for i=1,#self.PositionTable,1 do love.graphics.draw(img.Drawable,self.PositionTable[i].X,self.PositionTable[i].Y,0,CameraZoom,CameraZoom) end
+        if self.ColourBattalion then
+            love.graphics.draw(flagImg,flagPos.X,flagPos.Y,0,CameraZoom,CameraZoom)
+            love.graphics.setLineWidth( 3 * CameraZoom )
+            flagPole:DrawVector(flagPos,Effects.LightingColour(Colours.CreateColour({0.2627,0.1569,0.0941,1})))
+        end
     end
 end
 
@@ -612,10 +667,12 @@ function Battalion:UpdatePosition()
 
     if (self.Formation ~= self.Regiment.ColourBattalion.NextFormation) then
         if ( self.MoveTarget ) and ( self.NextFormation ~= self.Formation ) then
-            self:UpdateAnimation()
+            
+            self.CurrentAction = "Marching"
+            if not self.ToUpdateAnim then self.ToUpdateAnim = true table.insert(self.Regiment.Brigade.AnimsToUpdate,self) end
+
             local oldTheta = self.Position.Theta
             self.Moved = true
-            self.CurrentAction = "Marching"
             local theta = Mathematics.AngleFromVector( Mathematics.VectorFromSubtraction(self.MoveTarget, self.Position) )
 
             -- if they are moving from skirmish order into any other formation, instantly swap formations --
