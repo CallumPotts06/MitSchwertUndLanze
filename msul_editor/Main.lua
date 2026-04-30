@@ -19,8 +19,8 @@ Screen = require("EditorInterface/Screen")
 EditorScreen = require("InterfaceObjects/EditorScreen")
 
 ---/// EDITOR VARIABLES ///---
-MAP_NAME = "Map1"
-LOAD_MODE = "loadmap"--options, emptymap, loads emptymap, loadmap loads a map given by map name
+MAP_NAME = "Wissembourg"
+LOAD_MODE = "LoadMap"--options, emptymap, loads emptymap, loadmap loads a map given by map name
 
 viewMode = "editor"
 forestType = "Deciduous"
@@ -56,7 +56,7 @@ MapEditor.CurrentMap.Tiles = {}
 MapEditor.CurrentMap.TileCanvases = {}
 MapEditor.CurrentMap.Details = {}
 MapEditor.CurrentMap.Gameplay = {}
-MapEditor.CurrentMap.MapSize = Vector.New(graphics.KILOMETRE * 2.5, graphics.KILOMETRE * 1.5)---initial size---
+MapEditor.CurrentMap.MapSize = Vector.New(graphics.KILOMETRE * 6, graphics.KILOMETRE * 6)---initial size---
 
 MapEditor.Textures = {}
 MapEditor.Textures.Grass = love.image.newImageData("MapTextures/GrassTexture.png")
@@ -65,13 +65,25 @@ MapEditor.Textures.BlueWater = love.image.newImageData("MapTextures/BlueWaterTex
 MapEditor.Textures.Sand = love.image.newImageData("MapTextures/SandTexture.png")
 MapEditor.Textures.Path = love.image.newImageData("MapTextures/Path.png")
 MapEditor.Textures.Road = love.image.newImageData("MapTextures/Road.png")
+MapEditor.Textures.Wheat = love.image.newImageData("MapTextures/Farmland.png")
 
 MapEditor.Details = {}
 MapEditor.Details.DetailIndex = 1
 MapEditor.Details.List = {
 "DeciduousTree1","DeciduousTree2","DeciduousTree3","DeciduousTree4","DeciduousTree5","DeciduousTree6",
 "EvergreenTree1","EvergreenTree2",
+
 "House1","House2","House3","House4","House5","House6",
+"House7","House8","House9","House10","House11","House12",
+"House13","House14","House15","House16","House17",
+
+"Restaurant1","Restaurant2",
+
+"Church1",
+
+"Track0","Track45","Track90","Track135",
+
+"Wheat",
 }
 
 MapEditor.Details.DeciduousTree1 = love.graphics.newImage("MapDetails/OakTree1_Summer.png")
@@ -84,12 +96,19 @@ MapEditor.Details.DeciduousTree6 = love.graphics.newImage("MapDetails/BeechTree1
 MapEditor.Details.EvergreenTree1 = love.graphics.newImage("MapDetails/FirTree1_Summer.png")
 MapEditor.Details.EvergreenTree2 = love.graphics.newImage("MapDetails/FirTree2_Summer.png")
 
-MapEditor.Details.House1 = love.graphics.newImage("MapDetails/ty1.png")
-MapEditor.Details.House2 = love.graphics.newImage("MapDetails/ty2.png")
-MapEditor.Details.House3 = love.graphics.newImage("MapDetails/ty3.png")
-MapEditor.Details.House4 = love.graphics.newImage("MapDetails/ty4.png")
-MapEditor.Details.House5 = love.graphics.newImage("MapDetails/ty5.png")
-MapEditor.Details.House6 = love.graphics.newImage("MapDetails/ty6.png")
+for i = 1,17, 1 do MapEditor.Details["House"..tostring(i)] = love.graphics.newImage("MapDetails/ty"..tostring(i)..".png") end
+
+MapEditor.Details.Restaurant1 = love.graphics.newImage("MapDetails/Restaurant1.png")
+MapEditor.Details.Restaurant2 = love.graphics.newImage("MapDetails/Restaurant2.png")
+
+MapEditor.Details.Church1 = love.graphics.newImage("MapDetails/Church1.png")
+
+MapEditor.Details.Track0 = love.graphics.newImage("MapDetails/Track0.png")
+MapEditor.Details.Track45 = love.graphics.newImage("MapDetails/Track45.png")
+MapEditor.Details.Track90 = love.graphics.newImage("MapDetails/Track90.png")
+MapEditor.Details.Track135 = love.graphics.newImage("MapDetails/Track135.png")
+
+MapEditor.Details.Wheat = love.graphics.newImage("MapDetails/Wheat.png")
 
 
 MapEditor.Gameplay = {}
@@ -125,7 +144,7 @@ MapEditor.Colours.Road = Colours.CreateColour({0.3,0.3,0.3,1})
 ---/// ################################### ///---
 
 function love.load()
-    --local success = love.window.setFullscreen(true)--set the screen to full screen--
+    local success = love.window.setFullscreen(true)--set the screen to full screen--
     ScreenX, ScreenY = love.graphics.getDimensions()
     love.graphics.setDefaultFilter("nearest", "nearest")--removes anti aliasing--
 
@@ -295,6 +314,9 @@ function love.update(dt)
                         local treeran = math.random(1,6)
                         graphics.CreateDetail(posTable[i],"DeciduousTree"..tostring(treeran))
                     end
+                end
+                if ( currentMode == "Wheat" ) and ( math.floor(posTable[i].X) % 120 == 0 ) and ( math.floor(posTable[i].Y) % 45 == 0 ) then
+                    graphics.CreateDetail(posTable[i],"Wheat")
                 end
 
             end

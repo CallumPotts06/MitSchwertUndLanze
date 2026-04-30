@@ -41,7 +41,7 @@ HUD = require("GameStates/Game/GameHUD")
 
 ---/// LOCAL VARIABLES ///---
 local cumulativeTime = 0
-local currentMapPath = "Maps/Map1.map"
+local currentMapPath = "Maps/Wissembourg.map"
 
 ---/// GLOBALS ///---
 FlagTick = -5
@@ -84,59 +84,6 @@ function love.load()
     --load squads for gameplay--
     Squad.LoadAllSquads()
 
-    local tempReg1 = {} local tempReg2 = {} local tempReg3 = {} local tempReg4 = {}
-    tempReg1.Name = "1. Regiment Zu Fuss" tempReg1.UnitType = "DeutscherLineninfanterie" tempReg1.UnitTypeName = "PreussischerLineninfanterie"
-    tempReg2.Name = "2. Regiment Zu Fuss" tempReg2.UnitType = "DeutscherLineninfanterie" tempReg2.UnitTypeName = "HessischLineninfanterie"
-    tempReg3.Name = "3. Regiment Zu Fuss" tempReg3.UnitType = "DeutscherLineninfanterie" tempReg3.UnitTypeName = "SaechsischLineninfanterie"
-    tempReg4.Name = "4. Regiment Zu Fuss" tempReg4.UnitType = "DeutscherLineninfanterie" tempReg4.UnitTypeName = "BadenLineninfanterie"
-    brigade1Names = { tempReg1, tempReg2, tempReg3, tempReg4 }
-    Brigade1 = Brigade.New("1. Brigade",brigade1Names,"Germany","Infantry",Vector.New(3000,3000),"Summer")
-
-    local tempReg5 = {} local tempReg6 = {} local tempReg7 = {} local tempReg8 = {}
-    tempReg5.Name = "5. Regiment Artillerie" tempReg5.UnitType = "DeutscherArtillerie" tempReg5.UnitTypeName = "PreussischerArtillerie"
-    tempReg6.Name = "6. Regiment Artillerie" tempReg6.UnitType = "DeutscherArtillerie" tempReg6.UnitTypeName = "PreussischerArtillerie"
-    tempReg7.Name = "7. Regiment Artillerie" tempReg7.UnitType = "DeutscherArtillerie" tempReg7.UnitTypeName = "PreussischerArtillerie"
-    tempReg8.Name = "8. Regiment Artillerie" tempReg8.UnitType = "DeutscherArtillerie" tempReg8.UnitTypeName = "PreussischerArtillerie"
-    brigade2Names = { tempReg5, tempReg6, tempReg7, tempReg8 }
-    Brigade2 = Brigade.New("2. Brigade",brigade2Names,"Germany","Artillery",Vector.New(500,3000),"Summer")
-
-    local tempReg9 = {} local tempReg10 = {} local tempReg11 = {} local tempReg12 = {}
-    tempReg9.Name = "9. Regiment Uhlanen" tempReg9.UnitType = "PreussischerUhlanen" tempReg9.UnitTypeName = "PreussischerUhlanen"
-    tempReg10.Name = "10. Regiment Uhlanen" tempReg10.UnitType = "PreussischerUhlanen" tempReg10.UnitTypeName = "PreussischerUhlanen"
-    tempReg11.Name = "11. Regiment Husaren" tempReg11.UnitType = "PreussischerHusaren" tempReg11.UnitTypeName = "PreussischerHusaren"
-    tempReg12.Name = "12. Regiment Kuerassiere" tempReg12.UnitType = "PreussischerKuerassiere" tempReg12.UnitTypeName = "PreussischerKuerassiere"
-    brigade3Names = { tempReg9, tempReg10, tempReg11, tempReg12 }
-    Brigade3 = Brigade.New("3. Brigade",brigade3Names,"Germany","Cavalry",Vector.New(1500,3000),"Summer")
-
-    local tempReg13 = {} local tempReg14 = {} local tempReg15 = {} local tempReg16 = {}
-    tempReg13.Name = "13. Regiment Jaegers" tempReg13.UnitType = "DeutscherJaegers" tempReg13.UnitTypeName = "PreussischerJaegers"
-    tempReg14.Name = "14. Regiment Jaegers" tempReg14.UnitType = "DeutscherJaegers" tempReg14.UnitTypeName = "PreussischerJaegers"
-    tempReg15.Name = "15. Regiment Zu Fuss" tempReg15.UnitType = "DeutscherLandwehr" tempReg15.UnitTypeName = "PreussischerLandwehr"
-    tempReg16.Name = "16. Regiment Zu Fuss" tempReg16.UnitType = "DeutscherLandwehr" tempReg16.UnitTypeName = "PreussischerLandwehr"
-    brigade4Names = { tempReg13, tempReg14, tempReg15, tempReg16 }
-    Brigade4 = Brigade.New("4. Brigade",brigade4Names,"Germany","Infantry",Vector.New(3750,3000),"Summer")
-    
-    GermanyArmy = { Brigade1, Brigade2, Brigade3, Brigade4 }
-
-
-
-    local tempReg1 = {} local tempReg2 = {} local tempReg3 = {} local tempReg4 = {}
-    tempReg1.Name = "1er Regiment De Ligne" tempReg1.UnitType = "FrenchLineInfantry" tempReg1.UnitTypeName = "FrenchLineInfantry"
-    tempReg2.Name = "2er Regiment De Ligne" tempReg2.UnitType = "FrenchLineInfantry" tempReg2.UnitTypeName = "FrenchLineInfantry"
-    tempReg3.Name = "3er Regiment De Ligne" tempReg3.UnitType = "FrenchLineInfantry" tempReg3.UnitTypeName = "FrenchLineInfantry"
-    tempReg4.Name = "4er Regiment De Ligne" tempReg4.UnitType = "FrenchLineInfantry" tempReg4.UnitTypeName = "FrenchLineInfantry"
-    brigade5Names = { tempReg1, tempReg2, tempReg3, tempReg4 }
-    Brigade5 = Brigade.New("1er Brigade",brigade5Names,"France","Infantry",Vector.New(5000,1000),"Summer")
-    Brigade6 = Brigade.New("2er Brigade",brigade5Names,"France","Infantry",Vector.New(5600,1000),"Summer")
-    Brigade7 = Brigade.New("3er Brigade",brigade5Names,"France","Infantry",Vector.New(6200,1000),"Summer")
-    Brigade8 = Brigade.New("4er Brigade",brigade5Names,"France","Infantry",Vector.New(6800,1000),"Summer")
-
-    FrenchArmy = { Brigade5, Brigade6, Brigade7, Brigade8 }
-
-    
-
-
-
     --load map, testing --
     MapController.LoadMap( currentMapPath )
 end
@@ -169,10 +116,15 @@ function love.update(dt)
         frameCounter = 0 
         unitUpdateTick = unitUpdateTick + 1
 
-        if unitUpdateTick > 5 then unitUpdateTick = 0 end
-
+        
         for i=1,#GermanyArmy,1 do GermanyArmy[i]:UpdatePosition() end
         for i=1,#FrenchArmy,1 do FrenchArmy[i]:UpdatePosition() end
+    end
+
+    if unitUpdateTime >= 0.2 then
+        unitUpdateTime = unitUpdateTime - 0.2
+        unitUpdateTick = unitUpdateTick + 1
+        if unitUpdateTick > 5 then unitUpdateTick = 0 end
     end
 
 

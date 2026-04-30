@@ -68,6 +68,7 @@ local function findStatsObject(team,unitType)
     if team == "France" then
         teamStats = Stats.FrenchUnits
         if unitType == "FrenchLineInfantry" then typeStats = teamStats.FrenchLineInfantry end
+        if unitType == "FrenchZouaves" then typeStats = teamStats.FrenchZouaves end
     end
 
     return typeStats

@@ -65,7 +65,7 @@ DRAGOON_MARCH_ANIMS = {"MountedMarch1","MountedMarch1","MountedIdle","MountedIdl
 
 local function checkIfOnScreen(unitPos, service, formation)
     -- Compute world‑space bounding box
-    local margin = BattalionMargins[service][formation] * 2
+    local margin = BattalionMargins[service][formation] * 3
 
     local minPos = Vector.New(unitPos.X - margin, unitPos.Y - margin)
     local maxPos = Vector.New(unitPos.X + margin, unitPos.Y + margin)
@@ -84,6 +84,8 @@ local function checkIfOnScreen(unitPos, service, formation)
         minPos.X > screenW or    -- right of screen
         maxPos.Y < 0 or          -- above screen
         minPos.Y > screenH       -- below screen
+
+    if service == "Cavalry" then offScreen = false end
 
     -- CULL
     if offScreen then
@@ -128,6 +130,7 @@ local function findStatsObject(team,unitType)
     if team == "France" then
         teamStats = Stats.FrenchUnits
         if unitType == "FrenchLineInfantry" then typeStats = teamStats.FrenchLineInfantry end
+        if unitType == "FrenchZouaves" then typeStats = teamStats.FrenchZouaves end
     end
 
     return typeStats

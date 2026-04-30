@@ -224,5 +224,18 @@ UnitStats.FrenchUnits.FrenchLineInfantry.Actions = {"Move","Double","Wheel","Tar
 UnitStats.FrenchUnits.FrenchLineInfantry.Formations = {"BattleLine","MarchingColumn","SkirmishOrder"}
 
 
+---/// FRENCH ZOUAVES ///---
+UnitStats.FrenchUnits.FrenchZouaves = {}
+UnitStats.FrenchUnits.FrenchZouaves.Health = 100
+UnitStats.FrenchUnits.FrenchZouaves.Damage = 2
+UnitStats.FrenchUnits.FrenchZouaves.Accuracy = 5/10
+UnitStats.FrenchUnits.FrenchZouaves.MarchSpeed = 6
+UnitStats.FrenchUnits.FrenchZouaves.Morale = 75
+UnitStats.FrenchUnits.FrenchZouaves.Energy = 100
+UnitStats.FrenchUnits.FrenchZouaves.ChargeEnabled = true
+UnitStats.FrenchUnits.FrenchZouaves.Actions = {"Move","Double","Wheel","Target","Charge"}
+UnitStats.FrenchUnits.FrenchZouaves.Formations = {"BattleLine","MarchingColumn","SkirmishOrder"}
+
+
 return UnitStats
 

@@ -173,6 +173,8 @@ function Brigade.New(name,nametypes,team,service,startPos,season)
     newBrigade.AnimsToUpdate = {}
     newBrigade.BattalionsToDraw = {}
 
+    print(name.."   "..service.."   "..UnitUpdateTickAllocator)
+
     newBrigade.UpdateTick = UnitUpdateTickAllocator
     UnitUpdateTickAllocator = UnitUpdateTickAllocator + 1
     if UnitUpdateTickAllocator > 5 then
@@ -224,12 +226,7 @@ function Brigade:CreateFlagMeshes()
 end
 
 function Brigade:DrawBrigade()
-    --[[for i=1,#self.Regiments,1 do
-        self.Regiments[i]:DrawRegiment()
-    end]]
-
     for i=#self.BattalionsToDraw,1,-1 do
-        --print("Drawn: "..self.BattalionsToDraw[i].Name)
         self.BattalionsToDraw[i]:DrawBattalion()
     end
 end
