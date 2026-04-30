@@ -25,13 +25,25 @@ MapController.Textures.BlueWater = love.image.newImageData("Assets/Images/MapTex
 MapController.Textures.Sand = love.image.newImageData("Assets/Images/MapTextures/SandTexture.png")
 MapController.Textures.Path = love.image.newImageData("Assets/Images/MapTextures/Path.png")
 MapController.Textures.Road = love.image.newImageData("Assets/Images/MapTextures/Road.png")
+--MapController.Textures.Wheat = love.image.newImageData("Assets/Images/MapTextures/FarmLand.png")
 
 MapController.Details = {}
 MapController.Details.DetailIndex = 1
 MapController.Details.List = {
 "DeciduousTree1","DeciduousTree2","DeciduousTree3","DeciduousTree4","DeciduousTree5","DeciduousTree6",
 "EvergreenTree1","EvergreenTree2",
+
 "House1","House2","House3","House4","House5","House6",
+"House7","House8","House9","House10","House11","House12",
+"House13","House14","House15","House16","House17",
+
+"Restaurant1","Restaurant2",
+
+"Church1",
+
+"Track0","Track45","Track90","Track135",
+
+"Wheat",
 }
 
 MapController.Details.DeciduousTree1 = love.graphics.newImage("Assets/Images/MapDetails/OakTree1_Summer.png")
@@ -44,12 +56,19 @@ MapController.Details.DeciduousTree6 = love.graphics.newImage("Assets/Images/Map
 MapController.Details.EvergreenTree1 = love.graphics.newImage("Assets/Images/MapDetails/FirTree1_Summer.png")
 MapController.Details.EvergreenTree2 = love.graphics.newImage("Assets/Images/MapDetails/FirTree2_Summer.png")
 
-MapController.Details.House1 = love.graphics.newImage("Assets/Images/MapDetails/ty1.png")
-MapController.Details.House2 = love.graphics.newImage("Assets/Images/MapDetails/ty2.png")
-MapController.Details.House3 = love.graphics.newImage("Assets/Images/MapDetails/ty3.png")
-MapController.Details.House4 = love.graphics.newImage("Assets/Images/MapDetails/ty4.png")
-MapController.Details.House5 = love.graphics.newImage("Assets/Images/MapDetails/ty5.png")
-MapController.Details.House6 = love.graphics.newImage("Assets/Images/MapDetails/ty6.png")
+for i = 1,17, 1 do MapController.Details["House"..tostring(i)] = love.graphics.newImage("Assets/Images/MapDetails/ty"..tostring(i)..".png") end
+
+MapController.Details.Restaurant1 = love.graphics.newImage("Assets/Images/MapDetails/Restaurant1.png")
+MapController.Details.Restaurant2 = love.graphics.newImage("Assets/Images/MapDetails/Restaurant2.png")
+
+MapController.Details.Church1 = love.graphics.newImage("Assets/Images/MapDetails/Church1.png")
+
+MapController.Details.Track0 = love.graphics.newImage("Assets/Images/MapDetails/Track0.png")
+MapController.Details.Track45 = love.graphics.newImage("Assets/Images/MapDetails/Track45.png")
+MapController.Details.Track90 = love.graphics.newImage("Assets/Images/MapDetails/Track90.png")
+MapController.Details.Track135 = love.graphics.newImage("Assets/Images/MapDetails/Track135.png")
+
+MapController.Details.Wheat = love.graphics.newImage("Assets/Images/MapDetails/Wheat.png")
 
 MapController.Gameplay = {}
 MapController.Gameplay.TeamABrigadeCount = 0

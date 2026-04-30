@@ -37,6 +37,9 @@ MenuController = require("GameStates/Menu/MenuController")
 TitleScreen = require("GameStates/Menu/TitleScreen")
 HUD = require("GameStates/Game/GameHUD")
 
+--// IMPORT MAPS //--
+Wissembourg = require("Maps/Wissembourg_rules")
+
 --// END OF IMPORTS //--
 
 ---/// LOCAL VARIABLES ///---
@@ -70,6 +73,8 @@ unitUpdateTick = 1
 unitUpdateTime = 0
 UnitUpdateTickAllocator = 1
 
+Team1 = {}
+Team2 = {}
 
 
 ----//// ** LOVE LOAD FUNCTION ** ////----
@@ -81,11 +86,7 @@ function love.load()
     
     --MenuController.InitialiseMenu("TitleScreen")--open title screen on opening the game
 
-    --load squads for gameplay--
-    Squad.LoadAllSquads()
-
-    --load map, testing --
-    MapController.LoadMap( currentMapPath )
+    Team1, Team2 = Wissembourg.LaunchBattle()
 end
 
 ----//// ** LOVE UPDATE FUNCTION ** ////----
@@ -117,8 +118,8 @@ function love.update(dt)
         unitUpdateTick = unitUpdateTick + 1
 
         
-        for i=1,#GermanyArmy,1 do GermanyArmy[i]:UpdatePosition() end
-        for i=1,#FrenchArmy,1 do FrenchArmy[i]:UpdatePosition() end
+        for i=1,#Team1,1 do Team1[i]:UpdatePosition() end
+        for i=1,#Team2,1 do Team2[i]:UpdatePosition() end
     end
 
     if unitUpdateTime >= 0.2 then
@@ -135,8 +136,8 @@ function love.update(dt)
 
         if AnimTick > 8 then AnimTick = 1  end
 
-        for i=1,#GermanyArmy,1 do GermanyArmy[i]:UpdateAnimation() end
-        for i=1,#FrenchArmy,1 do FrenchArmy[i]:UpdateAnimation() end
+        for i=1,#Team1,1 do Team1[i]:UpdateAnimation() end
+        for i=1,#Team2,1 do Team2[i]:UpdateAnimation() end
     end
     
     local mouseData = Mouse.GetData(true,cumulativeTime)
@@ -145,7 +146,7 @@ function love.update(dt)
     if mouseData.LMBDown then
         local ui = nil
 
-        ui = UnitSelectUI.CheckForUnitClicks( love.keyboard.isDown("lshift"),  {FrenchArmy, GermanArmy}, mouseData )
+        ui = UnitSelectUI.CheckForUnitClicks( love.keyboard.isDown("lshift"),  {Team1, Team2}, mouseData )
 
         if ui then
             CurrentUnitScreen = ui
@@ -157,8 +158,8 @@ function love.update(dt)
     if CurrentUnit then InputControl.ControlUnit(mouseData, CurrentUnit) end
 
     --apply to armies when coded--
-    if CameraMoved then for i=1,#GermanyArmy,1 do GermanyArmy[i]:Moved() end end
-    if CameraMoved then for i=1,#FrenchArmy,1 do FrenchArmy[i]:Moved() end end
+    if CameraMoved then for i=1,#Team1,1 do Team1[i]:Moved() end end
+    if CameraMoved then for i=1,#Team2,1 do Team2[i]:Moved() end end
 end
 
 
@@ -167,7 +168,6 @@ end
 ----//// ** LOVE DRAW FUNCTION ** ////----
 function love.draw()
     Colours.SetColour(Colours.CreateColour(Colours.White))
-    love.graphics.print("FPS="..tostring(fps), 10, 10)
 
     if TimeOfDay>1400 then Effects.CurrentWeather = "Sunny" end
 
@@ -191,9 +191,11 @@ function love.draw()
         Renderer.DrawWithLightingAndShadow( index.Image, index.DrawPos, DetailZoom )
     end
 
-    for i=1,#GermanyArmy,1 do GermanyArmy[i]:DrawBrigade() end
-    for i=1,#FrenchArmy,1 do FrenchArmy[i]:DrawBrigade() end
+    for i=1,#Team1,1 do Team1[i]:DrawBrigade() end
+    for i=1,#Team2,1 do Team2[i]:DrawBrigade() end
 
 
      if CurrentUnitScreen and CurrentUnit then CurrentUnitScreen.Screen:DrawScreen() end
+
+     love.graphics.print("FPS="..tostring(fps), 10, 10)
 end

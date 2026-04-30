@@ -418,6 +418,7 @@ function Battalion:FindSquadPositions()
         --// CODE THAT DETERMINES WHERE THE SQUADS SHOULD BE DRAWN ON THE SCREEN //--
         self.Moved = false
         self:UpdateCurrentImage()
+        if (self.Team == "Germany") and (self.BranchofService == "Infantry")  then print(self.Name..",   "..self.UnitType..",   "..self.UnitTypeName) end
         local img = self.CurrentImage.Drawable
 
         --setup data--
