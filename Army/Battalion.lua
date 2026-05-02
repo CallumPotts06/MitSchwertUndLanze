@@ -72,7 +72,12 @@ local function checkIfOnScreen(unitPos, service, formation)
 
     -- Convert copies to screen space (your method mutates the vector)
     minPos:ToScreenPosition()
-    maxPos:ToScreenPosition()
+maxPos:ToScreenPosition()
+
+    local minX = math.min(minPos.X, maxPos.X)
+    local maxX = math.max(minPos.X, maxPos.X)
+    local minY = math.min(minPos.Y, maxPos.Y)
+    local maxY = math.max(minPos.Y, maxPos.Y)
 
     -- Screen bounds
     local screenW = ScreenX
@@ -80,10 +85,10 @@ local function checkIfOnScreen(unitPos, service, formation)
 
     -- OFF‑SCREEN TEST
     local offScreen =
-        maxPos.X < 0 or          -- left of screen
-        minPos.X > screenW or    -- right of screen
-        maxPos.Y < 0 or          -- above screen
-        minPos.Y > screenH       -- below screen
+        maxX < 0 or
+        minX > screenW or
+        maxY < 0 or
+        minY > screenH
 
     if service == "Cavalry" then offScreen = false end
 
@@ -131,6 +136,8 @@ local function findStatsObject(team,unitType)
         teamStats = Stats.FrenchUnits
         if unitType == "FrenchLineInfantry" then typeStats = teamStats.FrenchLineInfantry end
         if unitType == "FrenchZouaves" then typeStats = teamStats.FrenchZouaves end
+        if unitType == "FrenchChasseurs" then typeStats = teamStats.FrenchChasseurs end
+        if unitType == "FrenchArtillery" then typeStats = teamStats.Artillery end
     end
 
     return typeStats
@@ -410,15 +417,21 @@ function Battalion:FindSquadPositions()
         end
     else
         if not self.OnScreen then
-            table.insert(self.Regiment.Brigade.BattalionsToDraw, self)
             self.OnScreen = true
+
+            for i=#self.Regiment.Brigade.BattalionsToDraw,1,-1 do
+                if self.Regiment.Brigade.BattalionsToDraw[i].Name == self.Name then
+                    table.remove(self.Regiment.Brigade.BattalionsToDraw, i)
+                end
+            end
+
+            table.insert(self.Regiment.Brigade.BattalionsToDraw, self)
             self.OnScreenIndex = #self.Regiment.Brigade.BattalionsToDraw
         end
         
         --// CODE THAT DETERMINES WHERE THE SQUADS SHOULD BE DRAWN ON THE SCREEN //--
         self.Moved = false
         self:UpdateCurrentImage()
-        if (self.Team == "Germany") and (self.BranchofService == "Infantry")  then print(self.Name..",   "..self.UnitType..",   "..self.UnitTypeName) end
         local img = self.CurrentImage.Drawable
 
         --setup data--

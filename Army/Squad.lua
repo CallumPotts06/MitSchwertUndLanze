@@ -319,6 +319,8 @@ function Squads.LoadAllSquads()
     local frenchUnits = {
         {"FrenchLineInfantry","FrenchLineInfantry","Infantry","Seasonal"},
         {"FrenchZouaves","FrenchZouaves","Infantry","Seasonal"},
+        {"FrenchChasseurs","FrenchChasseurs","Infantry","Seasonal"},
+        {"FrenchArtillery","FrenchArtillery","Artillery","None"},
     }
 
     local nations = {germanUnits,frenchUnits}

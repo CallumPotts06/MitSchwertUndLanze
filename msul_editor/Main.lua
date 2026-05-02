@@ -20,7 +20,7 @@ EditorScreen = require("InterfaceObjects/EditorScreen")
 
 ---/// EDITOR VARIABLES ///---
 MAP_NAME = "Wissembourg"
-LOAD_MODE = "LoadMap"--options, emptymap, loads emptymap, loadmap loads a map given by map name
+LOAD_MODE = "emptymap"--options, emptymap, loads emptymap, loadmap loads a map given by map name
 
 viewMode = "editor"
 forestType = "Deciduous"
@@ -56,7 +56,7 @@ MapEditor.CurrentMap.Tiles = {}
 MapEditor.CurrentMap.TileCanvases = {}
 MapEditor.CurrentMap.Details = {}
 MapEditor.CurrentMap.Gameplay = {}
-MapEditor.CurrentMap.MapSize = Vector.New(graphics.KILOMETRE * 6, graphics.KILOMETRE * 6)---initial size---
+MapEditor.CurrentMap.MapSize = Vector.New(graphics.KILOMETRE * 5, graphics.KILOMETRE * 5)---initial size---
 
 MapEditor.Textures = {}
 MapEditor.Textures.Grass = love.image.newImageData("MapTextures/GrassTexture.png")
@@ -70,7 +70,8 @@ MapEditor.Textures.Wheat = love.image.newImageData("MapTextures/Farmland.png")
 MapEditor.Details = {}
 MapEditor.Details.DetailIndex = 1
 MapEditor.Details.List = {
-"DeciduousTree1","DeciduousTree2","DeciduousTree3","DeciduousTree4","DeciduousTree5","DeciduousTree6",
+--"DeciduousTree1","DeciduousTree2","DeciduousTree3","DeciduousTree4","DeciduousTree5","DeciduousTree6",
+"DeciduousGrove1","DeciduousGrove2","DeciduousGrove3","DeciduousGrove4",
 "EvergreenTree1","EvergreenTree2",
 
 "House1","House2","House3","House4","House5","House6",
@@ -85,13 +86,18 @@ MapEditor.Details.List = {
 
 "Wheat",
 }
-
+--[[
 MapEditor.Details.DeciduousTree1 = love.graphics.newImage("MapDetails/OakTree1_Summer.png")
 MapEditor.Details.DeciduousTree2 = love.graphics.newImage("MapDetails/OakTree2_Summer.png")
 MapEditor.Details.DeciduousTree3 = love.graphics.newImage("MapDetails/AshTree1_Summer.png")
 MapEditor.Details.DeciduousTree4 = love.graphics.newImage("MapDetails/AshTree2_Summer.png")
 MapEditor.Details.DeciduousTree5 = love.graphics.newImage("MapDetails/BirchTree1_Summer.png")
-MapEditor.Details.DeciduousTree6 = love.graphics.newImage("MapDetails/BeechTree1_Summer.png")
+MapEditor.Details.DeciduousTree6 = love.graphics.newImage("MapDetails/BeechTree1_Summer.png")]]
+
+MapEditor.Details.DeciduousGrove1 = love.graphics.newImage("MapDetails/DeciduousGrove1.png")
+MapEditor.Details.DeciduousGrove2 = love.graphics.newImage("MapDetails/DeciduousGrove2.png")
+MapEditor.Details.DeciduousGrove3 = love.graphics.newImage("MapDetails/DeciduousGrove3.png")
+MapEditor.Details.DeciduousGrove4 = love.graphics.newImage("MapDetails/DeciduousGrove4.png")
 
 MapEditor.Details.EvergreenTree1 = love.graphics.newImage("MapDetails/FirTree1_Summer.png")
 MapEditor.Details.EvergreenTree2 = love.graphics.newImage("MapDetails/FirTree2_Summer.png")
@@ -306,7 +312,7 @@ function love.update(dt)
                 if not found then table.insert(MapEditor.UpdatedTiles,changed) end
 
                 --if the brush type is forest, add tree details randomly--
-                if ( currentMode == "Forest" ) and ( math.random(1, (15000*(CameraZoom*6)) ) == 1 ) then
+                --[[if ( currentMode == "Forest" ) and ( math.random(1, (15000*(CameraZoom*6)) ) == 1 ) then
                     if forestType == "Evergreen" then
                         local treeran = math.random(1,2)
                         graphics.CreateDetail(posTable[i],"EvergreenTree"..tostring(treeran))
@@ -314,10 +320,7 @@ function love.update(dt)
                         local treeran = math.random(1,6)
                         graphics.CreateDetail(posTable[i],"DeciduousTree"..tostring(treeran))
                     end
-                end
-                if ( currentMode == "Wheat" ) and ( math.floor(posTable[i].X) % 120 == 0 ) and ( math.floor(posTable[i].Y) % 45 == 0 ) then
-                    graphics.CreateDetail(posTable[i],"Wheat")
-                end
+                end]]
 
             end
         end 

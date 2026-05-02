@@ -186,13 +186,14 @@ function love.draw()
         local index = TileQ.Data[i]
         Renderer.DrawWithLighting( index.Canvas, index.DrawPos, TileZoom )
     end
-    for i=1,#DetailQ.Data do
-        local index = DetailQ.Data[i]
-        Renderer.DrawWithLightingAndShadow( index.Image, index.DrawPos, DetailZoom )
-    end
 
     for i=1,#Team1,1 do Team1[i]:DrawBrigade() end
     for i=1,#Team2,1 do Team2[i]:DrawBrigade() end
+
+    for i=1,#DetailQ.Data do
+        local index = DetailQ.Data[i]
+        Renderer.DrawWithLighting( index.Image, index.DrawPos, DetailZoom )
+    end
 
 
      if CurrentUnitScreen and CurrentUnit then CurrentUnitScreen.Screen:DrawScreen() end

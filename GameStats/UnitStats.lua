@@ -237,5 +237,31 @@ UnitStats.FrenchUnits.FrenchZouaves.Actions = {"Move","Double","Wheel","Target",
 UnitStats.FrenchUnits.FrenchZouaves.Formations = {"BattleLine","MarchingColumn","SkirmishOrder"}
 
 
+---/// FRENCH CHASSEURS ///---
+UnitStats.FrenchUnits.FrenchChasseurs = {}
+UnitStats.FrenchUnits.FrenchChasseurs.Health = 100
+UnitStats.FrenchUnits.FrenchChasseurs.Damage = 2
+UnitStats.FrenchUnits.FrenchChasseurs.Accuracy = 5/10
+UnitStats.FrenchUnits.FrenchChasseurs.MarchSpeed = 6
+UnitStats.FrenchUnits.FrenchChasseurs.Morale = 75
+UnitStats.FrenchUnits.FrenchChasseurs.Energy = 100
+UnitStats.FrenchUnits.FrenchChasseurs.ChargeEnabled = true
+UnitStats.FrenchUnits.FrenchChasseurs.Actions = {"Move","Double","Wheel","Target","Charge"}
+UnitStats.FrenchUnits.FrenchChasseurs.Formations = {"BattleLine","MarchingColumn","SkirmishOrder"}
+
+
+----//// ARTILLERY -- ARTILLERY -- ARTILLERY ////----
+---/// FRENCH ARTILLERY ///---
+UnitStats.FrenchUnits.Artillery = {}
+UnitStats.FrenchUnits.Artillery.Health = 80
+UnitStats.FrenchUnits.Artillery.Damage = 10
+UnitStats.FrenchUnits.Artillery.Accuracy = 5/10
+UnitStats.FrenchUnits.Artillery.MarchSpeed = 6
+UnitStats.FrenchUnits.Artillery.Morale = 80
+UnitStats.FrenchUnits.Artillery.Energy = 100
+UnitStats.FrenchUnits.Artillery.ChargeEnabled = false
+UnitStats.FrenchUnits.Artillery.Actions = {"Move","Wheel","Target"}
+UnitStats.FrenchUnits.Artillery.Formations = {"FiringLine","MarchingColumn"}
+
 return UnitStats
 

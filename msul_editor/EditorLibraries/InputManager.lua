@@ -39,12 +39,12 @@ end
 function InputControl.MoveCamera(input)
     CameraMoved = true
 
-    if input=="Up" then CameraPosition.Y = CameraPosition.Y + 10 
-    elseif input=="Down" then CameraPosition.Y = CameraPosition.Y - 10 
-    elseif input=="Left" then CameraPosition.X = CameraPosition.X + 10 
-    elseif input=="Right" then CameraPosition.X = CameraPosition.X - 10 
-    elseif input=="ZoomIn" then CameraZoom = CameraZoom * 1.01
-    elseif input=="ZoomOut" then CameraZoom = CameraZoom / 1.01 end
+    if input=="Up" then CameraPosition.Y = CameraPosition.Y + 15 
+    elseif input=="Down" then CameraPosition.Y = CameraPosition.Y - 15 
+    elseif input=="Left" then CameraPosition.X = CameraPosition.X + 15 
+    elseif input=="Right" then CameraPosition.X = CameraPosition.X - 15 
+    elseif (input=="ZoomIn") and (CameraZoom<2) then CameraZoom = CameraZoom * 1.01
+    elseif (input=="ZoomOut") and (CameraZoom>0.1) then CameraZoom = CameraZoom / 1.01 end
 end
 
 

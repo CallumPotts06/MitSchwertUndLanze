@@ -13,8 +13,8 @@ graphics.MapScaleFactor = 4
 graphics.MapTileSize = 1024
 
 --battalion frontage = 315px, say its equal to 250m, let kilometre = 315 * 4 ~ 3300 (rounded up to 4000), where 1000/250 = 4
-graphics.KILOMETRE = 4000
-graphics.ROAD_WIDTH =  650
+graphics.KILOMETRE = 3500
+graphics.ROAD_WIDTH =  625
 
 drawGridLines = true
 
