@@ -30,7 +30,8 @@ MapController.Textures.Road = love.image.newImageData("Assets/Images/MapTextures
 MapController.Details = {}
 MapController.Details.DetailIndex = 1
 MapController.Details.List = {
-"DeciduousTree1","DeciduousTree2","DeciduousTree3","DeciduousTree4","DeciduousTree5","DeciduousTree6",
+--"DeciduousTree1","DeciduousTree2","DeciduousTree3","DeciduousTree4","DeciduousTree5","DeciduousTree6",
+"DeciduousGrove1","DeciduousGrove2","DeciduousGrove3","DeciduousGrove4",
 "EvergreenTree1","EvergreenTree2",
 
 "House1","House2","House3","House4","House5","House6",
@@ -45,13 +46,18 @@ MapController.Details.List = {
 
 "Wheat",
 }
+--[[
+MapEditor.Details.DeciduousTree1 = love.graphics.newImage("MapDetails/OakTree1_Summer.png")
+MapEditor.Details.DeciduousTree2 = love.graphics.newImage("MapDetails/OakTree2_Summer.png")
+MapEditor.Details.DeciduousTree3 = love.graphics.newImage("MapDetails/AshTree1_Summer.png")
+MapEditor.Details.DeciduousTree4 = love.graphics.newImage("MapDetails/AshTree2_Summer.png")
+MapEditor.Details.DeciduousTree5 = love.graphics.newImage("MapDetails/BirchTree1_Summer.png")
+MapEditor.Details.DeciduousTree6 = love.graphics.newImage("MapDetails/BeechTree1_Summer.png")]]
 
-MapController.Details.DeciduousTree1 = love.graphics.newImage("Assets/Images/MapDetails/OakTree1_Summer.png")
-MapController.Details.DeciduousTree2 = love.graphics.newImage("Assets/Images/MapDetails/OakTree2_Summer.png")
-MapController.Details.DeciduousTree3 = love.graphics.newImage("Assets/Images/MapDetails/AshTree1_Summer.png")
-MapController.Details.DeciduousTree4 = love.graphics.newImage("Assets/Images/MapDetails/AshTree2_Summer.png")
-MapController.Details.DeciduousTree5 = love.graphics.newImage("Assets/Images/MapDetails/BirchTree1_Summer.png")
-MapController.Details.DeciduousTree6 = love.graphics.newImage("Assets/Images/MapDetails/BeechTree1_Summer.png")
+MapController.Details.DeciduousGrove1 = love.graphics.newImage("Assets/Images/MapDetails/DeciduousGrove1.png")
+MapController.Details.DeciduousGrove2 = love.graphics.newImage("Assets/Images/MapDetails/DeciduousGrove2.png")
+MapController.Details.DeciduousGrove3 = love.graphics.newImage("Assets/Images/MapDetails/DeciduousGrove3.png")
+MapController.Details.DeciduousGrove4 = love.graphics.newImage("Assets/Images/MapDetails/DeciduousGrove4.png")
 
 MapController.Details.EvergreenTree1 = love.graphics.newImage("Assets/Images/MapDetails/FirTree1_Summer.png")
 MapController.Details.EvergreenTree2 = love.graphics.newImage("Assets/Images/MapDetails/FirTree2_Summer.png")
