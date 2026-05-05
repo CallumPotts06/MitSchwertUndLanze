@@ -188,6 +188,7 @@ function MapController.LoadMap(filepath)
             return false
         end
         MapController.CurrentMap.MapSize = Vector.New(mapSize[1], mapSize[2])
+        CurrentMapSize = Vector.New(mapSize[1], mapSize[2])
     end
 
     -- initialize map tiles --

@@ -12,6 +12,7 @@ Mouse = require("OtherLibraries/Mouse")
 
 Effects = require("Graphics/Effects")
 Renderer = require("Graphics/Renderer")
+FogofWar = require("Graphics/FogofWar")
 
 InputControl = require("OtherLibraries/InputManager")
 
@@ -47,11 +48,17 @@ local cumulativeTime = 0
 local currentMapPath = "Maps/Wissembourg.map"
 
 ---/// GLOBALS ///---
+PlayerTeam = 1
+
 FlagTick = -5
 AnimTick = 1
 TimeOfDay = 600
 
 ScreenX, ScreenY = 1,1
+CurrentMapSize = Vector.New(0,0)
+
+FogTiles = nil
+FogDivisions = 256
 
 CameraMoved = false
 CameraZoom = 0.6
@@ -115,7 +122,6 @@ function love.update(dt)
         fpsCounterTimer=fpsCounterTimer-0.1
         fps = frameCounter / 0.1
         frameCounter = 0 
-        unitUpdateTick = unitUpdateTick + 1
 
         
         for i=1,#Team1,1 do Team1[i]:UpdatePosition() end
@@ -125,12 +131,17 @@ function love.update(dt)
     if unitUpdateTime >= 0.2 then
         unitUpdateTime = unitUpdateTime - 0.2
         unitUpdateTick = unitUpdateTick + 1
-        if unitUpdateTick > 5 then unitUpdateTick = 0 end
+        if unitUpdateTick > 5 then unitUpdateTick = 1 end
+
+        TimeOfDay=TimeOfDay+0.1
+        if TimeOfDay > 2400 then TimeOfDay=0 end
+
+        FogofWar.renderFog()
     end
 
 
     if unitAnimTimer>=0.125 then 
-        unitAnimTimer=unitAnimTimer-0.125 FlagTick=FlagTick+flagIncrement TimeOfDay=TimeOfDay+0.5 AnimTick=AnimTick+1
+        unitAnimTimer=unitAnimTimer-0.125 FlagTick=FlagTick+flagIncrement AnimTick=AnimTick+1
         if FlagTick > 5 then flagIncrement = -1  end
         if FlagTick < -5 then flagIncrement = 1  end
 
@@ -146,7 +157,9 @@ function love.update(dt)
     if mouseData.LMBDown then
         local ui = nil
 
-        ui = UnitSelectUI.CheckForUnitClicks( love.keyboard.isDown("lshift"),  {Team1, Team2}, mouseData )
+        local currentTeam = Team1
+        if PlayerTeam == 2 then currentTeam = Team2 end
+        ui = UnitSelectUI.CheckForUnitClicks( love.keyboard.isDown("lshift"),  currentTeam, mouseData )
 
         if ui then
             CurrentUnitScreen = ui
@@ -168,8 +181,6 @@ end
 ----//// ** LOVE DRAW FUNCTION ** ////----
 function love.draw()
     Colours.SetColour(Colours.CreateColour(Colours.White))
-
-    if TimeOfDay>1400 then Effects.CurrentWeather = "Sunny" end
 
     --MenuController.DrawMenu()
 
@@ -195,8 +206,10 @@ function love.draw()
         Renderer.DrawWithLighting( index.Image, index.DrawPos, DetailZoom )
     end
 
+    FogofWar.draw(CurrentMapSize.X, CurrentMapSize.Y)
 
-     if CurrentUnitScreen and CurrentUnit then CurrentUnitScreen.Screen:DrawScreen() end
+    if CurrentUnitScreen and CurrentUnit then CurrentUnitScreen.Screen:DrawScreen() end
 
      love.graphics.print("FPS="..tostring(fps), 10, 10)
+     love.graphics.print("Time Of Day :"..tostring(math.floor(TimeOfDay)).."hrs", 10, 40)
 end

@@ -36,21 +36,17 @@ HEALTH_SCORES = {
 
 UnitUI = {}
 
-function UnitUI.CheckForUnitClicks( shift, Armies, mouseData )
+function UnitUI.CheckForUnitClicks( shift, Army, mouseData )
     if shift then
-        for i2 = 1, #Armies do
-            for i = 1, #Armies[i2] do
-                ui = Armies[i2][i]:CheckForClick(mouseData.Position, "Select")
-                if ui then return ui end
-            end
+        for i = 1, #Army do
+            ui = Army[i]:CheckForClick(mouseData.Position, "Select")
+            if ui then return ui end
         end
     else
-        for i2 = 1, #Armies do
-            for i = 1, #Armies[i2] do
-                for r = 1, #Armies[i2][i].Regiments do
-                    ui = Armies[i2][i].Regiments[r]:CheckForClick(mouseData.Position, "Select")
-                    if ui then return ui end
-                end
+        for i = 1, #Army do
+            for r = 1, #Army[i].Regiments do
+                ui = Army[i].Regiments[r]:CheckForClick(mouseData.Position, "Select")
+                if ui then return ui end
             end
         end
     end

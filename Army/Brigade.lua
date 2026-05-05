@@ -134,12 +134,15 @@ local function setupRegiments(nametypes,initbrigade,team,service,startPos,season
 
     local pos = getFormationPositions( service, "MarchingColumn", startPos, false )
 
-    local reg1 = Regiment.New(nametypes[1].Name,initbrigade,team,service,nametypes[1].UnitType,nametypes[1].UnitTypeName,pos[1].Position,season)
-    local reg2 = Regiment.New(nametypes[2].Name,initbrigade,team,service,nametypes[2].UnitType,nametypes[2].UnitTypeName,pos[2].Position,season)
-    local reg3 = Regiment.New(nametypes[3].Name,initbrigade,team,service,nametypes[3].UnitType,nametypes[3].UnitTypeName,pos[3].Position,season)
-    local reg4 = Regiment.New(nametypes[4].Name,initbrigade,team,service,nametypes[4].UnitType,nametypes[4].UnitTypeName,pos[4].Position,season)
+    local regimentCount = 4
+    local regs = { }
 
-    regs = { reg1, reg2, reg3, reg4 }
+    for i=1,#nametypes,1 do if nametypes[i].Name == "null" then regimentCount = regimentCount - 1 end end
+
+    for i=1,regimentCount,1 do 
+        local newReg = Regiment.New(nametypes[i].Name,initbrigade,team,service,nametypes[i].UnitType,nametypes[i].UnitTypeName,pos[i].Position,season)
+        table.insert(regs, newReg)
+    end
     
     for i=1,#regs,1 do
         regs[i].BrigadePosition = i
@@ -172,8 +175,6 @@ function Brigade.New(name,nametypes,team,service,startPos,season)
 
     newBrigade.AnimsToUpdate = {}
     newBrigade.BattalionsToDraw = {}
-
-    print(name.."   "..service.."   "..UnitUpdateTickAllocator)
 
     newBrigade.UpdateTick = UnitUpdateTickAllocator
     UnitUpdateTickAllocator = UnitUpdateTickAllocator + 1
@@ -254,6 +255,8 @@ function Brigade:UpdatePosition()
         self.Regiments[i]:UpdatePosition()
     end
     self:FindSquadPositions()
+
+    self:ScoutMap( false )
 end
 
 function Brigade:UpdateAnimation()
@@ -279,6 +282,14 @@ function Brigade:SelectUnit()
     local ui = UnitSelectUI.Open(self)
 
     return ui
+end
+
+function Brigade:ScoutMap( initScout )
+
+    for i=1,#self.Regiments,1 do
+        self.Regiments[i]:ScoutMap( initScout )
+    end
+
 end
 
 

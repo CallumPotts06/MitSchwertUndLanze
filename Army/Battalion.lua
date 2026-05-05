@@ -65,7 +65,7 @@ DRAGOON_MARCH_ANIMS = {"MountedMarch1","MountedMarch1","MountedIdle","MountedIdl
 
 local function checkIfOnScreen(unitPos, service, formation)
     -- Compute world‑space bounding box
-    local margin = BattalionMargins[service][formation] * 3
+    local margin = BattalionMargins[service][formation] * 4
 
     local minPos = Vector.New(unitPos.X - margin, unitPos.Y - margin)
     local maxPos = Vector.New(unitPos.X + margin, unitPos.Y + margin)
@@ -107,6 +107,10 @@ end
 
 local function normalizeAngle(a)
     return (a + math.pi) % (2 * math.pi) - math.pi
+end
+
+local function normalizeAngleForDrawing(a)
+    return (a % (2 * math.pi) + 2 * math.pi) % (2 * math.pi)
 end
 
 local function findStatsObject(team,unitType)
@@ -288,12 +292,14 @@ end
 
 --// UPDATE THE BATTALION'S CURRENT IMAGE ATTRIBUTE //--
 function Battalion:UpdateCurrentImage()
-    self.Position.Theta = self.Position.Theta % (2 * math.pi)
-    if (self.Position.Theta > math.rad(320)) or (self.Position.Theta < math.rad(45)) then self.Facing="North"
-    elseif (self.Position.Theta >= math.rad(45)) and (self.Position.Theta <= math.rad(135)) then self.Facing="East"
-    elseif (self.Position.Theta >= math.rad(135)) and (self.Position.Theta <= math.rad(225)) then self.Facing="South"
-    elseif (self.Position.Theta >= math.rad(225)) and (self.Position.Theta <= math.rad(320)) then self.Facing="West"
+    local a = normalizeAngleForDrawing(self.Position.Theta)
+
+    if (a > math.rad(320)) or (a < math.rad(45)) then self.Facing="North"
+    elseif (a >= math.rad(45)) and (a <= math.rad(135)) then self.Facing="East"
+    elseif (a >= math.rad(135)) and (a <= math.rad(225)) then self.Facing="South"
+    elseif (a >= math.rad(225)) and (a <= math.rad(320)) then self.Facing="West"
     end
+
 
     local imgFormationSet = nil
     if self.Formation=="BattleLine" then imgFormationSet = self.Images.BattleLine
@@ -334,7 +340,8 @@ end
 --Function maps the current action to the correct animation--
 function Battalion:UpdateAnimation()
     if self.CurrentAction == "Marching" then
-        self.Animation=INFANTRY_MARCH_ANIMS[AnimTick]
+        --self.Animation=INFANTRY_MARCH_ANIMS[AnimTick]
+        self.Animation = self.MarchSet[AnimTick]
         self:UpdateCurrentImage()
         return true
     else
@@ -455,13 +462,13 @@ function Battalion:FindSquadPositions()
         if (self.BranchofService=="Cavalry") and (not (self.Formation=="Dismounted")) then imgW = 70 imgH = 260 offset.Y=-120 end
         if (self.Animation=="Guard") then imgW=110 end
 
-        local tempTheta = normalizeAngle(pos.Theta)
-        if tempTheta < 0 then tempTheta = tempTheta + math.rad( 360 ) end
+        local tempTheta = normalizeAngleForDrawing(pos.Theta) --normalizeAngle(pos.Theta)
+        --if tempTheta < 0 then tempTheta = tempTheta + math.rad( 360 ) end
         pos = Mathematics.VectorFromAddition(pos,offset)
         pos.Theta = tempTheta
 
         --lowers the amount of squads if artillery or cavalry--
-        if self.BranchofService == "Artillery" then squadsPerHealth = 1/45 squadCount = (self.Health*squadsPerHealth) end
+        if self.BranchofService == "Artillery" then squadsPerHealth = 1/45 squadCount = 1 end
         if self.BranchofService == "Cavalry" then squadsPerHealth = 1/25 squadCount = (self.Health*squadsPerHealth) end
 
         --refines the information for the equations later--
@@ -619,9 +626,6 @@ function Battalion:WheelUnit(theta1, theta2, omega)
     local dTheta = shortestAngle(theta1, theta2)
     local direction = dTheta > 0 and 1 or -1
     local magnitude = math.abs(dTheta)
-
-    --print(dTheta)
-    --if magnitude > 0 then print(magnitude.." , "..math.rad( 90 ).."  Form="..self.Formation) end
     
     if ( magnitude > math.rad( 90 ) ) and ( self.Formation ~= "MarchingColumn" ) then
         -- do an about face if that makes the total turn faster, not in marching column though (as per the if statement) --
@@ -712,9 +716,9 @@ function Battalion:UpdatePosition()
                         
                     else
 
-                        self:MoveUnit(currentSpeed, oldTheta)
                         self:WheelUnit(oldTheta, theta, omega)
-
+                        self:MoveUnit(currentSpeed, oldTheta)
+                        
                     end
                     
                     self.Position.Theta = normalizeAngle(self.Position.Theta)

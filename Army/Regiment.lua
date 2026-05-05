@@ -104,9 +104,9 @@ local function setupBattalions(service,name,initregiment,team,unitType,unitTypeN
     local pos2 = Mathematics.VectorFromAddition(startPos, Vector.New(0,bnMargin))
     local pos3 = Mathematics.VectorFromAddition(startPos, Vector.New(0,bnMargin*2))
 
-    local bn1 = Battalion.New("1st Bn. "..name,initregiment,team,service,unitType,unitTypeName,startPos,season,true)
-    local bn2 = Battalion.New("2nd Bn. "..name,initregiment,team,service,unitType,unitTypeName,pos2,season,false)
-    local bn3 = Battalion.New("3rd Bn. "..name,initregiment,team,service,unitType,unitTypeName,pos3,season,false)
+    local bn1 = Battalion.New("1st Bn "..name,initregiment,team,service,unitType,unitTypeName,startPos,season,true)
+    local bn2 = Battalion.New("2nd Bn "..name,initregiment,team,service,unitType,unitTypeName,pos2,season,false)
+    local bn3 = Battalion.New("3rd Bn "..name,initregiment,team,service,unitType,unitTypeName,pos3,season,false)
 
     bns = { bn1, bn2, bn3 }
     
@@ -353,6 +353,41 @@ function Regiment:UpdateAnimation()
         self.Battalions[i]:UpdateAnimation()
     end
 end
+function Regiment:ScoutMap(initScout)
+    local viewRadius = 5
+    if self.BranchOfService == "Cavalry" then viewRadius = 8 end
 
+    local scoutPos = self.Position self.Position:ToGamePosition()
+
+    local fogX = math.floor(scoutPos.X / FogDivisions)
+    local fogY = math.floor(scoutPos.Y / FogDivisions)
+
+    if initScout then
+        -- Reveal full circle
+        for y = fogY - viewRadius, fogY + viewRadius do
+            for x = fogX - viewRadius, fogX + viewRadius do
+
+                if y >= 1 and y <= #FogTiles and x >= 1 and x <= #FogTiles[1] then
+                    FogTiles[y][x] = true
+                end
+
+            end
+        end
+
+    else
+        -- Reveal full circle (same logic — no reason to reveal only 4 points)
+        for y = fogY - viewRadius, fogY + viewRadius do
+            for x = fogX - viewRadius, fogX + viewRadius do
+
+                if y >= 1 and y <= #FogTiles and x >= 1 and x <= #FogTiles[1] then
+                    FogTiles[y][x] = true
+                end
+
+            end
+        end
+    end
+
+
+end
 
 return Regiment
