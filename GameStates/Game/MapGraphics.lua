@@ -2,19 +2,20 @@
 graphics = {}
 
 Colours = require("../../Interface/Colours")
+shaders = require("GameStates/Game/MapShaders")
 Vector = require("../../Mathematics/Vector")
 
 --// ############################## //--
 --// CONSTANT VALUES FOR THE MODULE //--
 --// ############################## //--
 
-graphics.DetailScaleFactor = 1.6
-graphics.MapScaleFactor = 4
+graphics.DetailScaleFactor = 1.0
+graphics.MapScaleFactor = 8
 graphics.MapTileSize = 1024
 
---battalion frontage = 315px, say its equal to 250m, let kilometre = 315 * 4 ~ 3300 (rounded up 3500), where 1000/250 = 4
-graphics.KILOMETRE = 3500
-graphics.ROAD_WIDTH =  650
+--battalion frontage = 315px, say its equal to 250m, let kilometre = 315 * 4 ~ 3300 (rounded up to 4000), where 1000/250 = 4
+graphics.KILOMETRE = 4250
+graphics.ROAD_WIDTH =  1650
 
 drawGridLines = true
 
@@ -38,6 +39,7 @@ MapColours.Sand = Colours.CreateColour({0.5,0.5,0.2,1})
 
 local currentVisibleTiles = {}
 local visibleTileDebounce = false
+local currentVisibleDetails = {}
 
 
 
@@ -67,7 +69,7 @@ end
 local function getTerrainTexture(terrain)
     local textureKey = terrain
     if terrain == "Stream" then textureKey = "BlueWater" end
-    return MapController.Textures[textureKey]
+    return MapEditor.Textures[textureKey]
 end
 
 local function getTexturePixel(texture,pos)
@@ -89,14 +91,14 @@ local function createTile(tileIndexX,tileIndexY)
     local newTile = {}
     newTile.IndexPosition = Vector.New(tileIndexX,tileIndexY)
     newTile.Pixels = {}
-    newTile.Canvas = nil
+    newTile.ImageData = love.image.newImageData(graphics.MapTileSize/graphics.MapScaleFactor, graphics.MapTileSize/graphics.MapScaleFactor)
     newTile.Visible = true
 
     --populate the table with default "grass" values--
     for y=1,(graphics.MapTileSize / graphics.MapScaleFactor)+1,1 do
         table.insert(newTile.Pixels,{})
         for x=1,(graphics.MapTileSize / graphics.MapScaleFactor)+1,1 do
-            table.insert(newTile.Pixels[y],"Grass")
+            table.insert(newTile.Pixels[y],1)
         end 
     end 
 
@@ -163,7 +165,7 @@ function graphics.InitialiseMap(mapSize)
         table.insert(tileMap,{})
         for x=1,tileMapWidth,1 do
             table.insert(tileMap[y],createTile(x,y))
-            graphics.UpdateTileCanvas(tileMap[y][x])
+            graphics.UpdateTileData(tileMap[y][x])
         end 
     end
 
@@ -175,46 +177,48 @@ function graphics.InitialiseMap(mapSize)
     --return the new map--
     return tileMap
 end
+--[[
+function graphics.UpdateTileData(tile)
+    local imgData = love.image.newImageData(
+        math.ceil(graphics.MapTileSize/graphics.MapScaleFactor)+1, math.ceil(graphics.MapTileSize/graphics.MapScaleFactor)+1
+    )
 
+    for y = 1, #tile.Pixels do
+        for x = 1, #tile.Pixels[y] do
+            local id = tile.Pixels[y][x]
+            --print("\n\n\nSIZE OF PIXELS:   "..#tile.Pixels[1]..","..#tile.Pixels)
+            print("SIZE OF IMGDAT:   "..imgData:getWidth()..","..imgData:getHeight())
+            print("INDEX POSITION:   "..(x-1)..","..(y-1))
+            imgData:setPixel(x-1, y-1, id, 0, 0, 1)
+        end
+    end
 
+    local mapTexture = love.graphics.newImage(imgData)
+    mapTexture:setFilter("nearest", "nearest")
 
+    tile.ImageData = mapTexture
+end]]
 
+function graphics.UpdateTileData(tile)
+    local imgData = love.image.newImageData(
+        math.ceil(graphics.MapTileSize/graphics.MapScaleFactor)+1, math.ceil(graphics.MapTileSize/graphics.MapScaleFactor)+1
+    )
 
---function that creates or updates the canvas of an individual tile--
-function graphics.UpdateTileCanvas(tile)
-    local pixels = tile.Pixels
-    local newCanvas = love.graphics.newCanvas( #pixels, #pixels )
-    love.graphics.setCanvas( newCanvas )
+    for y = 1, #tile.Pixels do
+        for x = 1, #tile.Pixels[y] do
+            local id = tile.Pixels[y][x]
+            -- encode the atlas index as a byte in the red channel:
+            -- write r = (id - 1) / 255 so shader's idxByte becomes id-1 (0-based)
+            local r = math.max(0, math.min(1, (id - 1) / 255))
+            imgData:setPixel(x-1, y-1, r, 0, 0, 1)
+        end
+    end
 
-    --loop through the tiles pixel table--
-    for y=1,#pixels,1 do
-        for x=1,#pixels[y],1 do
+    local mapTexture = love.graphics.newImage(imgData)
+    mapTexture:setFilter("nearest", "nearest")
 
-            local indexed = pixels[y][x]
-            local texture = getTerrainTexture(indexed)
-
-            if texture then
-                local textureColour = getTexturePixel(texture,Vector.New(x,y))
-                Colours.SetColour(textureColour)
-                love.graphics.points(x,y)
-            else
-                local colour = updateColour(indexed)
-                Colours.SetColour(colour)
-                love.graphics.points(x,y)
-            end
-        end 
-    end 
-        
-    --reset canvas to screen (default)--
-    love.graphics.setCanvas( )
-    --reset colour--
-    Colours.ResetColour( )
-
-    --update the tiles' canvas property--
-    tile.Canvas = newCanvas
-end 
-    
-
+    tile.ImageData = mapTexture
+end
 
 
 --function that draws all the visible tiles onto the screen--
@@ -224,6 +228,8 @@ function graphics.DrawMap(map,camMoved)
 
     --DRAWING TILES--
     if ( camMoved )  then
+        print("Camera Moved")
+
         currentVisibleTiles = {}
         currentVisibleDetails = {}
 
@@ -234,21 +240,19 @@ function graphics.DrawMap(map,camMoved)
                 local pos = Vector.New( (x-1) * graphics.MapTileSize, (y-1) * graphics.MapTileSize)
                 pos:ToScreenPosition()
 
-                --code for effects / lighting --
-                -- ... ... --
-                -- end  of code for lighting --
+                print("POS = "..pos.X..","..pos.Y)
 
-                if checkIfOnScreen(indexTile) then
+                if graphics.CheckIfOnScreen(indexTile) then
                     table.insert(currentVisibleTiles,indexTile)
-                    love.graphics.draw(indexTile.Canvas, pos.X, pos.Y, 0, tileZoom, tileZoom)
+                    shaders.DrawTile(indexTile.ImageData, pos.X, pos.Y, tileZoom, tileZoom)
                 end
             end
         end
 
-        local detailList = MapController.CurrentMap.Details
+        local detailList = MapEditor.CurrentMap.Details
         for i=1,#detailList,1 do
             local detail = detailList[i]
-            if checkIfDetailOnScreen(detail) then
+            if graphics.CheckIfDetailOnScreen(detail) then
                 table.insert(currentVisibleDetails, detail)
                 local pos = Vector.New(detail.Pos.X, detail.Pos.Y)
                 pos:ToScreenPosition()
@@ -261,7 +265,7 @@ function graphics.DrawMap(map,camMoved)
         for i=1,#currentVisibleTiles,1 do
             local pos = Vector.New( (currentVisibleTiles[i].IndexPosition.X-1) * graphics.MapTileSize, (currentVisibleTiles[i].IndexPosition.Y-1) * graphics.MapTileSize)
             pos:ToScreenPosition()
-            love.graphics.draw(currentVisibleTiles[i].Canvas, pos.X, pos.Y, 0, tileZoom, tileZoom)
+            shaders.DrawTile(currentVisibleTiles[i].ImageData, pos.X, pos.Y, tileZoom, tileZoom)
         end 
 
 
@@ -273,10 +277,10 @@ function graphics.DrawMap(map,camMoved)
 
     end 
 
-    for i=1,#MapController.CurrentMap.Gameplay,1 do
-        local pos = Vector.New(MapController.CurrentMap.Gameplay[i].Pos.X, MapController.CurrentMap.Gameplay[i].Pos.Y)
+    for i=1,#MapEditor.CurrentMap.Gameplay,1 do
+        local pos = Vector.New(MapEditor.CurrentMap.Gameplay[i].Pos.X, MapEditor.CurrentMap.Gameplay[i].Pos.Y)
         pos:ToScreenPosition()
-        love.graphics.draw(MapController.CurrentMap.Gameplay[i].Image,pos.X,pos.Y,0,cameraZoom,cameraZoom)
+        love.graphics.draw(MapEditor.CurrentMap.Gameplay[i].Image,pos.X,pos.Y,0,CameraZoom,CameraZoom)
     end
 
 
@@ -310,17 +314,17 @@ end
 function graphics.CreateDetail(pos,detail)
     local newDetail = {}
     newDetail.Type = detail
-    newDetail.Image = MapController.Details[detail]
+    newDetail.Image = MapEditor.Details[detail]
     newDetail.Pos = Vector.New( pos.X - ( ( newDetail.Image:getWidth() * graphics.DetailScaleFactor ) / 2 ), pos.Y - ( ( newDetail.Image:getHeight() * graphics.DetailScaleFactor ) / 1.5 )  )
-    table.insert(MapController.CurrentMap.Details,newDetail)
+    table.insert(MapEditor.CurrentMap.Details,newDetail)
 end
 
 function graphics.CreateGameplay(pos,game)
     local newGame = {}
     newGame.Type = game
-    newGame.Image = MapController.Gameplay[game]
+    newGame.Image = MapEditor.Gameplay[game]
     newGame.Pos = Vector.New( pos.X - newGame.Image:getWidth(), pos.Y -  newGame.Image:getHeight() )
-    table.insert(MapController.CurrentMap.Gameplay,newGame)
+    table.insert(MapEditor.CurrentMap.Gameplay,newGame)
 end
 
 function graphics.RemoveDetail(pos,detailList)
@@ -460,9 +464,11 @@ function graphics.GetVisibleTiles()
     local maxY = camMinY + tilesDown + 1
 
     -- Loop only through tiles that *might* be visible
+    -- Loop only through tiles that *might* be visible. Use the current map tiles (MapEditor.CurrentMap.Tiles) when available.
+    local tiles = MapEditor and MapEditor.CurrentMap and MapEditor.CurrentMap.Tiles or nil
     for x = minX, maxX do
         for y = minY, maxY do
-            local tile = Map[x] and Map[x][y]
+            local tile = tiles and tiles[y] and tiles[y][x]
             if tile then
                 table.insert(visibleTiles, tile)
             end

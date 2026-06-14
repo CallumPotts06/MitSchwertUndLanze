@@ -2,6 +2,7 @@ MapController = {}
 
 --// link the map graphics library //--
 graphics = require("GameStates/Game/MapGraphics")
+shaders = require("GameStates/Game/MapShaders")
 Queue = require("Mathematics/Queue")
 
 
@@ -158,6 +159,7 @@ end
 ----//// ################# ////----
 ----//// LOAD MAP FUNCTION ////----
 ----//// ################# ////----
+-- function that loads a map from a specified filepath --
 function MapController.LoadMap(filepath)
     local data = love.filesystem.read(filepath)
     if not data then
@@ -188,14 +190,13 @@ function MapController.LoadMap(filepath)
             return false
         end
         MapController.CurrentMap.MapSize = Vector.New(mapSize[1], mapSize[2])
-        CurrentMapSize = Vector.New(mapSize[1], mapSize[2])
     end
 
     -- initialize map tiles --
     MapController.CurrentMap.Tiles = graphics.InitialiseMap(MapController.CurrentMap.MapSize)
     local tileList = graphics.ListTiles(MapController.CurrentMap.Tiles)
     for i = 1, #tileList do
-        graphics.UpdateTileCanvas(tileList[i])
+        graphics.UpdateTileData(tileList[i])
     end
 
     -- parse terrain --
@@ -227,7 +228,7 @@ function MapController.LoadMap(filepath)
                         index = index + 1
                     end
                 end
-                graphics.UpdateTileCanvas(tile)
+                graphics.UpdateTileData(tile)
             end
         end
     end
@@ -291,9 +292,6 @@ function MapController.LoadMap(filepath)
             end
         end
     end
-
-    MapController.ReturnTiles(true)
-    MapController.ReturnDetails(true)
 
     print("Map loaded successfully from: " .. filepath)
     return true

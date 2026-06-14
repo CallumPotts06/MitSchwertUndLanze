@@ -362,6 +362,7 @@ function Regiment:ScoutMap(initScout)
     local fogX = math.floor(scoutPos.X / FogDivisions)
     local fogY = math.floor(scoutPos.Y / FogDivisions)
 
+    --[[
     if initScout then
         -- Reveal full circle
         for y = fogY - viewRadius, fogY + viewRadius do
@@ -386,7 +387,7 @@ function Regiment:ScoutMap(initScout)
             end
         end
     end
-
+    ]]
 
 end
 

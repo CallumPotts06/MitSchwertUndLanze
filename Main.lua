@@ -58,10 +58,10 @@ ScreenX, ScreenY = 1,1
 CurrentMapSize = Vector.New(0,0)
 
 FogTiles = nil
-FogDivisions = 256
+FogDivisions = 128
 
 CameraMoved = false
-CameraZoom = 0.6
+CameraZoom = 1
 CameraPosition = Vector.New(0,0,0)
 
 CurrentUnit = false
@@ -195,7 +195,8 @@ function love.draw()
 
     for i=1,#TileQ.Data do
         local index = TileQ.Data[i]
-        Renderer.DrawWithLighting( index.Canvas, index.DrawPos, TileZoom )
+        Shader.DrawTile(index.ImageData, index.DrawPos.X, index.DrawPos.Y, TileZoom, TileZoom)
+        --Renderer.DrawWithLighting( index.ImageData, index.DrawPos, TileZoom )
     end
 
     for i=1,#Team1,1 do Team1[i]:DrawBrigade() end
