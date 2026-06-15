@@ -72,7 +72,7 @@ local function checkIfOnScreen(unitPos, service, formation)
 
     -- Convert copies to screen space (your method mutates the vector)
     minPos:ToScreenPosition()
-maxPos:ToScreenPosition()
+    maxPos:ToScreenPosition()
 
     local minX = math.min(minPos.X, maxPos.X)
     local maxX = math.max(minPos.X, maxPos.X)
@@ -563,13 +563,14 @@ function Battalion:DrawBattalion()
 
         --draw all the troops' shadows--
         for i=1,#self.PositionTable,1 do Effects.DrawShadow(img.Drawable,self.PositionTable[i],"Image") end
-        
 
         --set a lighting colour for the troops--
         Colours.SetColour(Effects.LightingColour(Colours.CreateColour({1,1,1,1})),false)
         --draw flag, flagpole and soldiers--
         for i=1,#self.PositionTable,1 do love.graphics.draw(img.Drawable,self.PositionTable[i].X,self.PositionTable[i].Y,0,CameraZoom,CameraZoom) end
         if self.ColourBattalion then
+            print("CLR POS = "..self.Position.X..","..self.Position.Y)
+
             love.graphics.draw(flagImg,flagPos.X,flagPos.Y,0,CameraZoom,CameraZoom)
             love.graphics.setLineWidth( 3 * CameraZoom )
             flagPole:DrawVector(flagPos,Effects.LightingColour(Colours.CreateColour({0.2627,0.1569,0.0941,1})))

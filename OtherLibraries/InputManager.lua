@@ -74,7 +74,7 @@ function InputControl.MoveCamera(input)
         -- Adjust camera so world point stays at screen center
         CameraPosition.X = screenCenterX - (worldX * CameraZoom)
         CameraPosition.Y = screenCenterY - (worldY * CameraZoom)
-    elseif (input=="ZoomOut") and (CameraZoom>0.3) then 
+    elseif (input=="ZoomOut") and (CameraZoom>0.125) then 
         local sw, sh = love.graphics.getWidth(), love.graphics.getHeight()
         local screenCenterX, screenCenterY = sw / 2, sh / 2
         
