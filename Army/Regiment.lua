@@ -357,7 +357,7 @@ function Regiment:ScoutMap(initScout)
     local viewRadius = 5
     if self.BranchOfService == "Cavalry" then viewRadius = 8 end
 
-    local scoutPos = self.Position self.Position:ToGamePosition()
+    local scoutPos = self.Position --self.Position:ToGamePosition()
 
     local fogX = math.floor(scoutPos.X / FogDivisions)
     local fogY = math.floor(scoutPos.Y / FogDivisions)

@@ -743,7 +743,7 @@ function Battalion:UpdatePosition()
             end
         end
     end
-    if self.ColourBattalion then self.Regiment.Position = self.Regiment.ColourBattalion.Position end
+    if self.ColourBattalion then self.Regiment.Position = self.Position end
 end
 
 --// FINISH UP BY RETURNING THE NEW OBJECT BACK TO MAIN //--

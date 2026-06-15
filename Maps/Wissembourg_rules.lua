@@ -115,10 +115,6 @@ function maprules.LaunchBattle()
 
 
 
-
-
-
-
     ---/// ############ ///---
     ---/// LOAD THE MAP ///---
     ---/// ############ ///---
