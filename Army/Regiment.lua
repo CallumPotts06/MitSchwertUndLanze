@@ -141,6 +141,10 @@ function Regiment.New(name,brigade,team,service,unitType,unitTypeName,startPos,s
     newRegiment.ColourBattalion = newBns[1]
     newRegiment.BrigadePosition = 0
 
+    newRegiment.Destroyed = false
+    newRegiment.InRetreat = false
+    newRegiment.OverrideFire = false
+
     --add mathematical data--
     newRegiment.Position = startPos
 
@@ -150,15 +154,20 @@ function Regiment.New(name,brigade,team,service,unitType,unitTypeName,startPos,s
     newRegiment.Health = currentStats.Health
     newRegiment.Damage = currentStats.Damage
     newRegiment.Accuracy = currentStats.Accuracy
+    newRegiment.MaxRange = currentStats.MaxRange
+    newRegiment.FireRate = currentStats.FireRate
     newRegiment.MarchSpeed = currentStats.MarchSpeed
     newRegiment.Morale = currentStats.Morale
     newRegiment.ChargeEnabled = currentStats.ChargeEnabled
     newRegiment.Actions = currentStats.Actions
     newRegiment.Formations = currentStats.Formations
+    newRegiment.AccuracyFunction = currentStats.AccuracyFunction
 
+    newRegiment.CurrentTarget = nil
     newRegiment.CurrentAction = "Idle"
     newRegiment.InvertedFlanks = false
     newRegiment.RemainingWheel = nil
+    newRegiment.AimingWheelFlag = false
     
     --finish up the object--
     setmetatable(newRegiment,{__index=Regiment})--map the new table onto the Battalion class--
@@ -187,14 +196,119 @@ function Regiment:CreateFlagMeshes()
 end
 
 function Regiment:DrawRegiment()
+    local destroyedBattalions = 0
     for i=1,#self.Battalions,1 do
-        self.Battalions[i]:DrawBattalion()
+        if not self.Battalions[i].Destroyed then
+            self.Battalions[i]:DrawBattalion()
+        else
+            destroyedBattalions = destroyedBattalions + 1
+        end
+    end
+
+    if destroyedBattalions == 3 then
+        self.Destroyed = true
     end
 end
 
 function Regiment:Moved()
     for i=1,#self.Battalions,1 do
         self.Battalions[i].Moved = true
+    end
+end
+
+function Regiment:CheckForEnemies(enemyUnits)
+    local pos1 = self.Position
+    local pos2 = Vector.New(9999999,9999999)  --PRETTY LARGE NUMBER--
+    local magnitude = Mathematics.VectorMagnitude( pos1, pos2 )
+    local nearestEnemy = nil
+
+    for i=1,#enemyUnits,1 do
+        pos2 = enemyUnits[i].Position
+        local newMagnitude = Mathematics.VectorMagnitude( pos1, pos2 )
+
+        if ( newMagnitude < magnitude ) and ( newMagnitude < self.MaxRange ) then
+            magnitude = newMagnitude
+            nearestEnemy = enemyUnits[i]
+        end
+
+    end
+
+    self.CurrentTarget = nil
+    if nearestEnemy then self.CurrentTarget = nearestEnemy else self.AimingWheelFlag = false end
+end
+
+
+
+function Regiment:IndexRandomBattalion()
+    --so that other regiments can index a random bn that exsists (not dead)--
+    local avaliableBns = {}
+    for i=1,#self.Battalions,1 do
+        if not self.Battalions[i].Destroyed then table.insert(avaliableBns, i) end
+    end
+
+    if avaliableBns == 0 then return false end
+    return self.Battalions[avaliableBns[math.random(1,#avaliableBns)]]
+end
+
+
+
+function Regiment:Fire()
+    if (self.OverrideFire)or(self.Formation=="MarchingColumn")or(self.Destroyed) then return nil end
+    if (not self.CurrentTarget)or(self.CurrentTarget.Destroyed) then return nil end
+
+    --wheel to face the enemy--
+    local unitPos = self.Position
+    local angle = Mathematics.AngleFromVector( Mathematics.VectorFromSubtraction( self.CurrentTarget.Position, unitPos ) )
+    local newPos = unitPos newPos.Theta = angle
+    self:MoveRegiment(newPos, angle)
+
+    --update the regiments anim / status--
+    self.CurrentAction = "Aiming"
+    self.AimingWheelFlag = true
+    self:UpdateAnimation()
+
+    --find the amount of guns on the firing line--
+    local aimedBattalions = 0
+    for i=1,#self.Battalions,1 do
+        if not ( ( self.Battalions[i].InRetreat ) or ( self.Battalions[i].Destroyed ) ) then
+            aimedBattalions = aimedBattalions + 1
+        end
+    end
+
+
+    if math.random( 1, ( self.FireRate * 3 ) ) <= aimedBattalions then
+        Audio.PlayEffect( Audio.MusketFire )
+
+
+        local currentBattalion = self:IndexRandomBattalion()
+        if currentBattalion.OnScreen then
+            local postable = currentBattalion.PositionTable
+            local tblLength = #postable
+            local ran = math.random(1,tblLength-1)
+            local fxPos = Vector.New( postable[ran].X, postable[ran].Y )
+            Effects.CreateNewSmoke(fxPos,self.BranchofService)
+        end
+
+
+        magnitude = Mathematics.VectorMagnitude( self.Position, self.CurrentTarget.Position )
+        local hit = self.AccuracyFunction(magnitude, self.MaxRange)
+        local targetBattalion = self.CurrentTarget:IndexRandomBattalion()
+
+        if not targetBattalion then self.CurrentTarget = false
+        else
+            if hit then 
+                targetBattalion.Health = targetBattalion.Health - self.Damage 
+
+            else
+                if targetBattalion.OnScreen then
+                    local postable = targetBattalion.PositionTable
+                    local tblLength = #postable
+                    local ran = math.random(1,tblLength-1)
+                    fxPos = Vector.New( postable[ran].X, postable[ran].Y )
+                    Effects.CreateNewMiss(fxPos)
+                end
+            end
+        end
     end
 end
 
@@ -214,6 +328,7 @@ end
 
 
 function Regiment:ChangeFormation(newFormation, newPos)
+    self.CurrentAction = "Marching"
     self.Position = self.ColourBattalion.Position
 
     local lastFormation = self.Formation
@@ -259,6 +374,8 @@ end
 
 function Regiment:MoveRegiment(newPos, wheel)
     self.RemainingWheel = wheel
+
+    self.CurrentAction = "Marching"
 
     local form = self.Formation
     local originPos = self.Battalions[1].Position
@@ -343,19 +460,23 @@ end
 
 
 function Regiment:UpdatePosition()
-    for i=1,#self.Battalions,1 do
-        self.Battalions[i]:UpdatePosition( self.RemainingWheel )
+    if self.CurrentAction == "Marching" then
+        for i=1,#self.Battalions,1 do
+            self.Battalions[i]:UpdatePosition( self.RemainingWheel )
+        end
     end
 end
 
 function Regiment:UpdateAnimation()
     for i=1,#self.Battalions,1 do
+        --!--
+        self.Battalions[i].CurrentAction = self.CurrentAction
         self.Battalions[i]:UpdateAnimation()
     end
 end
 function Regiment:ScoutMap(initScout)
     local viewRadius = 5
-    if self.BranchOfService == "Cavalry" then viewRadius = 8 end
+    if self.BranchofService == "Cavalry" then viewRadius = 8 end
 
     local scoutPos = self.Position --self.Position:ToGamePosition()
 

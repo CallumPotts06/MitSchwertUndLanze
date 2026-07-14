@@ -109,9 +109,13 @@ local function normalizeAngle(a)
     return (a + math.pi) % (2 * math.pi) - math.pi
 end
 
-local function normalizeAngleForDrawing(a)
+--[[local function normalizeAngleForDrawing(a)
     return (a % (2 * math.pi) + 2 * math.pi) % (2 * math.pi)
+end]]
+local function normalizeAngleForDrawing(a)
+    return a % (2 * math.pi)
 end
+
 
 local function findStatsObject(team,unitType)
     local teamStats = nil
@@ -214,6 +218,9 @@ function Battalion.New(name,regiment,team,service,unitType,unitTypeName,startPos
     newBattalion.UnitType = unitType
     newBattalion.UnitTypeName = unitTypeName
     newBattalion.BranchofService = service
+
+    newBattalion.InRetreat = false
+    newBattalion.Destroyed = false
 
     --add mathematical data--
     newBattalion.Position = startPos
@@ -413,8 +420,12 @@ end
 
 
 function Battalion:FindSquadPositions()
-
     local onScreen = checkIfOnScreen(self.Position, self.BranchofService, self.Formation)
+
+    if self.Health <= 0 then
+        self.Destroyed = true
+        onScreen = false
+    end
 
     --// ON SCREEN //--
     if not onScreen then
@@ -464,6 +475,8 @@ function Battalion:FindSquadPositions()
 
         local tempTheta = normalizeAngleForDrawing(pos.Theta) --normalizeAngle(pos.Theta)
         --if tempTheta < 0 then tempTheta = tempTheta + math.rad( 360 ) end
+        
+
         pos = Mathematics.VectorFromAddition(pos,offset)
         pos.Theta = tempTheta
 
@@ -498,17 +511,20 @@ function Battalion:FindSquadPositions()
         end
 
         --get to locating the positions of the squads--
+        pos.Theta = tempTheta
         for n = n1,n2,increment do
             local newPos = Vector.New(0,0)
             
             if not (self.Formation == "SkirmishOrder") then
                 if direction == "Right" then
                     local dx = imgW * n
-                    newPos = Mathematics.VectorFromAddition(pos, Mathematics.RightVector(pos,dx))
+                    local rv = Mathematics.RightVector( pos, dx )
+                    newPos = Mathematics.VectorFromAddition( pos, rv )
                     
                 elseif direction == "Forward" then
                     local dy = - ( ( imgH / 1.5 ) * n ) -- changed the denominator from 2 to 1.5 for test --
-                    newPos = Mathematics.VectorFromAddition(pos, Mathematics.ForwardVector(pos,dy))
+                    local fv = Mathematics.ForwardVector( pos, dy )
+                    newPos = Mathematics.VectorFromAddition( pos, fv )
                 
                 end
             else
@@ -648,6 +664,7 @@ function Battalion:MoveUnit(speed, theta)
     if Mathematics.VectorMagnitude( self.Position, self.MoveTarget ) < speed then
         self.Position.X = self.MoveTarget.X 
         self.Position.Y = self.MoveTarget.Y
+        if self.ColourBattalion then self.Regiment.OverrideFire = false end
         return true
     else
         local dPos = Mathematics.ForwardVector(self.Position, speed)
@@ -660,6 +677,8 @@ end
 
 function Battalion:UpdatePosition()
     local movetype = "normal"
+
+    if ( self.CurrentAction == "Aiming") and ( not self.Regiment.AimingWheelFlag ) then return nil end
 
     if ( not self.ColourBattalion ) and ( not self.NextFormation ) then --and ( self.Formation == "MarchingColumn" ) then
         movetype = "Wheel"

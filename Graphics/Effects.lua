@@ -166,4 +166,118 @@ function Effects.WeatherColour()
     Colours.ResetColour()
 end
 
+
+
+
+
+
+
+
+----//// ####################################### ////----
+----//// BATTLEFIELD EFFECT FUNCTIONS AND TABLES ////----
+----//// ####################################### ////----
+
+Effects.CurrentSmokeEffects = {}
+Effects.CurrentMissEffects = {}
+
+Effects.SmokeEffects = { 
+    love.graphics.newImage("Assets/Images/Effects/Smoke1.png") 
+}
+
+Effects.MissEffects = { 
+    love.graphics.newImage("Assets/Images/Effects/BulletHit1.png"),
+    love.graphics.newImage("Assets/Images/Effects/BulletHit2.png"),
+    love.graphics.newImage("Assets/Images/Effects/BulletHit3.png"),
+}
+
+
+---/// CREATE EFFECT FUNCTIONS ///---
+function Effects.CreateNewSmoke(pos,size)
+    local object = {}
+
+    object.Position = pos
+    object.Position:ToGamePosition()
+    object.Position = Mathematics.VectorFromAddition( object.Position, Vector.New(15, 30) )
+    object.Size = 1.8
+    object.Age = 0
+    object.End = 15
+    object.SmokeImage = math.random(1,1)
+
+    if size == "Artillery" then object.Size = 5 end
+
+    table.insert(Effects.CurrentSmokeEffects, object)
+end
+
+function Effects.CreateNewMiss(pos)
+    local object = {}
+
+    object.Position = pos
+    object.Position:ToGamePosition()
+    local ranVector = Vector.New( math.random(-40,40), math.random(-40,40) )
+    object.Position = Mathematics.VectorFromAddition( object.Position, ranVector )
+    object.Size = 2.25
+    object.Age = 0
+    object.End = 2.5
+    object.MissImage = math.random(1,3)
+
+    table.insert(Effects.CurrentMissEffects, object)
+end
+
+
+
+---/// EFFECTS UPDATE AND DRAW FUNCRIONS ///---
+function Effects.DrawEffects()
+
+    for i = #Effects.CurrentSmokeEffects,1,-1 do
+        local object = Effects.CurrentSmokeEffects[i]
+
+        local scale = object.Size * CameraZoom
+        scale = scale * ( ( (-1/18) * object.Age ) + 1 )
+
+        local drawPos = Vector.New( object.Position.X, object.Position.Y )
+        drawPos:ToScreenPosition()
+
+        local transparency = ( (-0.2/15) * object.Age ) + 0.2
+        love.graphics.setColor(1, 1, 1, transparency)
+
+        love.graphics.draw(Effects.SmokeEffects[object.SmokeImage], drawPos.X, drawPos.Y, 0, scale, scale)
+    end
+
+    for i = #Effects.CurrentMissEffects,1,-1 do
+        local object = Effects.CurrentMissEffects[i]
+
+        local scale = object.Size * CameraZoom
+
+        local drawPos = Vector.New( object.Position.X, object.Position.Y )
+        drawPos:ToScreenPosition()
+
+        local transparency = ( (-1/3) * object.Age ) + 1
+        love.graphics.setColor(1, 1, 1, transparency)
+
+        love.graphics.draw(Effects.MissEffects[object.MissImage], drawPos.X, drawPos.Y, 0, scale, scale)
+    end
+
+    love.graphics.setColor(1, 1, 1, 1)
+
+end
+
+function Effects.UpdateEffects()
+
+    ---/// SMOKE EFFECTS ///---
+    for i = #Effects.CurrentSmokeEffects,1,-1 do
+        Effects.CurrentSmokeEffects[i].Age = Effects.CurrentSmokeEffects[i].Age + 0.2
+        if Effects.CurrentSmokeEffects[i].Age >= Effects.CurrentSmokeEffects[i].End then
+            table.remove(Effects.CurrentSmokeEffects, i)
+        end
+    end
+
+    ---/// MISS EFFECTS ///---
+    for i = #Effects.CurrentMissEffects,1,-1 do
+        Effects.CurrentMissEffects[i].Age = Effects.CurrentMissEffects[i].Age + 0.2
+        if Effects.CurrentMissEffects[i].Age >= Effects.CurrentMissEffects[i].End then
+            table.remove(Effects.CurrentMissEffects, i)
+        end
+    end
+end
+
 return Effects

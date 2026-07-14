@@ -7,6 +7,7 @@ Font = require("Interface/Font")
 
 Images = require("MediaHandler/Images")
 Sounds = require("MediaHandler/Sounds")
+Audio = require("OtherLibraries/AudioLibrary")
 
 Mouse = require("OtherLibraries/Mouse")
 
@@ -81,7 +82,9 @@ unitUpdateTime = 0
 UnitUpdateTickAllocator = 1
 
 Team1 = {}
+Team1Regiments = {}
 Team2 = {}
+Team2Regiments = {}
 
 
 ----//// ** LOVE LOAD FUNCTION ** ////----
@@ -93,7 +96,7 @@ function love.load()
     
     --MenuController.InitialiseMenu("TitleScreen")--open title screen on opening the game
 
-    Team1, Team2 = Wissembourg.LaunchBattle()
+    Team1, Team1Regiments, Team2, Team2Regiments = Wissembourg.LaunchBattle()
 end
 
 ----//// ** LOVE UPDATE FUNCTION ** ////----
@@ -110,6 +113,8 @@ local map = nil
 function love.update(dt)
     CameraMoved = false
 
+    
+
     cameraTimer = cameraTimer + dt
     fpsCounterTimer = fpsCounterTimer + dt
     frameCounter = frameCounter + 1
@@ -124,8 +129,8 @@ function love.update(dt)
         frameCounter = 0 
 
         
-        for i=1,#Team1,1 do Team1[i]:UpdatePosition() end
-        for i=1,#Team2,1 do Team2[i]:UpdatePosition() end
+        for i=1,#Team1,1 do Team1[i]:UpdatePosition() Team1[i]:Fire() end
+        for i=1,#Team2,1 do Team2[i]:UpdatePosition() Team2[i]:Fire() end
     end
 
     if unitUpdateTime >= 0.2 then
@@ -136,6 +141,7 @@ function love.update(dt)
         TimeOfDay=TimeOfDay+0.1
         if TimeOfDay > 2400 then TimeOfDay=0 end
 
+        Effects.UpdateEffects()
         FogofWar.renderFog()
     end
 
@@ -147,8 +153,8 @@ function love.update(dt)
 
         if AnimTick > 8 then AnimTick = 1  end
 
-        for i=1,#Team1,1 do Team1[i]:UpdateAnimation() end
-        for i=1,#Team2,1 do Team2[i]:UpdateAnimation() end
+        for i=1,#Team1,1 do Team1[i]:UpdateAnimation() Team1[i]:CheckForEnemies( Team2Regiments ) end
+        for i=1,#Team2,1 do Team2[i]:UpdateAnimation() Team2[i]:CheckForEnemies( Team1Regiments ) end
     end
     
     local mouseData = Mouse.GetData(true,cumulativeTime)
@@ -158,11 +164,17 @@ function love.update(dt)
         local ui = nil
 
         local currentTeam = Team1
-        if PlayerTeam == 2 then currentTeam = Team2 end
+        --if PlayerTeam == 2 then currentTeam = Team2 end
         ui = UnitSelectUI.CheckForUnitClicks( love.keyboard.isDown("lshift"),  currentTeam, mouseData )
-
         if ui then
             CurrentUnitScreen = ui
+        end
+
+        --TEST FOR BOTH TEAM CONTROL--
+        currentTeam = Team2
+        ui2 = UnitSelectUI.CheckForUnitClicks( love.keyboard.isDown("lshift"),  currentTeam, mouseData )
+        if ui2 then
+            CurrentUnitScreen = ui2
         end
 
     end
@@ -207,6 +219,7 @@ function love.draw()
         Renderer.DrawWithLighting( index.Image, index.DrawPos, DetailZoom )
     end
 
+    Effects.DrawEffects()
     FogofWar.draw(CurrentMapSize.X, CurrentMapSize.Y)
 
     if CurrentUnitScreen and CurrentUnit then CurrentUnitScreen.Screen:DrawScreen() end

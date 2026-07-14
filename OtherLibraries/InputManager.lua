@@ -138,6 +138,7 @@ function InputControl.ControlUnit(mousedata, unit)
         -- Move Unit To Mouse Position --
         if CurrentUnitControl == "Move" then
             if unit.UnitClass == "Regiment" then
+                if unit.CurrentAction == "Aiming" then unit.OverrideFire = true end
                 unit:MoveRegiment(movePos)
             else
                 unit:MoveBrigade(movePos)

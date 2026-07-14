@@ -52,10 +52,10 @@ function maprules.LaunchBattle()
 
     brigade4Names = { tempReg1, tempReg2, tempReg3, tempReg4 }
 
-    Brigade1 = Brigade.New("1st Brigade",brigade1Names,"France","Infantry",Vector.New(4900,1750),"Summer")
-    Brigade2 = Brigade.New("2nd Brigade",brigade2Names,"France","Infantry",Vector.New(4900,5250),"Summer")
-    Brigade3 = Brigade.New("4th Brigade",brigade3Names,"France","Infantry",Vector.New(4900,9750),"Summer")
-    Brigade4 = Brigade.New("Artillery Brigade",brigade4Names,"France","Artillery",Vector.New(4000,8500),"Summer")
+    Brigade1 = Brigade.New("1st Brigade",brigade1Names,"France","Infantry",Vector.New(13600,7650),"Summer")
+    Brigade2 = Brigade.New("2nd Brigade",brigade2Names,"France","Infantry",Vector.New(13600,14800),"Summer")
+    Brigade3 = Brigade.New("4th Brigade",brigade3Names,"France","Infantry",Vector.New(13600,18700),"Summer")
+    Brigade4 = Brigade.New("Artillery Brigade",brigade4Names,"France","Artillery",Vector.New(13600,13800),"Summer")
 
     local FrenchArmy = { Brigade1, Brigade2, Brigade3, Brigade4 }
 
@@ -105,11 +105,12 @@ function maprules.LaunchBattle()
     brigade6Names = { tempReg1, tempReg2, tempReg3, tempReg4 }
 
 
-    Brigade6 = Brigade.New("Bavarian Brigade",brigade1Names,"Germany","Infantry",Vector.New(22525,2125),"Summer")
+    Brigade6 = Brigade.New("Bavarian Brigade",brigade1Names,"Germany","Infantry",Vector.New(24000,2600),"Summer")
     Brigade7 = Brigade.New("Baden-Wuerttemburg Brigade",brigade2Names,"Germany","Infantry",Vector.New(30600,11050),"Summer")
-    Brigade8 = Brigade.New("Prussian-Hessian Brigade",brigade3Names,"Germany","Infantry",Vector.New(26350,19125),"Summer")
-    Brigade9 = Brigade.New("Artillery Brigade",brigade5Names,"Germany","Artillery",Vector.New(28500,7650),"Summer")
-    Brigade10 = Brigade.New("Cavalry Brigade",brigade6Names,"Germany","Cavalry",Vector.New(26350,7650),"Summer")
+    --Brigade8 = Brigade.New("Prussian-Hessian Brigade",brigade3Names,"Germany","Infantry",Vector.New(27350,18000),"Summer")
+    Brigade8 = Brigade.New("Prussian-Hessian Brigade",brigade3Names,"Germany","Infantry",Vector.New(20000,18000),"Summer")
+    Brigade9 = Brigade.New("Artillery Brigade",brigade5Names,"Germany","Artillery",Vector.New(28500,7000),"Summer")
+    Brigade10 = Brigade.New("Cavalry Brigade",brigade6Names,"Germany","Cavalry",Vector.New(26350,7000),"Summer")
 
     local GermanArmy = { Brigade6,Brigade7,Brigade8,Brigade9,Brigade10 }
 
@@ -141,7 +142,21 @@ function maprules.LaunchBattle()
     -- for the users team, which is GERMANY --
     --for i=1,#GermanArmy,1 do GermanArmy[i]:ScoutMap( true ) end
 
-    return GermanArmy, FrenchArmy 
+    local germanRegs = {}
+    for i=1,#GermanArmy,1 do
+        for i2 = 1,#GermanArmy[i].Regiments,1 do
+            table.insert(germanRegs, GermanArmy[i].Regiments[i2])
+        end
+    end
+
+    local frenchRegs = {}
+    for i=1,#FrenchArmy,1 do
+        for i2 = 1,#FrenchArmy[i].Regiments,1 do
+            table.insert(frenchRegs, FrenchArmy[i].Regiments[i2])
+        end
+    end
+
+    return GermanArmy, germanRegs, FrenchArmy, frenchRegs
 
 end	
 
