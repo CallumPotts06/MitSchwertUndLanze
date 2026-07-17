@@ -19,7 +19,7 @@ Screen = require("Interface/Screen")
 
 --// CONSTANTS //--
 MORALE_SCORES = {
-    "Excited",
+    "Confident",
     "Confident",
     "Uneased",
     "Breaking Point",
@@ -143,11 +143,11 @@ function UnitUI.Open(unit)
     local health local morale local currentActionTxt local currentAction 
 
     if unit.UnitClass ~= "Brigade" then
-        healthIndex = math.floor((unit.Health / unit.MaxHealth) * (#HEALTH_SCORES - 1)) + 1
-        healthScore = "Health:\n\n" .. HEALTH_SCORES[healthIndex]
+        healthIndex = 1--math.floor((unit.Health / unit.MaxHealth) / (#HEALTH_SCORES - 1)) + 1
+        healthScore = "Health:\n\n" .. tostring( unit.Health ) --HEALTH_SCORES[healthIndex]
 
-        moraleIndex = math.floor((unit.Morale / 100) * (#MORALE_SCORES - 1)) + 1
-        moraleScore = "Morale:\n\n" .. MORALE_SCORES[moraleIndex]
+        moraleIndex = 1--math.floor((unit.Morale / 100) / (#MORALE_SCORES - 1)) + 1
+        moraleScore = "Morale:\n\n" .. tostring( unit.Morale ) --MORALE_SCORES[moraleIndex]
         currentAction = "Currently:\n\n"..unit.CurrentAction
     end
 

@@ -150,14 +150,15 @@ function Regiment.New(name,brigade,team,service,unitType,unitTypeName,startPos,s
 
     --add logical / admin data--
     local currentStats = findStatsObject(team,unitTypeName)
-    newRegiment.MaxHealth = currentStats.Health
-    newRegiment.Health = currentStats.Health
+    newRegiment.MaxHealth = currentStats.Health * 3
+    newRegiment.Health = currentStats.Health * 3
     newRegiment.Damage = currentStats.Damage
     newRegiment.Accuracy = currentStats.Accuracy
     newRegiment.MaxRange = currentStats.MaxRange
     newRegiment.FireRate = currentStats.FireRate
     newRegiment.MarchSpeed = currentStats.MarchSpeed
-    newRegiment.Morale = currentStats.Morale
+    newRegiment.MaxMorale = currentStats.Morale * 3
+    newRegiment.Morale = currentStats.Morale * 3
     newRegiment.ChargeEnabled = currentStats.ChargeEnabled
     newRegiment.Actions = currentStats.Actions
     newRegiment.Formations = currentStats.Formations
@@ -204,6 +205,28 @@ function Regiment:DrawRegiment()
             destroyedBattalions = destroyedBattalions + 1
         end
     end
+
+
+    if self.Morale <= 10 then
+        print(self.Name.." Is now in Retreat!")
+
+        self.InRetreat = true
+
+        local theta = 0
+        if self.CurrentTarget then
+            local dPos = Mathematics.VectorFromSubtraction( self.Position, self.CurrentTarget.Position )
+            theta = Mathematics.AngleFromVector( dPos ) 
+        else
+            theta = normalizeAngle( self.Position.Theta - math.rad(180) )
+        end
+
+        local retreatPos = Vector.New( self.Position.X, self.Position.Y )
+        retreatPos.Theta = theta
+        retreatPos = Mathematics.ForwardVector( retreatPos, -6000 )
+
+        self:MoveRegiment( retreatPos )
+    end
+
 
     if destroyedBattalions == 3 then
         self.Destroyed = true
@@ -290,14 +313,18 @@ function Regiment:Fire()
         end
 
 
+        local enemyFormationBonus = 1
+        if self.CurrentTarget.Formation == "MarchingColumn" then enemyFormationBonus = 0.4
+        elseif self.CurrentTarget.Formation == "SkirmishOrder" then enemyFormationBonus = 2 end
         magnitude = Mathematics.VectorMagnitude( self.Position, self.CurrentTarget.Position )
-        local hit = self.AccuracyFunction(magnitude, self.MaxRange)
+        local hit = self.AccuracyFunction(magnitude, self.MaxRange, enemyFormationBonus)
         local targetBattalion = self.CurrentTarget:IndexRandomBattalion()
 
         if not targetBattalion then self.CurrentTarget = false
         else
             if hit then 
                 targetBattalion.Health = targetBattalion.Health - self.Damage 
+                targetBattalion.Regiment.Morale = targetBattalion.Regiment.Morale - self.Damage 
 
             else
                 if targetBattalion.OnScreen then

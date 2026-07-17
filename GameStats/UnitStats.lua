@@ -24,14 +24,14 @@ UnitStats.GermanUnits.PrussianLineInfantry.Accuracy = 5/10
 UnitStats.GermanUnits.PrussianLineInfantry.MaxRange = 3500
 UnitStats.GermanUnits.PrussianLineInfantry.FireRate = 5 -- shots per 10 seconds --
 UnitStats.GermanUnits.PrussianLineInfantry.MarchSpeed = 6
-UnitStats.GermanUnits.PrussianLineInfantry.Morale = 75
+UnitStats.GermanUnits.PrussianLineInfantry.Morale = 60
 UnitStats.GermanUnits.PrussianLineInfantry.Energy = 100
 UnitStats.GermanUnits.PrussianLineInfantry.ChargeEnabled = true
 UnitStats.GermanUnits.PrussianLineInfantry.Actions = {"Move","Double","Wheel","Target","Charge"}
 UnitStats.GermanUnits.PrussianLineInfantry.Formations = {"BattleLine","MarchingColumn","SkirmishOrder"}
-function UnitStats.GermanUnits.PrussianLineInfantry.AccuracyFunction(magnitude, unitrange)
+function UnitStats.GermanUnits.PrussianLineInfantry.AccuracyFunction(magnitude, unitrange, enemyFormationBonus)
     local f = math.floor( ( ( 5 / unitrange ) * magnitude ) + 1 )
-    local ran = math.random(1, f)
+    local ran = math.random(1, math.ceil( f * enemyFormationBonus ) )
     if ran == 1 then return true
     else return false end
 end
@@ -46,14 +46,14 @@ UnitStats.GermanUnits.HessianLineInfantry.Accuracy = 5/10
 UnitStats.GermanUnits.HessianLineInfantry.MaxRange = 3500
 UnitStats.GermanUnits.HessianLineInfantry.FireRate = 5 -- shots per 10 seconds --
 UnitStats.GermanUnits.HessianLineInfantry.MarchSpeed = 6
-UnitStats.GermanUnits.HessianLineInfantry.Morale = 75
+UnitStats.GermanUnits.HessianLineInfantry.Morale = 60
 UnitStats.GermanUnits.HessianLineInfantry.Energy = 100
 UnitStats.GermanUnits.HessianLineInfantry.ChargeEnabled = true
 UnitStats.GermanUnits.HessianLineInfantry.Actions = {"Move","Double","Wheel","Target","Charge"}
 UnitStats.GermanUnits.HessianLineInfantry.Formations = {"BattleLine","MarchingColumn","SkirmishOrder"}
-function UnitStats.GermanUnits.HessianLineInfantry.AccuracyFunction(magnitude, unitrange)
+function UnitStats.GermanUnits.HessianLineInfantry.AccuracyFunction(magnitude, unitrange, enemyFormationBonus)
     local f = math.floor( ( ( 5 / unitrange ) * magnitude ) + 1 )
-    local ran = math.random(1, f)
+    local ran = math.random(1, math.ceil( f * enemyFormationBonus ) )
     if ran == 1 then return true
     else return false end
 end
@@ -66,14 +66,14 @@ UnitStats.GermanUnits.SaxonLineInfantry.Accuracy = 5/10
 UnitStats.GermanUnits.SaxonLineInfantry.MaxRange = 3500
 UnitStats.GermanUnits.SaxonLineInfantry.FireRate = 5 -- shots per 10 seconds --
 UnitStats.GermanUnits.SaxonLineInfantry.MarchSpeed = 6
-UnitStats.GermanUnits.SaxonLineInfantry.Morale = 75
+UnitStats.GermanUnits.SaxonLineInfantry.Morale = 60
 UnitStats.GermanUnits.SaxonLineInfantry.Energy = 100
 UnitStats.GermanUnits.SaxonLineInfantry.ChargeEnabled = true
 UnitStats.GermanUnits.SaxonLineInfantry.Actions = {"Move","Double","Wheel","Target","Charge"}
 UnitStats.GermanUnits.SaxonLineInfantry.Formations = {"BattleLine","MarchingColumn","SkirmishOrder"}
-function UnitStats.GermanUnits.SaxonLineInfantry.AccuracyFunction(magnitude, unitrange)
+function UnitStats.GermanUnits.SaxonLineInfantry.AccuracyFunction(magnitude, unitrange, enemyFormationBonus)
     local f = math.floor( ( ( 5 / unitrange ) * magnitude ) + 1 )
-    local ran = math.random(1, f)
+    local ran = math.random(1, math.ceil( f * enemyFormationBonus ) )
     if ran == 1 then return true
     else return false end
 end
@@ -86,14 +86,14 @@ UnitStats.GermanUnits.BadenLineInfantry.Accuracy = 5/10
 UnitStats.GermanUnits.BadenLineInfantry.MaxRange = 3500
 UnitStats.GermanUnits.BadenLineInfantry.FireRate = 5 -- shots per 10 seconds --
 UnitStats.GermanUnits.BadenLineInfantry.MarchSpeed = 6
-UnitStats.GermanUnits.BadenLineInfantry.Morale = 75
+UnitStats.GermanUnits.BadenLineInfantry.Morale = 60
 UnitStats.GermanUnits.BadenLineInfantry.Energy = 100
 UnitStats.GermanUnits.BadenLineInfantry.ChargeEnabled = true
 UnitStats.GermanUnits.BadenLineInfantry.Actions = {"Move","Double","Wheel","Target","Charge"}
 UnitStats.GermanUnits.BadenLineInfantry.Formations = {"BattleLine","MarchingColumn","SkirmishOrder"}
-function UnitStats.GermanUnits.BadenLineInfantry.AccuracyFunction(magnitude, unitrange)
+function UnitStats.GermanUnits.BadenLineInfantry.AccuracyFunction(magnitude, unitrange, enemyFormationBonus)
     local f = math.floor( ( ( 5 / unitrange ) * magnitude ) + 1 )
-    local ran = math.random(1, f)
+    local ran = math.random(1, math.ceil( f * enemyFormationBonus ) )
     if ran == 1 then return true
     else return false end
 end
@@ -107,34 +107,34 @@ UnitStats.GermanUnits.WuerttemburgLineInfantry.Accuracy = 5/10
 UnitStats.GermanUnits.WuerttemburgLineInfantry.MaxRange = 3500
 UnitStats.GermanUnits.WuerttemburgLineInfantry.FireRate = 5 -- shots per 10 seconds --
 UnitStats.GermanUnits.WuerttemburgLineInfantry.MarchSpeed = 6
-UnitStats.GermanUnits.WuerttemburgLineInfantry.Morale = 75
+UnitStats.GermanUnits.WuerttemburgLineInfantry.Morale = 60
 UnitStats.GermanUnits.WuerttemburgLineInfantry.Energy = 100
 UnitStats.GermanUnits.WuerttemburgLineInfantry.ChargeEnabled = true
 UnitStats.GermanUnits.WuerttemburgLineInfantry.Actions = {"Move","Double","Wheel","Target","Charge"}
 UnitStats.GermanUnits.WuerttemburgLineInfantry.Formations = {"BattleLine","MarchingColumn","SkirmishOrder"}
-function UnitStats.GermanUnits.WuerttemburgLineInfantry.AccuracyFunction(magnitude, unitrange)
+function UnitStats.GermanUnits.WuerttemburgLineInfantry.AccuracyFunction(magnitude, unitrange, enemyFormationBonus)
     local f = math.floor( ( ( 5 / unitrange ) * magnitude ) + 1 )
-    local ran = math.random(1, f)
+    local ran = math.random(1, math.ceil( f * enemyFormationBonus ) )
     if ran == 1 then return true
     else return false end
 end
 
 ---/// PRUSSIAN GARDE ZU FUSS ///---
 UnitStats.GermanUnits.PrussianGuards = {}
-UnitStats.GermanUnits.PrussianGuards.Health = 115
+UnitStats.GermanUnits.PrussianGuards.Health = 120
 UnitStats.GermanUnits.PrussianGuards.Damage = 1
 UnitStats.GermanUnits.PrussianGuards.Accuracy = 5/10
 UnitStats.GermanUnits.PrussianGuards.MaxRange = 3700
 UnitStats.GermanUnits.PrussianGuards.FireRate = 5 -- shots per 10 seconds --
 UnitStats.GermanUnits.PrussianGuards.MarchSpeed = 7
-UnitStats.GermanUnits.PrussianGuards.Morale = 90
+UnitStats.GermanUnits.PrussianGuards.Morale = 95
 UnitStats.GermanUnits.PrussianGuards.Energy = 100
 UnitStats.GermanUnits.PrussianGuards.ChargeEnabled = true
 UnitStats.GermanUnits.PrussianGuards.Actions = {"Move","Double","Wheel","Target","Charge"}
 UnitStats.GermanUnits.PrussianGuards.Formations = {"BattleLine","MarchingColumn","SkirmishOrder"}
-function UnitStats.GermanUnits.PrussianGuards.AccuracyFunction(magnitude, unitrange)
+function UnitStats.GermanUnits.PrussianGuards.AccuracyFunction(magnitude, unitrange, enemyFormationBonus)
     local f = math.floor( ( ( 5 / unitrange ) * magnitude ) + 1 )
-    local ran = math.random(1, f)
+    local ran = math.random(1, math.ceil( f * enemyFormationBonus ) )
     if ran == 1 then return true
     else return false end
 end
@@ -148,14 +148,14 @@ UnitStats.GermanUnits.PrussianJaegers.Accuracy = 5/10
 UnitStats.GermanUnits.PrussianJaegers.MaxRange = 4500
 UnitStats.GermanUnits.PrussianJaegers.FireRate = 5 -- shots per 10 seconds --
 UnitStats.GermanUnits.PrussianJaegers.MarchSpeed = 10
-UnitStats.GermanUnits.PrussianJaegers.Morale = 75
+UnitStats.GermanUnits.PrussianJaegers.Morale = 80
 UnitStats.GermanUnits.PrussianJaegers.Energy = 100
 UnitStats.GermanUnits.PrussianJaegers.ChargeEnabled = true
 UnitStats.GermanUnits.PrussianJaegers.Actions = {"Move","Double","Wheel","Target","Charge"}
 UnitStats.GermanUnits.PrussianJaegers.Formations = {"BattleLine","MarchingColumn","SkirmishOrder"}
-function UnitStats.GermanUnits.PrussianJaegers.AccuracyFunction(magnitude, unitrange)
+function UnitStats.GermanUnits.PrussianJaegers.AccuracyFunction(magnitude, unitrange, enemyFormationBonus)
     local f = math.floor( ( ( 5 / unitrange ) * magnitude ) + 1 )
-    local ran = math.random(1, f)
+    local ran = math.random(1, math.ceil( f * enemyFormationBonus ) )
     if ran == 1 then return true
     else return false end
 end
@@ -168,14 +168,14 @@ UnitStats.GermanUnits.Landwehr.Accuracy = 4/10
 UnitStats.GermanUnits.Landwehr.MaxRange = 3000
 UnitStats.GermanUnits.Landwehr.FireRate = 5 -- shots per 10 seconds --
 UnitStats.GermanUnits.Landwehr.MarchSpeed = 5
-UnitStats.GermanUnits.Landwehr.Morale = 65
+UnitStats.GermanUnits.Landwehr.Morale = 50
 UnitStats.GermanUnits.Landwehr.Energy = 100
 UnitStats.GermanUnits.Landwehr.ChargeEnabled = true
 UnitStats.GermanUnits.Landwehr.Actions = {"Move","Double","Wheel","Target","Charge"}
 UnitStats.GermanUnits.Landwehr.Formations = {"BattleLine","MarchingColumn","SkirmishOrder"}
-function UnitStats.GermanUnits.Landwehr.AccuracyFunction(magnitude, unitrange)
+function UnitStats.GermanUnits.Landwehr.AccuracyFunction(magnitude, unitrange, enemyFormationBonus)
     local f = math.floor( ( ( 5 / unitrange ) * magnitude ) + 1 )
-    local ran = math.random(1, f)
+    local ran = math.random(1, math.ceil( f * enemyFormationBonus ) )
     if ran == 1 then return true
     else return false end
 end
@@ -189,14 +189,14 @@ UnitStats.GermanUnits.BayerischerLineInfantry.Accuracy = 5/10
 UnitStats.GermanUnits.BayerischerLineInfantry.MaxRange = 3800
 UnitStats.GermanUnits.BayerischerLineInfantry.FireRate = 5 -- shots per 10 seconds --
 UnitStats.GermanUnits.BayerischerLineInfantry.MarchSpeed = 6
-UnitStats.GermanUnits.BayerischerLineInfantry.Morale = 75
+UnitStats.GermanUnits.BayerischerLineInfantry.Morale = 60
 UnitStats.GermanUnits.BayerischerLineInfantry.Energy = 100
 UnitStats.GermanUnits.BayerischerLineInfantry.ChargeEnabled = true
 UnitStats.GermanUnits.BayerischerLineInfantry.Actions = {"Move","Double","Wheel","Target","Charge"}
 UnitStats.GermanUnits.BayerischerLineInfantry.Formations = {"BattleLine","MarchingColumn","SkirmishOrder"}
-function UnitStats.GermanUnits.BayerischerLineInfantry.AccuracyFunction(magnitude, unitrange)
+function UnitStats.GermanUnits.BayerischerLineInfantry.AccuracyFunction(magnitude, unitrange, enemyFormationBonus)
     local f = math.floor( ( ( 5 / unitrange ) * magnitude ) + 1 )
-    local ran = math.random(1, f)
+    local ran = math.random(1, math.ceil( f * enemyFormationBonus ) )
     if ran == 1 then return true
     else return false end
 end
@@ -212,14 +212,14 @@ UnitStats.GermanUnits.Uhlanen.Accuracy = 8/10
 UnitStats.GermanUnits.Uhlanen.MaxRange = 100
 UnitStats.GermanUnits.Uhlanen.FireRate = 5 -- shots per 10 seconds --
 UnitStats.GermanUnits.Uhlanen.MarchSpeed = 14
-UnitStats.GermanUnits.Uhlanen.Morale = 95
+UnitStats.GermanUnits.Uhlanen.Morale = 60
 UnitStats.GermanUnits.Uhlanen.Energy = 100
 UnitStats.GermanUnits.Uhlanen.ChargeEnabled = true
 UnitStats.GermanUnits.Uhlanen.Actions = {"Move","Double","Wheel","Charge"}
 UnitStats.GermanUnits.Uhlanen.Formations = {"BattleLine","MarchingColumn"}
-function UnitStats.GermanUnits.Uhlanen.AccuracyFunction(magnitude, unitrange)
-    local f = math.floor( ( ( 5 / unitrange ) * magnitude ) + 1 )
-    local ran = math.random(1, f)
+function UnitStats.GermanUnits.Uhlanen.AccuracyFunction(magnitude, unitrange, enemyFormationBonus)
+    local f = 1
+    local ran = math.random(1, math.ceil( f * enemyFormationBonus ) )
     if ran == 1 then return true
     else return false end
 end
@@ -232,14 +232,14 @@ UnitStats.GermanUnits.Husaren.Accuracy = 8/10
 UnitStats.GermanUnits.Husaren.MaxRange = 100
 UnitStats.GermanUnits.Husaren.FireRate = 5 -- shots per 10 seconds --
 UnitStats.GermanUnits.Husaren.MarchSpeed = 14
-UnitStats.GermanUnits.Husaren.Morale = 95
+UnitStats.GermanUnits.Husaren.Morale = 60
 UnitStats.GermanUnits.Husaren.Energy = 100
 UnitStats.GermanUnits.Husaren.ChargeEnabled = true
 UnitStats.GermanUnits.Husaren.Actions = {"Move","Double","Wheel","Charge"}
 UnitStats.GermanUnits.Husaren.Formations = {"BattleLine","MarchingColumn"}
-function UnitStats.GermanUnits.Husaren.AccuracyFunction(magnitude, unitrange)
-    local f = math.floor( ( ( 5 / unitrange ) * magnitude ) + 1 )
-    local ran = math.random(1, f)
+function UnitStats.GermanUnits.Husaren.AccuracyFunction(magnitude, unitrange, enemyFormationBonus)
+    local f = 1
+    local ran = math.random(1, math.ceil( f * enemyFormationBonus ) )
     if ran == 1 then return true
     else return false end
 end
@@ -252,14 +252,14 @@ UnitStats.GermanUnits.Kuerassiere.Accuracy = 8/10
 UnitStats.GermanUnits.Kuerassiere.MaxRange = 100
 UnitStats.GermanUnits.Kuerassiere.FireRate = 5 -- shots per 10 seconds --
 UnitStats.GermanUnits.Kuerassiere.MarchSpeed = 14
-UnitStats.GermanUnits.Kuerassiere.Morale = 95
+UnitStats.GermanUnits.Kuerassiere.Morale = 60
 UnitStats.GermanUnits.Kuerassiere.Energy = 100
 UnitStats.GermanUnits.Kuerassiere.ChargeEnabled = true
 UnitStats.GermanUnits.Kuerassiere.Actions = {"Move","Double","Wheel","Charge"}
 UnitStats.GermanUnits.Kuerassiere.Formations = {"BattleLine","MarchingColumn"}
-function UnitStats.GermanUnits.Kuerassiere.AccuracyFunction(magnitude, unitrange)
-    local f = math.floor( ( ( 5 / unitrange ) * magnitude ) + 1 )
-    local ran = math.random(1, f)
+function UnitStats.GermanUnits.Kuerassiere.AccuracyFunction(magnitude, unitrange, enemyFormationBonus)
+    local f = 1
+    local ran = math.random(1, math.ceil( f * enemyFormationBonus ) )
     if ran == 1 then return true
     else return false end
 end
@@ -295,7 +295,7 @@ UnitStats.GermanUnits.DismountedDragoons.Formations = {"Mounted","Dismounted"}
 ---/// PRUSSIAN ARTILLERY ///---
 UnitStats.GermanUnits.Artillery = {}
 UnitStats.GermanUnits.Artillery.Health = 80
-UnitStats.GermanUnits.Artillery.Damage = 10
+UnitStats.GermanUnits.Artillery.Damage = 8
 UnitStats.GermanUnits.Artillery.Accuracy = 5/10
 UnitStats.GermanUnits.Artillery.MaxRange = 8800
 UnitStats.GermanUnits.Artillery.FireRate = 1 -- shots per 10 seconds --
@@ -305,9 +305,9 @@ UnitStats.GermanUnits.Artillery.Energy = 100
 UnitStats.GermanUnits.Artillery.ChargeEnabled = false
 UnitStats.GermanUnits.Artillery.Actions = {"Move","Wheel","Target"}
 UnitStats.GermanUnits.Artillery.Formations = {"FiringLine","MarchingColumn"}
-function UnitStats.GermanUnits.Artillery.AccuracyFunction(magnitude, unitrange)
+function UnitStats.GermanUnits.Artillery.AccuracyFunction(magnitude, unitrange, enemyFormationBonus)
     local f = math.floor( ( ( 5 / unitrange ) * magnitude ) + 1 )
-    local ran = math.random(1, f)
+    local ran = math.random(1, math.ceil( f * enemyFormationBonus ) )
     if ran == 1 then return true
     else return false end
 end
@@ -335,14 +335,14 @@ UnitStats.FrenchUnits.FrenchLineInfantry.Accuracy = 5/10
 UnitStats.FrenchUnits.FrenchLineInfantry.MaxRange = 3500
 UnitStats.FrenchUnits.FrenchLineInfantry.FireRate = 5 -- shots per 10 seconds --
 UnitStats.FrenchUnits.FrenchLineInfantry.MarchSpeed = 6
-UnitStats.FrenchUnits.FrenchLineInfantry.Morale = 75
+UnitStats.FrenchUnits.FrenchLineInfantry.Morale = 60
 UnitStats.FrenchUnits.FrenchLineInfantry.Energy = 100
 UnitStats.FrenchUnits.FrenchLineInfantry.ChargeEnabled = true
 UnitStats.FrenchUnits.FrenchLineInfantry.Actions = {"Move","Double","Wheel","Target","Charge"}
 UnitStats.FrenchUnits.FrenchLineInfantry.Formations = {"BattleLine","MarchingColumn","SkirmishOrder"}
-function UnitStats.FrenchUnits.FrenchLineInfantry.AccuracyFunction(magnitude, unitrange)
+function UnitStats.FrenchUnits.FrenchLineInfantry.AccuracyFunction(magnitude, unitrange, enemyFormationBonus)
     local f = math.floor( ( ( 5 / unitrange ) * magnitude ) + 1 )
-    local ran = math.random(1, f)
+    local ran = math.random(1, math.ceil( f * enemyFormationBonus ) )
     if ran == 1 then return true
     else return false end
 end
@@ -355,14 +355,14 @@ UnitStats.FrenchUnits.FrenchZouaves.Accuracy = 5/10
 UnitStats.FrenchUnits.FrenchZouaves.MaxRange = 3500
 UnitStats.FrenchUnits.FrenchZouaves.FireRate = 5 -- shots per 10 seconds --
 UnitStats.FrenchUnits.FrenchZouaves.MarchSpeed = 6
-UnitStats.FrenchUnits.FrenchZouaves.Morale = 75
+UnitStats.FrenchUnits.FrenchZouaves.Morale = 65
 UnitStats.FrenchUnits.FrenchZouaves.Energy = 100
 UnitStats.FrenchUnits.FrenchZouaves.ChargeEnabled = true
 UnitStats.FrenchUnits.FrenchZouaves.Actions = {"Move","Double","Wheel","Target","Charge"}
 UnitStats.FrenchUnits.FrenchZouaves.Formations = {"BattleLine","MarchingColumn","SkirmishOrder"}
-function UnitStats.FrenchUnits.FrenchZouaves.AccuracyFunction(magnitude, unitrange)
+function UnitStats.FrenchUnits.FrenchZouaves.AccuracyFunction(magnitude, unitrange, enemyFormationBonus)
     local f = math.floor( ( ( 5 / unitrange ) * magnitude ) + 1 )
-    local ran = math.random(1, f)
+    local ran = math.random(1, math.ceil( f * enemyFormationBonus ) )
     if ran == 1 then return true
     else return false end
 end
@@ -375,14 +375,14 @@ UnitStats.FrenchUnits.FrenchChasseurs.Accuracy = 5/10
 UnitStats.FrenchUnits.FrenchChasseurs.MaxRange = 4500
 UnitStats.FrenchUnits.FrenchChasseurs.FireRate = 5 -- shots per 10 seconds --
 UnitStats.FrenchUnits.FrenchChasseurs.MarchSpeed = 9
-UnitStats.FrenchUnits.FrenchChasseurs.Morale = 75
+UnitStats.FrenchUnits.FrenchChasseurs.Morale = 70
 UnitStats.FrenchUnits.FrenchChasseurs.Energy = 100
 UnitStats.FrenchUnits.FrenchChasseurs.ChargeEnabled = true
 UnitStats.FrenchUnits.FrenchChasseurs.Actions = {"Move","Double","Wheel","Target","Charge"}
 UnitStats.FrenchUnits.FrenchChasseurs.Formations = {"BattleLine","MarchingColumn","SkirmishOrder"}
-function UnitStats.FrenchUnits.FrenchChasseurs.AccuracyFunction(magnitude, unitrange)
+function UnitStats.FrenchUnits.FrenchChasseurs.AccuracyFunction(magnitude, unitrange, enemyFormationBonus)
     local f = math.floor( ( ( 5 / unitrange ) * magnitude ) + 1 )
-    local ran = math.random(1, f)
+    local ran = math.random(1, math.ceil( f * enemyFormationBonus ) )
     if ran == 1 then return true
     else return false end
 end
@@ -402,9 +402,9 @@ UnitStats.FrenchUnits.Artillery.Energy = 100
 UnitStats.FrenchUnits.Artillery.ChargeEnabled = false
 UnitStats.FrenchUnits.Artillery.Actions = {"Move","Wheel","Target"}
 UnitStats.FrenchUnits.Artillery.Formations = {"FiringLine","MarchingColumn"}
-function UnitStats.FrenchUnits.Artillery.AccuracyFunction(magnitude, unitrange)
+function UnitStats.FrenchUnits.Artillery.AccuracyFunction(magnitude, unitrange, enemyFormationBonus)
     local f = math.floor( ( ( 5 / unitrange ) * magnitude ) + 1 )
-    local ran = math.random(1, f)
+    local ran = math.random(1, math.ceil( f * enemyFormationBonus ) )
     if ran == 1 then return true
     else return false end
 end
