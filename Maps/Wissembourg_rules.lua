@@ -140,7 +140,7 @@ function maprules.LaunchBattle()
     print("Loaded Fog Map")
 
     -- for the users team, which is GERMANY --
-    --for i=1,#GermanArmy,1 do GermanArmy[i]:ScoutMap( true ) end
+    for i=1,#GermanArmy,1 do GermanArmy[i]:ScoutMap( true ) end
 
     local germanRegs = {}
     for i=1,#GermanArmy,1 do

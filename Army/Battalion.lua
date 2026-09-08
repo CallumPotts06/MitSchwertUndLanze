@@ -473,7 +473,7 @@ function Battalion:FindSquadPositions()
         if (self.BranchofService=="Cavalry") and (not (self.Formation=="Dismounted")) then imgW = 70 imgH = 260 offset.Y=-120 end
         if (self.Animation=="Guard") then imgW=110 end
 
-        local tempTheta = normalizeAngleForDrawing(pos.Theta) --normalizeAngle(pos.Theta)
+        local tempTheta = normalizeAngle(pos.Theta)--normalizeAngleForDrawing(pos.Theta) --
         --if tempTheta < 0 then tempTheta = tempTheta + math.rad( 360 ) end
         
 
@@ -511,6 +511,7 @@ function Battalion:FindSquadPositions()
         end
 
         --get to locating the positions of the squads--
+        print("TempTheta = "..tostring(tempTheta))
         pos.Theta = tempTheta
         for n = n1,n2,increment do
             local newPos = Vector.New(0,0)

@@ -213,6 +213,12 @@ function Brigade:MoveBrigade( newPos )
     end
 end
 
+function Brigade:MoraleRecovery( )
+    for i=1,#self.Regiments,1 do
+        self.Regiments[i]:MoraleRecovery( )
+    end
+end
+
 function Brigade:CheckForEnemies( enemyUnits )
     if self.UpdateTick == unitUpdateTick  then
         for i=1,#self.Regiments,1 do

@@ -102,6 +102,7 @@ end
 ----//// ** LOVE UPDATE FUNCTION ** ////----
 local unitAnimTimer = 0
 local flagIncrement = -1
+local tenSecondTimer = 0
 
 local fpsCounterTimer = 0
 local frameCounter = 0
@@ -121,6 +122,7 @@ function love.update(dt)
     unitAnimTimer=unitAnimTimer+dt
     cumulativeTime = cumulativeTime + dt
     unitUpdateTime = unitUpdateTime + dt
+    tenSecondTimer = tenSecondTimer + dt
 
     
     if fpsCounterTimer>=0.1 then 
@@ -157,6 +159,12 @@ function love.update(dt)
         for i=1,#Team2,1 do Team2[i]:UpdateAnimation() Team2[i]:CheckForEnemies( Team1Regiments ) end
     end
     
+    if tenSecondTimer >= 10 then
+        tenSecondTimer = tenSecondTimer - 10
+        for i=1,#Team1,1 do Team1[i]:MoraleRecovery() end
+        for i=1,#Team2,1 do Team2[i]:MoraleRecovery() end 
+    end
+
     local mouseData = Mouse.GetData(true,cumulativeTime)
     --MenuController.CheckForClicks(mouseData.Position,mouseData.LMBDown)
     if CurrentUnitScreen then CurrentUnitScreen:CheckForClicks(mouseData.Position,mouseData.LMBDown) end
@@ -210,6 +218,9 @@ function love.draw()
         Shader.DrawTile(index.ImageData, index.DrawPos.X, index.DrawPos.Y, TileZoom, TileZoom)
         --Renderer.DrawWithLighting( index.ImageData, index.DrawPos, TileZoom )
     end
+
+    --unit selection / unit range--
+    if CurrentUnitScreen and CurrentUnit and ( CurrentUnit.UnitClass == "Regiment" ) then CurrentUnit:DrawRanges() end
 
     for i=1,#Team1,1 do Team1[i]:DrawBrigade() end
     for i=1,#Team2,1 do Team2[i]:DrawBrigade() end

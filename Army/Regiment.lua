@@ -205,11 +205,45 @@ function Regiment:DrawRegiment()
             destroyedBattalions = destroyedBattalions + 1
         end
     end
+end
+
+function Regiment:Moved()
+    for i=1,#self.Battalions,1 do
+        self.Battalions[i].Moved = true
+    end
+end
+
+function Regiment:CheckForEnemies(enemyUnits)
+    if self.InRetreat then return nil end
+
+    local pos1 = self.Position
+    local pos2 = Vector.New(9999999,9999999)  --PRETTY LARGE NUMBER--
+    local magnitude = Mathematics.VectorMagnitude( pos1, pos2 )
+    local nearestEnemy = nil
+
+    for i=1,#enemyUnits,1 do
+        pos2 = enemyUnits[i].Position
+        local newMagnitude = Mathematics.VectorMagnitude( pos1, pos2 )
+
+        local autoTargetRange
+        if self.BranchofService == "Infantry" then autoTargetRange = InfantryRange
+        elseif self.BranchofService == "Artillery" then autoTargetRange = ArtilleryRange
+        else autoTargetRange = CavalryRange end
+
+        if ( newMagnitude < magnitude ) and ( newMagnitude < autoTargetRange ) then
+            magnitude = newMagnitude
+            nearestEnemy = enemyUnits[i]
+        end
+
+    end
+
+    self.CurrentTarget = nil
+    if nearestEnemy then self.CurrentTarget = nearestEnemy else self.AimingWheelFlag = false end
 
 
-    if self.Morale <= 10 then
-        print(self.Name.." Is now in Retreat!")
+    --ALSO CHECK IF THE UNIT SHOULD RETREAT OR NOT--
 
+    if self.Morale <= 30 then
         self.InRetreat = true
 
         local theta = 0
@@ -231,33 +265,7 @@ function Regiment:DrawRegiment()
     if destroyedBattalions == 3 then
         self.Destroyed = true
     end
-end
 
-function Regiment:Moved()
-    for i=1,#self.Battalions,1 do
-        self.Battalions[i].Moved = true
-    end
-end
-
-function Regiment:CheckForEnemies(enemyUnits)
-    local pos1 = self.Position
-    local pos2 = Vector.New(9999999,9999999)  --PRETTY LARGE NUMBER--
-    local magnitude = Mathematics.VectorMagnitude( pos1, pos2 )
-    local nearestEnemy = nil
-
-    for i=1,#enemyUnits,1 do
-        pos2 = enemyUnits[i].Position
-        local newMagnitude = Mathematics.VectorMagnitude( pos1, pos2 )
-
-        if ( newMagnitude < magnitude ) and ( newMagnitude < self.MaxRange ) then
-            magnitude = newMagnitude
-            nearestEnemy = enemyUnits[i]
-        end
-
-    end
-
-    self.CurrentTarget = nil
-    if nearestEnemy then self.CurrentTarget = nearestEnemy else self.AimingWheelFlag = false end
 end
 
 
@@ -276,6 +284,8 @@ end
 
 
 function Regiment:Fire()
+    if self.InRetreat then self.CurrentTarget = nil self.CurrentAction = "Idle" return nil end
+
     if (self.OverrideFire)or(self.Formation=="MarchingColumn")or(self.Destroyed) then return nil end
     if (not self.CurrentTarget)or(self.CurrentTarget.Destroyed) then return nil end
 
@@ -293,7 +303,7 @@ function Regiment:Fire()
     --find the amount of guns on the firing line--
     local aimedBattalions = 0
     for i=1,#self.Battalions,1 do
-        if not ( ( self.Battalions[i].InRetreat ) or ( self.Battalions[i].Destroyed ) ) then
+        if not ( ( self.InRetreat ) or ( self.Battalions[i].Destroyed ) ) then
             aimedBattalions = aimedBattalions + 1
         end
     end
@@ -322,9 +332,20 @@ function Regiment:Fire()
 
         if not targetBattalion then self.CurrentTarget = false
         else
+
+            --calculate the amount of damage caused to morale
+            local moraleDmg = self.Damage
+            if self.BranchofService == "Infantry" then moraleDmg = moraleDmg * 0.2
+            elseif self.BranchofService == "Artillery" then moraleDmg = moraleDmg * 0.3
+            elseif self.BranchofService == "Cavalry" then moraleDmg = moraleDmg * 2 end
+
             if hit then 
                 targetBattalion.Health = targetBattalion.Health - self.Damage 
-                targetBattalion.Regiment.Morale = targetBattalion.Regiment.Morale - self.Damage 
+                targetBattalion.Regiment.Health = targetBattalion.Regiment.Health - self.Damage
+
+                if self.BranchofService == "Infantry" then moraleDmg = moraleDmg * 2
+                elseif self.BranchofService == "Artillery" then moraleDmg = moraleDmg * 1.5
+                elseif self.BranchofService == "Cavalry" then moraleDmg = moraleDmg * 4 end
 
             else
                 if targetBattalion.OnScreen then
@@ -335,8 +356,16 @@ function Regiment:Fire()
                     Effects.CreateNewMiss(fxPos)
                 end
             end
+
+            --Morale is damaged whether the target unit is hit or not, though the values will be different-- 
+            targetBattalion.Regiment.Morale = targetBattalion.Regiment.Morale - moraleDmg
         end
     end
+end
+
+function Regiment:MoraleRecovery()
+    self.Morale = self.Morale + 4
+    if self.Morale > self.MaxMorale then self.Morale = self.MaxMorale end
 end
 
 function Regiment:CheckForClick(mPos,mode)
@@ -510,7 +539,6 @@ function Regiment:ScoutMap(initScout)
     local fogX = math.floor(scoutPos.X / FogDivisions)
     local fogY = math.floor(scoutPos.Y / FogDivisions)
 
-    --[[
     if initScout then
         -- Reveal full circle
         for y = fogY - viewRadius, fogY + viewRadius do
@@ -535,7 +563,27 @@ function Regiment:ScoutMap(initScout)
             end
         end
     end
-    ]]
+
+end
+
+function Regiment:DrawRanges()
+
+    local autoTargetRange
+        if self.BranchofService == "Infantry" then autoTargetRange = InfantryRange
+        elseif self.BranchofService == "Artillery" then autoTargetRange = ArtilleryRange
+        else autoTargetRange = CavalryRange end
+
+        local pos = Vector.New(self.Position.X,self.Position.Y)
+        pos:ToScreenPosition()
+
+        local clr1 = Colours.CreateColour({0.7,0.6,0.2,0.3})
+        local clr2 = Colours.CreateColour({1,0.5,0.5,0.3})
+
+        Colours.SetColour(clr1)
+        love.graphics.circle("fill",pos.X,pos.Y,self.MaxRange*CameraZoom,50)
+        Colours.SetColour(clr2)
+        love.graphics.circle("fill",pos.X,pos.Y,autoTargetRange*CameraZoom,50)
+        Colours.ResetColour()
 
 end
 
