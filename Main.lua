@@ -58,8 +58,7 @@ TimeOfDay = 600
 ScreenX, ScreenY = 1,1
 CurrentMapSize = Vector.New(0,0)
 
-FogTiles = nil
-FogDivisions = 128
+--FogDivisions = 128
 
 CameraMoved = false
 CameraZoom = 1
@@ -144,7 +143,8 @@ function love.update(dt)
         if TimeOfDay > 2400 then TimeOfDay=0 end
 
         Effects.UpdateEffects()
-        FogofWar.renderFog()
+        --FogofWar.UpdateFog()
+        --FogofWar.renderFog()
     end
 
 
@@ -231,7 +231,9 @@ function love.draw()
     end
 
     Effects.DrawEffects()
-    FogofWar.draw(CurrentMapSize.X, CurrentMapSize.Y)
+    --FogofWar.draw(CurrentMapSize.X, CurrentMapSize.Y)
+
+    FogofWar.DrawFog()
 
     if CurrentUnitScreen and CurrentUnit then CurrentUnitScreen.Screen:DrawScreen() end
 

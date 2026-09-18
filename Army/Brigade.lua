@@ -274,8 +274,6 @@ function Brigade:UpdatePosition()
         self.Regiments[i]:UpdatePosition()
     end
     self:FindSquadPositions()
-
-    self:ScoutMap( false )
 end
 
 function Brigade:UpdateAnimation()

@@ -6,7 +6,7 @@ UnitStats  = {}
 -----///// GENERIC STATS FOR ALL UNITS ////-----
 
 -- Km = 4250 --
-InfantryRange = 1600
+InfantryRange = 1500
 JaegerRange = 2000
 CavalryRange = 300
 ArtilleryRange = 5500

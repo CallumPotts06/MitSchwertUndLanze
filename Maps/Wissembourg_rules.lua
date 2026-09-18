@@ -121,26 +121,28 @@ function maprules.LaunchBattle()
     ---/// ############ ///---
 
     MapController.LoadMap( mapName )
+    CurrentMapSize = MapController.CurrentMap.MapSize
 
-    FogWidth = FogDivisions+2--math.ceil(  CurrentMapSize.X / FogDivisions  )
+    --[[FogWidth = FogDivisions+2--math.ceil(  CurrentMapSize.X / FogDivisions  )
     FogHeight = FogDivisions+2--math.ceil( CurrentMapSize.Y / FogDivisions )
-    FogTiles = { }
+    FogofWar.Tiles = { }
 
-    print("X,Y  =  "..FogWidth..","..FogHeight)
+    print("FOG: X,Y  =  "..FogWidth..","..FogHeight)]]
 
-    for y=1,FogHeight,1 do
-        table.insert(FogTiles, {})
+    FogofWar.init( CurrentMapSize.X, CurrentMapSize.Y )
+    FogofWar.RevealMode = "all"
+
+
+    --[[for y=1,FogHeight,1 do
+        table.insert(FogofWar.Tiles, {})
         for x=1,FogWidth,1 do
-            table.insert(FogTiles[y], false)
+            table.insert(FogofWar.Tiles[y], false)
         end
     end
 
-    FogofWar.init(FogWidth, FogHeight, FogDivisions)
+    FogofWar.init(FogWidth, FogHeight, FogDivisions)]]
 
     print("Loaded Fog Map")
-
-    -- for the users team, which is GERMANY --
-    for i=1,#GermanArmy,1 do GermanArmy[i]:ScoutMap( true ) end
 
     local germanRegs = {}
     for i=1,#GermanArmy,1 do

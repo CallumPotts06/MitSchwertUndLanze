@@ -211,6 +211,8 @@ function Regiment:Moved()
     for i=1,#self.Battalions,1 do
         self.Battalions[i].Moved = true
     end
+
+    FogofWar.Scout( self.Position, self.BranchofService, self.Team )
 end
 
 function Regiment:CheckForEnemies(enemyUnits)
@@ -530,9 +532,12 @@ function Regiment:UpdateAnimation()
         self.Battalions[i]:UpdateAnimation()
     end
 end
+
+--[[
 function Regiment:ScoutMap(initScout)
+
     local viewRadius = 5
-    if self.BranchofService == "Cavalry" then viewRadius = 8 end
+    if self.BranchofService == "Cavalry" then viewRadius = 9 end
 
     local scoutPos = self.Position --self.Position:ToGamePosition()
 
@@ -544,8 +549,8 @@ function Regiment:ScoutMap(initScout)
         for y = fogY - viewRadius, fogY + viewRadius do
             for x = fogX - viewRadius, fogX + viewRadius do
 
-                if y >= 1 and y <= #FogTiles and x >= 1 and x <= #FogTiles[1] then
-                    FogTiles[y][x] = true
+                if y >= 1 and y <= #FogofWar.Tiles and x >= 1 and x <= #FogofWar.Tiles[1] then
+                    FogofWar.Tiles[y][x] = true
                 end
 
             end
@@ -556,15 +561,15 @@ function Regiment:ScoutMap(initScout)
         for y = fogY - viewRadius, fogY + viewRadius do
             for x = fogX - viewRadius, fogX + viewRadius do
 
-                if y >= 1 and y <= #FogTiles and x >= 1 and x <= #FogTiles[1] then
-                    FogTiles[y][x] = true
+                if y >= 1 and y <= #FogofWar.Tiles and x >= 1 and x <= #FogofWar.Tiles[1] then
+                    FogofWar.Tiles[y][x] = true
                 end
 
             end
         end
     end
 
-end
+end]]
 
 function Regiment:DrawRanges()
 
