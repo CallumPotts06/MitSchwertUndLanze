@@ -63,6 +63,10 @@ function BotPlayer.BrigadeLevelControl(brigade)
     for i=2,#brigade.Regiments,1 do
         meanPosition = Mathematics.VectorFromAddition(meanPosition, brigade.Regiments[i].Position)
         meanPosition = Mathematics.VectorFromDivision(meanPosition, 2)
+
+        if brigade.BranchOfService == "Artillery" then
+            brigade.Regiments[i].MarchSpeed = brigade.Regiments[i].MarchSpeed / 3
+        end
     end
 
 
@@ -87,43 +91,183 @@ function BotPlayer.BrigadeLevelControl(brigade)
     brigade.TargetBrigade = nearestEnemy.Brigade
 
 
-    --if the enemy are really far away, march to them in column--
-    if distance > 4250 * 4 then
-        if brigade.Formation ~= "MarchingColumn" then brigade:ChangeFormation( "MarchingColumn" )
-        else
-            if BotPlayer.GenericEnemyDirection == "Right" then
-                brigade:MoveBrigade( Mathematics.VectorFromAddition(meanPosition + Vector.New(1500,math.random(-200,200))) )
-            elseif BotPlayer.GenericEnemyDirection == "Left" then
-                brigade:MoveBrigade( Mathematics.VectorFromAddition(meanPosition + Vector.New(-1500,math.random(-200,200))) )
-            elseif BotPlayer.GenericEnemyDirection == "Up" then
-                brigade:MoveBrigade( Mathematics.VectorFromAddition(meanPosition + Vector.New(math.random(-200,200), -1500)) )
-            elseif BotPlayer.GenericEnemyDirection == "Down" then
-                brigade:MoveBrigade( Mathematics.VectorFromAddition(meanPosition + Vector.New(math.random(-200,200), 1500)) )
+
+
+    ----//// ########################## ////----
+    ----//// STRATERGY MODE - ATTACKING ////----
+    ----//// ########################## ////----
+
+    if BotPlayer.Stratergy == "Attacking" then
+
+        --if the brigade is not currently changing formation, move the brigade where appropriate--
+        if brigade.ChangingFormation == 0 then
+
+            local brigadeHidden = true
+
+            for i = 1,#brigade.Regiments,1 do
+                if not brigade.Regiments[i].IsHidden then
+                    brigadeHidden = false
+                    local correctingFormation = false
+
+                    if brigade.BranchOfService == "Infantry" then
+                        if brigade.Formation ~= "FullBattleLine" then correctingFormation = true brigade:ChangeFormation( "FullBattleLine" ) end
+                    elseif brigade.BranchOfService == "Cavalry" then
+                        if brigade.Formation ~= "FullBattleLine" then correctingFormation = true brigade:ChangeFormation( "FullBattleLine" ) end
+                    elseif brigade.BranchOfService == "Artillery" then
+                        if brigade.Formation ~= "Deployed" then correctingFormation = true brigade:ChangeFormation( "Deployed" ) end
+                    end
+                    
+                    if not correctingFormation then
+                        brigade:MoveBrigade( nearestEnemy.Brigade.Regiments[1].Position )
+                    end
+                    break
+                end
+            end
+
+            if brigadeHidden then
+                --if the enemy are really far away, march to them in column--
+                if distance > 4250 * 4.5 then
+                    local correctingFormation = false
+
+                    if brigade.Formation ~= "MarchingColumn" then brigade:ChangeFormation( "MarchingColumn" ) correctingFormation = true
+
+                    else
+                        if BotPlayer.GenericEnemyDirection == "Right" then
+                            brigade:MoveBrigade( Mathematics.VectorFromAddition(meanPosition, Vector.New(1500,math.random(-300,300))) )
+                        elseif BotPlayer.GenericEnemyDirection == "Left" then
+                            brigade:MoveBrigade( Mathematics.VectorFromAddition(meanPosition, Vector.New(-1500,math.random(-300,300))) )
+                        elseif BotPlayer.GenericEnemyDirection == "Up" then
+                            brigade:MoveBrigade( Mathematics.VectorFromAddition(meanPosition, Vector.New(math.random(-300,300), -1500)) )
+                        elseif BotPlayer.GenericEnemyDirection == "Down" then
+                            brigade:MoveBrigade( Mathematics.VectorFromAddition(meanPosition, Vector.New(math.random(-300,300), 1500)) )
+                        end
+                    end
+
+
+
+                --if the enemy are a bit closer, march to them in battle line--
+                elseif distance > 4250 * 0.8 then
+                    local correctingFormation = false
+
+                    if brigade.BranchOfService == "Infantry" then
+                        if brigade.Formation ~= "FullBattleLine" then correctingFormation = true brigade:ChangeFormation( "FullBattleLine" ) end
+                    end
+                    if brigade.BranchOfService == "Cavalry" then
+                        if brigade.Formation ~= "FullBattleLine" then correctingFormation = true brigade:ChangeFormation( "FullBattleLine" ) end
+                    end
+                    if brigade.BranchOfService == "Artillery" then
+                        
+                        if brigade.Formation ~= "Deployed" then correctingFormation = true brigade:ChangeFormation( "Deployed" ) end
+                    end
+                    
+                    if not correctingFormation then
+                        if BotPlayer.GenericEnemyDirection == "Right" then
+                            brigade:MoveBrigade( Mathematics.VectorFromAddition(meanPosition, Vector.New(1500,math.random(-300,300))) )
+                        elseif BotPlayer.GenericEnemyDirection == "Left" then
+                            brigade:MoveBrigade( Mathematics.VectorFromAddition(meanPosition, Vector.New(-1500,math.random(-300,300))) )
+                        elseif BotPlayer.GenericEnemyDirection == "Up" then
+                            brigade:MoveBrigade( Mathematics.VectorFromAddition(meanPosition, Vector.New(math.random(-300,300), -1500)) )
+                        elseif BotPlayer.GenericEnemyDirection == "Down" then
+                            brigade:MoveBrigade( Mathematics.VectorFromAddition(meanPosition, Vector.New(math.random(-300,300), 1500)) )
+                        end
+                    end
+                end
             end
         end
 
-    elseif distance > 4250 * 1.5 then
-        if brigade.Formation ~= "BattleLine" then brigade:ChangeFormation( "BattleLine" )
-        else
-            if BotPlayer.GenericEnemyDirection == "Right" then
-                brigade:MoveBrigade( Mathematics.VectorFromAddition(meanPosition + Vector.New(1500,math.random(-200,200))) )
-            elseif BotPlayer.GenericEnemyDirection == "Left" then
-                brigade:MoveBrigade( Mathematics.VectorFromAddition(meanPosition + Vector.New(-1500,math.random(-200,200))) )
-            elseif BotPlayer.GenericEnemyDirection == "Up" then
-                brigade:MoveBrigade( Mathematics.VectorFromAddition(meanPosition + Vector.New(math.random(-200,200), -1500)) )
-            elseif BotPlayer.GenericEnemyDirection == "Down" then
-                brigade:MoveBrigade( Mathematics.VectorFromAddition(meanPosition + Vector.New(math.random(-200,200), 1500)) )
-            end
-        end
+        
     end
 
-    --[[for i = 1,#brigade.Regiments,1 do
-        if not brigade.Regiments[i].IsHidden then
-            if brigade.Formation ~= "BattleLine" then brigade:ChangeFormation( "BattleLine" ) end
-            brigade:MoveBrigade( nearestEnemy.Brigade.Regiments[1] )
-            break
+
+
+
+
+
+
+    ----//// ########################## ////----
+    ----//// STRATERGY MODE - DEFENSIVE ////----
+    ----//// ########################## ////----
+
+    if BotPlayer.Stratergy == "Defensive" then
+
+        --if the brigade is not currently changing formation, move the brigade where appropriate--
+        if brigade.ChangingFormation == 0 then
+
+            local brigadeHidden = true
+
+            for i = 1,#brigade.Regiments,1 do
+                if not brigade.Regiments[i].IsHidden then
+                    brigadeHidden = false
+                    local correctingFormation = false
+
+                    if brigade.BranchOfService == "Infantry" then
+                        if brigade.Formation == "MarchingColumn" then correctingFormation = true brigade:ChangeFormation( "FullBattleLine" ) end
+                    elseif brigade.BranchOfService == "Cavalry" then
+                        if brigade.Formation ~= "FullBattleLine" then correctingFormation = true brigade:ChangeFormation( "FullBattleLine" ) end
+                    elseif brigade.BranchOfService == "Artillery" then
+                        if brigade.Formation ~= "Deployed" then correctingFormation = true brigade:ChangeFormation( "Deployed" ) end
+                    end
+                    
+                    if not correctingFormation then
+                        brigade:MoveBrigade( nearestEnemy.Brigade.Regiments[1].Position )
+                    end
+                    break
+                end
+            end
+
+            if brigadeHidden then
+                --if the enemy are really far away, march to them in column a little bit--
+                if distance > 4250 * 6 then
+                    local correctingFormation = false
+
+                    if brigade.Formation ~= "MarchingColumn" then brigade:ChangeFormation( "MarchingColumn" ) correctingFormation = true
+
+                    else
+                        if BotPlayer.GenericEnemyDirection == "Right" then
+                            brigade:MoveBrigade( Mathematics.VectorFromAddition(meanPosition, Vector.New(500,math.random(-200,200))) )
+                        elseif BotPlayer.GenericEnemyDirection == "Left" then
+                            brigade:MoveBrigade( Mathematics.VectorFromAddition(meanPosition, Vector.New(-500,math.random(-200,200))) )
+                        elseif BotPlayer.GenericEnemyDirection == "Up" then
+                            brigade:MoveBrigade( Mathematics.VectorFromAddition(meanPosition, Vector.New(math.random(-200,200), -500)) )
+                        elseif BotPlayer.GenericEnemyDirection == "Down" then
+                            brigade:MoveBrigade( Mathematics.VectorFromAddition(meanPosition, Vector.New(math.random(-200,200), 500)) )
+                        end
+                    end
+
+
+
+                --if the enemy are a bit closer, form up in a defensive formation and hold tight--
+                else
+                    local correctingFormation = false
+
+                    if brigade.BranchOfService == "Infantry" then
+                        if brigade.Formation ~= "FullBattleLine" then correctingFormation = true brigade:ChangeFormation( "FullBattleLine" ) end
+                    end
+                    if brigade.BranchOfService == "Cavalry" then
+                        if brigade.Formation ~= "FullBattleLine" then correctingFormation = true brigade:ChangeFormation( "FullBattleLine" ) end
+                    end
+                    if brigade.BranchOfService == "Artillery" then
+                        if brigade.Formation ~= "Deployed" then correctingFormation = true brigade:ChangeFormation( "Deployed" ) end
+                    end
+
+                    if not correctingFormation then
+                        if BotPlayer.GenericEnemyDirection == "Right" then
+                            brigade:MoveBrigade( Mathematics.VectorFromAddition(meanPosition, Vector.New(500,math.random(-200,200))) )
+                        elseif BotPlayer.GenericEnemyDirection == "Left" then
+                            brigade:MoveBrigade( Mathematics.VectorFromAddition(meanPosition, Vector.New(-500,math.random(-200,200))) )
+                        elseif BotPlayer.GenericEnemyDirection == "Up" then
+                            brigade:MoveBrigade( Mathematics.VectorFromAddition(meanPosition, Vector.New(math.random(-200,200), -500)) )
+                        elseif BotPlayer.GenericEnemyDirection == "Down" then
+                            brigade:MoveBrigade( Mathematics.VectorFromAddition(meanPosition, Vector.New(math.random(-200,200), 500)) )
+                        end
+                    end
+
+                end
+            end
         end
-    end]]
+
+
+    end
 
 
 end

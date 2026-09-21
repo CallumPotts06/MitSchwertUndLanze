@@ -705,6 +705,10 @@ function Battalion:UpdatePosition()
     end
 
     local currentSpeed = self.MarchSpeed / 1.35
+
+    --if the brigade is changing formation, march faster--
+    if self.Regiment.Brigade.ChangingFormation > 0 then currentSpeed = currentSpeed * 1.4 end
+
     local omega = math.rad(2)
     local angleTolerance = math.rad(0.5)
 
@@ -726,8 +730,8 @@ function Battalion:UpdatePosition()
                 
                 if ( movetype == "Wheel" ) then
                     -- if the whole regiment is wheeling (rather than bn) the bn is permitted to move and wheel at the same time --
-                    self:WheelUnit(oldTheta, theta, omega * 1.25)
-                    self:MoveUnit(currentSpeed * 1.25, theta)
+                    self:WheelUnit(oldTheta, theta, omega * 1.3)
+                    self:MoveUnit(currentSpeed * 1.3, theta)
                 else
 
                     -- regular movement --

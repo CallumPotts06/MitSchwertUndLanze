@@ -20,7 +20,7 @@ Screen = require("EditorInterface/Screen")
 EditorScreen = require("InterfaceObjects/EditorScreen")
 
 ---/// EDITOR VARIABLES ///---
-MAP_NAME = "Wissembourg"
+MAP_NAME = "Wissembourg2"
 LOAD_MODE = "loadmap"--options, emptymap, loads emptymap, loadmap loads a map given by map name
 
 viewMode = "editor"
@@ -57,7 +57,7 @@ MapEditor.CurrentMap.Tiles = {}
 MapEditor.CurrentMap.TileCanvases = {}
 MapEditor.CurrentMap.Details = {}
 MapEditor.CurrentMap.Gameplay = {}
-MapEditor.CurrentMap.MapSize = Vector.New(graphics.KILOMETRE * 8, graphics.KILOMETRE * 7)---initial size---
+MapEditor.CurrentMap.MapSize = Vector.New(graphics.KILOMETRE * 7, graphics.KILOMETRE * 6)---initial size---
 
 MapEditor.Textures = {}
 MapEditor.Textures.Grass = love.image.newImageData("MapTextures/GrassTexture.png")

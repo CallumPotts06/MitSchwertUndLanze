@@ -250,7 +250,7 @@ function Regiment:CheckForEnemies(enemyUnits)
 
     --ALSO CHECK IF THE UNIT SHOULD RETREAT OR NOT--
 
-    if self.Morale <= 30 then
+    if self.Morale <= 40 then
         self.InRetreat = true
 
         local theta = 0
@@ -266,6 +266,14 @@ function Regiment:CheckForEnemies(enemyUnits)
         retreatPos = Mathematics.ForwardVector( retreatPos, -6000 )
 
         self:MoveRegiment( retreatPos )
+    end
+
+    if self.Health <= 0 then 
+        self.Position = Vector.New(0,0)
+        for i=1,#self.Battalions,1 do
+            self.Battalions[i].Positon = Vector.New(0,0)
+            self.Damage = 0
+        end
     end
 
 
@@ -342,17 +350,17 @@ function Regiment:Fire()
 
             --calculate the amount of damage caused to morale
             local moraleDmg = self.Damage
-            if self.BranchofService == "Infantry" then moraleDmg = moraleDmg * 0.2
-            elseif self.BranchofService == "Artillery" then moraleDmg = moraleDmg * 0.3
-            elseif self.BranchofService == "Cavalry" then moraleDmg = moraleDmg * 2 end
+            if self.BranchofService == "Infantry" then moraleDmg = moraleDmg * 0.8
+            elseif self.BranchofService == "Artillery" then moraleDmg = moraleDmg * 0.75
+            elseif self.BranchofService == "Cavalry" then moraleDmg = moraleDmg * 3 end
 
             if hit then 
                 targetBattalion.Health = targetBattalion.Health - self.Damage 
                 targetBattalion.Regiment.Health = targetBattalion.Regiment.Health - self.Damage
 
-                if self.BranchofService == "Infantry" then moraleDmg = moraleDmg * 2
-                elseif self.BranchofService == "Artillery" then moraleDmg = moraleDmg * 1.5
-                elseif self.BranchofService == "Cavalry" then moraleDmg = moraleDmg * 4 end
+                if self.BranchofService == "Infantry" then moraleDmg = moraleDmg * 2.5
+                elseif self.BranchofService == "Artillery" then moraleDmg = moraleDmg * 1.75
+                elseif self.BranchofService == "Cavalry" then moraleDmg = moraleDmg * 5 end
 
             else
                 if targetBattalion.OnScreen then
@@ -371,7 +379,7 @@ function Regiment:Fire()
 end
 
 function Regiment:MoraleRecovery()
-    self.Morale = self.Morale + 4
+    self.Morale = self.Morale + 3
     if self.Morale > self.MaxMorale then self.Morale = self.MaxMorale end
 end
 

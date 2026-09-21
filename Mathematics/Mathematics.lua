@@ -19,6 +19,7 @@ function Mathematics.VectorFromSubtraction(Vector1,Vector2)
     --finds the difference between two vectors--
     local dx = Vector1.X-Vector2.X
     local dy = Vector1.Y-Vector2.Y
+    local dth = Vector1.Theta
     local dVector = Vector.New(dx,dy,dth)
 
     return dVector--returns a vector object--
@@ -29,6 +30,7 @@ function Mathematics.VectorFromAddition(Vector1,Vector2)
     --adds the two vectors together--
     local x = Vector1.X+Vector2.X
     local y = Vector1.Y+Vector2.Y
+    local th = Vector1.Theta
     local newVector = Vector.New(x,y,th)
 
     return newVector--returns a vector object--
@@ -38,6 +40,7 @@ function Mathematics.VectorFromMultiplication(Vector1,Magnitude)
     --multiplies the vector by a magnitude--
     local x = Vector1.X*Magnitude
     local y = Vector1.Y*Magnitude
+    local th = Vector1.Theta
     local newVector = Vector.New(x,y,th)
 
     return newVector--returns a vector object--
@@ -47,6 +50,7 @@ function Mathematics.VectorFromDivision(Vector1,Magnitude)
     --Divides the vector by a magnitude--
     local x = Vector1.X/Magnitude
     local y = Vector1.Y/Magnitude
+    local th = Vector1.Theta
     local newVector = Vector.New(x,y,th)
 
     return newVector--returns a vector object--

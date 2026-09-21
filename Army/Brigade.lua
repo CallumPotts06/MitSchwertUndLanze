@@ -15,7 +15,7 @@ Formation Types:
     Infantry:
         Marching Column (4x Regiment In Column)
         Full Battle Line (4x Regiment Deployed In Line)
-        Battle Line (2x Regiment Deployed In Line, 2x Regiment In Reserve)
+        Battle Line (3x Regiment Deployed In Line, 1x Regiment In Reserve)
         Skirmish Line (2x Regiment Deployed In Skirmish, 2x Regiment In Reserve)
 
     Artillery:
@@ -72,32 +72,41 @@ local function getFormationPositions( service, formation, o, anglePos  )
 
     elseif ( formation == "FullBattleLine" ) or ( formation == "Deployed" ) then
 
-        local margin = BattalionMargins[ service ][ "BattleLine" ] * 3.2
+        local margin = 500
+        if service == "Artillery" then
+            margin = BattalionMargins[ service ][ "FiringLine" ] * 3.3
+        else
+            margin = BattalionMargins[ service ][ "BattleLine" ] * 3.3
+        end
 
         local pos2 = o
         local pos1 = Mathematics.VectorFromAddition( pos2, Mathematics.RightVector( pos2, -margin ) )
-        local pos3 = Mathematics.VectorFromAddition( pos1, Mathematics.RightVector( pos1, margin ) )
-        local pos4 = Mathematics.VectorFromAddition( pos1, Mathematics.RightVector( pos1, margin*2 ) )
+        local pos3 = Mathematics.VectorFromAddition( pos2, Mathematics.RightVector( pos2, margin ) )
+        local pos4 = Mathematics.VectorFromAddition( pos2, Mathematics.RightVector( pos2, margin*2 ) )
 
-        returnSet1 = {} returnSet1.Position = pos1 returnSet1.Formation = "BattleLine"
-        returnSet2 = {} returnSet2.Position = pos2 returnSet2.Formation = "BattleLine"
-        returnSet3 = {} returnSet3.Position = pos3 returnSet3.Formation = "BattleLine"
-        returnSet4 = {} returnSet4.Position = pos4 returnSet4.Formation = "BattleLine"
+        local nextFormation = "BattleLine"
+        if service == "Artillery" then nextFormation = "FiringLine" end
+
+        returnSet1 = {} returnSet1.Position = pos1 returnSet1.Formation = nextFormation
+        returnSet2 = {} returnSet2.Position = pos2 returnSet2.Formation = nextFormation
+        returnSet3 = {} returnSet3.Position = pos3 returnSet3.Formation = nextFormation
+        returnSet4 = {} returnSet4.Position = pos4 returnSet4.Formation = nextFormation
+
 
         return {returnSet1,returnSet2,returnSet3,returnSet4}
 
     elseif formation == "BattleLine" then
 
-        local margin = BattalionMargins[ service ][ "BattleLine" ] * 3.2
+        local margin = BattalionMargins[ service ][ "BattleLine" ] * 3.3
 
-        local pos1 = Mathematics.VectorFromAddition( o, Mathematics.RightVector( o, -margin/2 ) )
-        local pos2 = Mathematics.VectorFromAddition( o, Mathematics.RightVector( o, margin/2 ) )
-        local pos3 = Mathematics.VectorFromAddition( pos1, Mathematics.ForwardVector( pos1, -margin ) )
-        local pos4 = Mathematics.VectorFromAddition( pos2, Mathematics.ForwardVector( pos2, -margin ) )
+        local pos1 = o
+        local pos2 = Mathematics.VectorFromAddition( o, Mathematics.RightVector( o, margin ) )
+        local pos3 = Mathematics.VectorFromAddition( o, Mathematics.RightVector( o, -margin ) )
+        local pos4 = Mathematics.VectorFromAddition( pos1, Mathematics.ForwardVector( pos2, -(margin*2) ) )
 
         returnSet1 = {} returnSet1.Position = pos1 returnSet1.Formation = "BattleLine"
         returnSet2 = {} returnSet2.Position = pos2 returnSet2.Formation = "BattleLine"
-        returnSet3 = {} returnSet3.Position = pos3 returnSet3.Formation = "MarchingColumn"
+        returnSet3 = {} returnSet3.Position = pos3 returnSet3.Formation = "BattleLine"
         returnSet4 = {} returnSet4.Position = pos4 returnSet4.Formation = "MarchingColumn"
         if service == "Cavalry" then
             returnSet3 = {} returnSet3.Position = pos3 returnSet3.Formation = "BattleLine"
@@ -109,13 +118,13 @@ local function getFormationPositions( service, formation, o, anglePos  )
 
     elseif formation == "SkirmishOrder" then
 
-        local skirmishmargin = BattalionMargins[ service ][ "SkirmishOrder" ] * 3.2
-        local battlemargin = BattalionMargins[ service ][ "BattleLine" ] * 3.2
+        local skirmishmargin = BattalionMargins[ service ][ "SkirmishOrder" ] * 3.3
+        local battlemargin = BattalionMargins[ service ][ "BattleLine" ] * 3.3
 
         local pos1 = Mathematics.VectorFromAddition( o, Mathematics.RightVector( o, -skirmishmargin/2 ) )
         local pos2 = Mathematics.VectorFromAddition( o, Mathematics.RightVector( o, skirmishmargin/2 ) )
-        local pos3 = Mathematics.VectorFromAddition( pos1, Mathematics.ForwardVector( pos1, -battlemargin ) )
-        local pos4 = Mathematics.VectorFromAddition( pos2, Mathematics.ForwardVector( pos2, -battlemargin ) )
+        local pos3 = Mathematics.VectorFromAddition( pos1, Mathematics.ForwardVector( pos1, -(battlemargin*2) ) )
+        local pos4 = Mathematics.VectorFromAddition( pos2, Mathematics.ForwardVector( pos2, -(battlemargin*2) ) )
 
         returnSet1 = {} returnSet1.Position = pos1 returnSet1.Formation = "SkirmishOrder"
         returnSet2 = {} returnSet2.Position = pos2 returnSet2.Formation = "SkirmishOrder"
@@ -178,6 +187,8 @@ function Brigade.New(name,nametypes,team,service,startPos,season)
     newBrigade.AnimsToUpdate = {}
     newBrigade.BattalionsToDraw = {}
 
+    newBrigade.ChangingFormation = 0
+
     newBrigade.UpdateTick = UnitUpdateTickAllocator
     UnitUpdateTickAllocator = UnitUpdateTickAllocator + 1
     if UnitUpdateTickAllocator > 5 then
@@ -201,6 +212,7 @@ end
 ----//// METHODS FOR THE OBJECT ////----
 ----//// ###################### ////----
 function Brigade:ChangeFormation( newFormation )
+    self.ChangingFormation = 6
     self.Formation = newFormation
     local newPos = getFormationPositions( self.BranchOfService, newFormation, self.Regiments[1].Position, false )
     for i=1,#self.Regiments,1 do
@@ -216,6 +228,12 @@ function Brigade:MoveBrigade( newPos )
 end
 
 function Brigade:MoraleRecovery( )
+
+    --lower the change formation timer--
+    self.ChangingFormation = self.ChangingFormation - 1
+    if self.ChangingFormation < 0 then self.ChangingFormation = 0 end
+
+    --recover morale--
     for i=1,#self.Regiments,1 do
         self.Regiments[i]:MoraleRecovery( )
     end
