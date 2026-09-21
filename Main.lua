@@ -34,6 +34,8 @@ Battalion = require("Army/Battalion")
 Regiment = require("Army/Regiment")
 Brigade = require("Army/Brigade")
 
+BotPlayer = require("GameStates/Game/BotPlayer")
+
 --// IMPORT MENUS //--
 MenuController = require("GameStates/Menu/MenuController")
 TitleScreen = require("GameStates/Menu/TitleScreen")
@@ -163,6 +165,8 @@ function love.update(dt)
         tenSecondTimer = tenSecondTimer - 10
         for i=1,#Team1,1 do Team1[i]:MoraleRecovery() end
         for i=1,#Team2,1 do Team2[i]:MoraleRecovery() end 
+
+        if BotPlayer.Active then BotPlayer.ArmyLevelControl() end
     end
 
     local mouseData = Mouse.GetData(true,cumulativeTime)
@@ -172,18 +176,18 @@ function love.update(dt)
         local ui = nil
 
         local currentTeam = Team1
-        --if PlayerTeam == 2 then currentTeam = Team2 end
+        if PlayerTeam == 2 then currentTeam = Team2 end
         ui = UnitSelectUI.CheckForUnitClicks( love.keyboard.isDown("lshift"),  currentTeam, mouseData )
         if ui then
             CurrentUnitScreen = ui
         end
 
         --TEST FOR BOTH TEAM CONTROL--
-        currentTeam = Team2
+        --[[currentTeam = Team2
         ui2 = UnitSelectUI.CheckForUnitClicks( love.keyboard.isDown("lshift"),  currentTeam, mouseData )
         if ui2 then
             CurrentUnitScreen = ui2
-        end
+        end]]
 
     end
 

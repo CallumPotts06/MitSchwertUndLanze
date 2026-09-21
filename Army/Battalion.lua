@@ -511,7 +511,7 @@ function Battalion:FindSquadPositions()
         end
 
         --get to locating the positions of the squads--
-        --print("TempTheta = "..tostring(tempTheta))
+        print("TempTheta = "..tostring(tempTheta))
         pos.Theta = tempTheta
         for n = n1,n2,increment do
             local newPos = Vector.New(0,0)
@@ -562,6 +562,8 @@ end
 
 
 function Battalion:DrawBattalion()
+    if self.Regiment.IsHidden then return nil end
+
     --update squad positions if necessary--
     if self.Moved then self:FindSquadPositions() end
 

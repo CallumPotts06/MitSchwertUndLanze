@@ -173,6 +173,8 @@ function Brigade.New(name,nametypes,team,service,startPos,season)
     newBrigade.Formations = FormationTypes[service]
     newBrigade.UnitClass = "Brigade"
 
+    newBrigade.TargetBrigade = nil
+
     newBrigade.AnimsToUpdate = {}
     newBrigade.BattalionsToDraw = {}
 

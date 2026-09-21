@@ -144,6 +144,7 @@ function Regiment.New(name,brigade,team,service,unitType,unitTypeName,startPos,s
     newRegiment.Destroyed = false
     newRegiment.InRetreat = false
     newRegiment.OverrideFire = false
+    newRegiment.IsHidden = true
 
     --add mathematical data--
     newRegiment.Position = startPos
@@ -216,7 +217,11 @@ function Regiment:Moved()
 end
 
 function Regiment:CheckForEnemies(enemyUnits)
-    if self.InRetreat then return nil end
+    --update if unit is visible from the fog--
+    local hidden = FogofWar.CheckIfHidden(self.Position)
+    self.IsHidden = hidden
+
+    if self.InRetreat or self.IsHidden then return nil end
 
     local pos1 = self.Position
     local pos2 = Vector.New(9999999,9999999)  --PRETTY LARGE NUMBER--
@@ -533,43 +538,6 @@ function Regiment:UpdateAnimation()
     end
 end
 
---[[
-function Regiment:ScoutMap(initScout)
-
-    local viewRadius = 5
-    if self.BranchofService == "Cavalry" then viewRadius = 9 end
-
-    local scoutPos = self.Position --self.Position:ToGamePosition()
-
-    local fogX = math.floor(scoutPos.X / FogDivisions)
-    local fogY = math.floor(scoutPos.Y / FogDivisions)
-
-    if initScout then
-        -- Reveal full circle
-        for y = fogY - viewRadius, fogY + viewRadius do
-            for x = fogX - viewRadius, fogX + viewRadius do
-
-                if y >= 1 and y <= #FogofWar.Tiles and x >= 1 and x <= #FogofWar.Tiles[1] then
-                    FogofWar.Tiles[y][x] = true
-                end
-
-            end
-        end
-
-    else
-        -- Reveal full circle (same logic — no reason to reveal only 4 points)
-        for y = fogY - viewRadius, fogY + viewRadius do
-            for x = fogX - viewRadius, fogX + viewRadius do
-
-                if y >= 1 and y <= #FogofWar.Tiles and x >= 1 and x <= #FogofWar.Tiles[1] then
-                    FogofWar.Tiles[y][x] = true
-                end
-
-            end
-        end
-    end
-
-end]]
 
 function Regiment:DrawRanges()
 

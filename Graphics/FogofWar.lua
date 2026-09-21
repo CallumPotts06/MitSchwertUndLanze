@@ -97,7 +97,7 @@ return Fog
 ---//// NEW SOLUTION ////---
 local Fog = {}
 
-Fog.TILESIZE = 192
+Fog.TILESIZE = 256
 
 Fog.Size = nil
 Fog.Tiles = nil
@@ -174,9 +174,9 @@ function Fog.Scout(pos, unitType, team)
 
     --determine how much to reveal based on unit type--
     local visRange = 1
-    if unitType == "Infantry" then visRange = 12
-    elseif unitType == "Artillery" then visRange = 14
-    elseif unitType == "Cavalry" then visRange = 22 end
+    if unitType == "Infantry" then visRange = 9
+    elseif unitType == "Artillery" then visRange = 12
+    elseif unitType == "Cavalry" then visRange = 18 end
 
     --find the unit's position on the tile map--
     local tilePos = Vector.New(  math.ceil(pos.X/Fog.TILESIZE),  math.ceil(pos.Y/Fog.TILESIZE)  )
@@ -209,7 +209,18 @@ function Fog.Scout(pos, unitType, team)
 
         end
     end
+end
 
+function Fog.CheckIfHidden(pos)
+    local tileX = math.floor(pos.X / Fog.TILESIZE)
+    local tileY = math.floor(pos.Y / Fog.TILESIZE)
+
+    if (tileX>0) and (tileX<#Fog.Tiles[1]) then
+        if (tileY>0) and (tileY<#Fog.Tiles) then
+            if Fog.Tiles[tileY][tileX] == "Seen" then return false 
+            else return true end
+        end
+    end
 end
 
 

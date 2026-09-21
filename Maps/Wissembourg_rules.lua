@@ -108,7 +108,7 @@ function maprules.LaunchBattle()
     Brigade6 = Brigade.New("Bavarian Brigade",brigade1Names,"Germany","Infantry",Vector.New(24000,2600),"Summer")
     Brigade7 = Brigade.New("Baden-Wuerttemburg Brigade",brigade2Names,"Germany","Infantry",Vector.New(30600,11050),"Summer")
     --Brigade8 = Brigade.New("Prussian-Hessian Brigade",brigade3Names,"Germany","Infantry",Vector.New(27350,18000),"Summer")
-    Brigade8 = Brigade.New("Prussian-Hessian Brigade",brigade3Names,"Germany","Infantry",Vector.New(20000,18000),"Summer")
+    Brigade8 = Brigade.New("Prussian-Hessian Brigade",brigade3Names,"Germany","Infantry",Vector.New(23000,18000),"Summer")
     Brigade9 = Brigade.New("Artillery Brigade",brigade5Names,"Germany","Artillery",Vector.New(28500,7000),"Summer")
     Brigade10 = Brigade.New("Cavalry Brigade",brigade6Names,"Germany","Cavalry",Vector.New(26350,7000),"Summer")
 
@@ -130,7 +130,7 @@ function maprules.LaunchBattle()
     print("FOG: X,Y  =  "..FogWidth..","..FogHeight)]]
 
     FogofWar.init( CurrentMapSize.X, CurrentMapSize.Y )
-    FogofWar.RevealMode = "all"
+    --FogofWar.RevealMode = "Germany"
 
 
     --[[for y=1,FogHeight,1 do
@@ -157,6 +157,8 @@ function maprules.LaunchBattle()
             table.insert(frenchRegs, FrenchArmy[i].Regiments[i2])
         end
     end
+
+    BotPlayer.Init("Germany", "Easy", "Defensive", FrenchArmy, GermanArmy, "Right")
 
     return GermanArmy, germanRegs, FrenchArmy, frenchRegs
 
